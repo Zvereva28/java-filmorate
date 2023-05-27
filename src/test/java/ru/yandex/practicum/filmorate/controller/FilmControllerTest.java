@@ -5,14 +5,12 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
 import ru.yandex.practicum.filmorate.exception.FilmException;
-import ru.yandex.practicum.filmorate.exception.UserException;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.model.User;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class FilmControllerTest {
     private FilmController filmController;
@@ -31,15 +29,15 @@ class FilmControllerTest {
     @Test
     @DisplayName("Список фильмов")
     void findAllStandard() {
-        filmController.createFilm(new Film(0,"dolore", "description description",  LocalDate.of(1995, 11, 28), 50) );
-        filmController.createFilm(new Film(0,"dolore2", "description description",  LocalDate.of(1985, 12, 11), 66) );
+        filmController.createFilm(new Film(0, "dolore", "description description", LocalDate.of(1995, 11, 28), 50));
+        filmController.createFilm(new Film(0, "dolore2", "description description", LocalDate.of(1985, 12, 11), 66));
         assertEquals(2, filmController.findAllFilms().size());
     }
 
     @Test
     @DisplayName("Создание фильмов")
     void createStandard() {
-        assertEquals(1,filmController.createFilm(new Film(0,"dolore", "description description",  LocalDate.of(1995, 11, 28), 50)).getId());
+        assertEquals(1, filmController.createFilm(new Film(0, "dolore", "description description", LocalDate.of(1995, 11, 28), 50)).getId());
     }
 
 
@@ -54,7 +52,7 @@ class FilmControllerTest {
     }
 
     private Executable generateExecutableToName() {
-        return () -> filmController.createFilm(new Film(0," ", "description description",  LocalDate.of(1985, 12, 11), 66));
+        return () -> filmController.createFilm(new Film(0, " ", "description description", LocalDate.of(1985, 12, 11), 66));
     }
 
 
@@ -69,7 +67,7 @@ class FilmControllerTest {
     }
 
     private Executable generateExecutableToDescription() {
-        return () -> filmController.createFilm(new Film(0,"filmName", "description description description description description description description description description description description description description descriptionescription description description description description description description description",  LocalDate.of(1985, 12, 11), 66));
+        return () -> filmController.createFilm(new Film(0, "filmName", "description description description description description description description description description description description description description descriptionescription description description description description description description description", LocalDate.of(1985, 12, 11), 66));
     }
 
     @Test
@@ -83,7 +81,7 @@ class FilmControllerTest {
     }
 
     private Executable generateExecutableToDuration() {
-        return () -> filmController.createFilm(new Film(0,"filmName", "description description",  LocalDate.of(1985, 12, 11), -66));
+        return () -> filmController.createFilm(new Film(0, "filmName", "description description", LocalDate.of(1985, 12, 11), -66));
     }
 
     @Test
@@ -97,14 +95,14 @@ class FilmControllerTest {
     }
 
     private Executable generateExecutableToReleaseDate() {
-        return () -> filmController.createFilm(new Film(0,"filmName", "description description",  LocalDate.of(1885, 12, 11), 66));
+        return () -> filmController.createFilm(new Film(0, "filmName", "description description", LocalDate.of(1885, 12, 11), 66));
     }
 
     @Test
     @DisplayName("Обновление фильмов")
     void updateStandard() {
-        filmController.createFilm(new Film(0,"dolore", "description description",  LocalDate.of(1995, 11, 28), 50));
-        assertEquals("newName",filmController.updateFilm(new Film(1,"newName", "description description",  LocalDate.of(1995, 11, 28), 50)).getName());
+        filmController.createFilm(new Film(0, "dolore", "description description", LocalDate.of(1995, 11, 28), 50));
+        assertEquals("newName", filmController.updateFilm(new Film(1, "newName", "description description", LocalDate.of(1995, 11, 28), 50)).getName());
     }
 
     @Test
@@ -114,16 +112,17 @@ class FilmControllerTest {
                 FilmException.class,
                 generateExecutableIDError()
         );
-        assertEquals("Фильма с id = 99 не существует", exception.getMessage());}
+        assertEquals("Фильма с id = 99 не существует", exception.getMessage());
+    }
 
     private Executable generateExecutableIDError() {
-        return () ->filmController.updateFilm(new Film(99,"newName", "description description",  LocalDate.of(1995, 11, 28), 50));
+        return () -> filmController.updateFilm(new Film(99, "newName", "description description", LocalDate.of(1995, 11, 28), 50));
     }
 
     @Test
     @DisplayName("Обновление фильмов, Описание фильма больше 200 символов")
     void createUpdateExceptionDescription() {
-        filmController.createFilm(new Film(0,"dolore", "description description",  LocalDate.of(1995, 11, 28), 50));
+        filmController.createFilm(new Film(0, "dolore", "description description", LocalDate.of(1995, 11, 28), 50));
 
         FilmException exception = assertThrows(
                 FilmException.class,
@@ -133,13 +132,13 @@ class FilmControllerTest {
     }
 
     private Executable generateUpdateExecutableToDescription() {
-        return () -> filmController.updateFilm(new Film(1,"filmName", "description description description description description description description description description description description description description descriptionescription description description description description description description description",  LocalDate.of(1985, 12, 11), 66));
+        return () -> filmController.updateFilm(new Film(1, "filmName", "description description description description description description description description description description description description description descriptionescription description description description description description description description", LocalDate.of(1985, 12, 11), 66));
     }
 
     @Test
     @DisplayName("Обновление фильмов, Продолжительность меньше 0")
     void updateExceptionDuration() {
-        filmController.createFilm(new Film(0,"dolore", "description description",  LocalDate.of(1995, 11, 28), 50));
+        filmController.createFilm(new Film(0, "dolore", "description description", LocalDate.of(1995, 11, 28), 50));
 
         FilmException exception = assertThrows(
                 FilmException.class,
@@ -149,13 +148,13 @@ class FilmControllerTest {
     }
 
     private Executable generateUpdateExecutableToDuration() {
-        return () -> filmController.updateFilm(new Film(1,"filmName", "description description",  LocalDate.of(1985, 12, 11), -66));
+        return () -> filmController.updateFilm(new Film(1, "filmName", "description description", LocalDate.of(1985, 12, 11), -66));
     }
 
     @Test
     @DisplayName("Обновление фильмов, Дата релиза не корректна")
     void updateExceptionReleaseDate() {
-        filmController.createFilm(new Film(0,"dolore", "description description",  LocalDate.of(1995, 11, 28), 50));
+        filmController.createFilm(new Film(0, "dolore", "description description", LocalDate.of(1995, 11, 28), 50));
 
         FilmException exception = assertThrows(
                 FilmException.class,
@@ -165,7 +164,7 @@ class FilmControllerTest {
     }
 
     private Executable generateUpdateExecutableToReleaseDate() {
-        return () -> filmController.updateFilm(new Film(1,"filmName", "description description",  LocalDate.of(1885, 12, 11), 66));
+        return () -> filmController.updateFilm(new Film(1, "filmName", "description description", LocalDate.of(1885, 12, 11), 66));
     }
 
 
