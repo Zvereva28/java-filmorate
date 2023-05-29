@@ -11,19 +11,21 @@ import java.util.*;
 
 @Slf4j
 @RestController
+@RequestMapping("/users")
 public class UserController {
+    private UserValidator userValidator = new UserValidator();
     private Map<Integer, User> users = new HashMap<>();
     private int idManager = 0;
 
 
-    @GetMapping("/users")
-    public List<User> findAllUser() {
+    @GetMapping
+    public List<User> getUsers() {
         return new ArrayList<>(users.values());
     }
 
-    @PostMapping("/users")
-    public User createUser(@RequestBody @Validated User user) {
-        UserValidator.checkUser(user);
+    @PostMapping
+    public User postUser(@RequestBody @Validated User user) {
+        userValidator.checkUser(user);
         if (!Objects.nonNull(user.getName()) || user.getName().isEmpty() || user.getName().isBlank()) {
             log.debug("Name не должен быть пустым ");
             user.setName(user.getLogin());
@@ -33,12 +35,12 @@ public class UserController {
         return user;
     }
 
-    @PutMapping("/users")
-    public User updateUser(@RequestBody @Validated User user) {
+    @PutMapping
+    public User putUser(@RequestBody @Validated User user) {
         if (!users.containsKey(user.getId())) {
             throw new UserException("Пользователя с id = " + user.getId() + " не существует");
         }
-        UserValidator.checkUser(user);
+        userValidator.checkUser(user);
         users.put(user.getId(), user);
         return user;
     }

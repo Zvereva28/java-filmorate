@@ -4,6 +4,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
+import org.springframework.boot.test.context.SpringBootTest;
 import ru.yandex.practicum.filmorate.exception.UserException;
 import ru.yandex.practicum.filmorate.model.User;
 
@@ -12,6 +13,7 @@ import java.time.LocalDate;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+@SpringBootTest
 class UserControllerTest {
 
     private UserController userController;
@@ -24,21 +26,21 @@ class UserControllerTest {
     @Test
     @DisplayName("Список пользователей, когда он пуст")
     void findAllNullArray() {
-        assertEquals(0, userController.findAllUser().size());
+        assertEquals(0, userController.getUsers().size());
     }
 
     @Test
     @DisplayName("Список пользователей")
     void findAllStandard() {
-        userController.createUser(new User(0, "dolore", "NickName", "Nick Name", LocalDate.of(1995, 11, 28)));
-        userController.createUser(new User(0, "dolore2", "LogName", "NickName", LocalDate.of(1985, 11, 28)));
-        assertEquals(2, userController.findAllUser().size());
+        userController.postUser(new User(0, "dolore", "NickName", "Nick Name", LocalDate.of(1995, 11, 28)));
+        userController.postUser(new User(0, "dolore2", "LogName", "NickName", LocalDate.of(1985, 11, 28)));
+        assertEquals(2, userController.getUsers().size());
     }
 
     @Test
     @DisplayName("Создание пользователя")
     void createStandard() {
-        assertEquals(1, userController.createUser(new User(0, "dolore", "NickName", "Nick Name", LocalDate.now())).getId());
+        assertEquals(1, userController.postUser(new User(0, "dolore", "NickName", "Nick Name", LocalDate.now())).getId());
     }
 
     @Test
@@ -52,7 +54,7 @@ class UserControllerTest {
     }
 
     private Executable generateExecutableToUserName() {
-        return () -> userController.createUser(new User(0, "fdhfgj", "Status Task.NEW", "635", LocalDate.of(2018, 5, 11)));
+        return () -> userController.postUser(new User(0, "fdhfgj", "Status Task.NEW", "635", LocalDate.of(2018, 5, 11)));
     }
 
     @Test
@@ -66,20 +68,20 @@ class UserControllerTest {
     }
 
     private Executable generateExecutableToBirthday() {
-        return () -> userController.createUser(new User(0, "fdhfgj", "StatusTask.NEW", "635", LocalDate.now().plusDays(1)));
+        return () -> userController.postUser(new User(0, "fdhfgj", "StatusTask.NEW", "635", LocalDate.now().plusDays(1)));
     }
 
     @Test
     @DisplayName("Обновление пользователя")
     void updateStandard() {
-        userController.createUser(new User(0, "dolore", "NickName", "Nick Name", LocalDate.of(1995, 11, 28)));
-        assertEquals("newEmail", userController.updateUser(new User(1, "newEmail", "NickName", "Nick Name", LocalDate.of(1995, 11, 28))).getEmail());
+        userController.postUser(new User(0, "dolore", "NickName", "Nick Name", LocalDate.of(1995, 11, 28)));
+        assertEquals("newEmail", userController.putUser(new User(1, "newEmail", "NickName", "Nick Name", LocalDate.of(1995, 11, 28))).getEmail());
     }
 
     @Test
     @DisplayName("Обновление пользователя, Login содержит пробел")
     void updateExceptionUserName() {
-        userController.createUser(new User(0, "dolore", "NickName", "Nick Name", LocalDate.of(1995, 11, 28)));
+        userController.postUser(new User(0, "dolore", "NickName", "Nick Name", LocalDate.of(1995, 11, 28)));
         UserException exception = assertThrows(
                 UserException.class,
                 generateUpdateExecutableToUserLogin()
@@ -88,13 +90,13 @@ class UserControllerTest {
     }
 
     private Executable generateUpdateExecutableToUserLogin() {
-        return () -> userController.updateUser(new User(1, "fdhfgj", "Status Task.NEW", "635", LocalDate.of(2018, 5, 11)));
+        return () -> userController.putUser(new User(1, "fdhfgj", "Status Task.NEW", "635", LocalDate.of(2018, 5, 11)));
     }
 
     @Test
     @DisplayName("Обновление пользователя, Не верная дата рождения")
     void updateExceptionBirthday() {
-        userController.createUser(new User(0, "dolore", "NickName", "Nick Name", LocalDate.of(1995, 11, 28)));
+        userController.postUser(new User(0, "dolore", "NickName", "Nick Name", LocalDate.of(1995, 11, 28)));
         UserException exception = assertThrows(
                 UserException.class,
                 generateUpdateExecutableToBirthday()
@@ -103,7 +105,7 @@ class UserControllerTest {
     }
 
     private Executable generateUpdateExecutableToBirthday() {
-        return () -> userController.updateUser(new User(1, "fdhfgj", "StatusTask.NEW", "635", LocalDate.now().plusDays(1)));
+        return () -> userController.putUser(new User(1, "fdhfgj", "StatusTask.NEW", "635", LocalDate.now().plusDays(1)));
     }
 
     @Test
@@ -117,7 +119,7 @@ class UserControllerTest {
     }
 
     private Executable generateUpdateExecutableIDError() {
-        return () -> userController.updateUser(new User(99, "fdhfgj", "StatusTask.NEW", "635", LocalDate.of(1995, 11, 28)));
+        return () -> userController.putUser(new User(99, "fdhfgj", "StatusTask.NEW", "635", LocalDate.of(1995, 11, 28)));
     }
 
 

@@ -11,7 +11,7 @@ public class FilmValidator {
     private static int MAX_LENGTH_FILM_NAME = 200;
     private static LocalDate MIN_DATE_RELEASE_DATE = LocalDate.of(1895, 12, 28);
 
-    public static void checkFilm(Film film) {
+    public void checkFilm(Film film) {
 
         if (film.getName().isEmpty() || film.getName().isBlank()) {
             log.debug("Название фильма не должно быть пустым ");

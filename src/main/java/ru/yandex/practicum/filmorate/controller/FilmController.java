@@ -12,29 +12,31 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
+@RequestMapping("/films")
 public class FilmController {
+    private FilmValidator filmValidator = new FilmValidator();
     private Map<Integer, Film> films = new HashMap<>();
     private int idManager = 0;
 
-    @GetMapping("/films")
-    public List<Film> findAllFilms() {
+    @GetMapping
+    public List<Film> getFilms() {
         return new ArrayList<>(films.values());
     }
 
-    @PostMapping("/films")
-    public Film createFilm(@RequestBody Film film) {
-        FilmValidator.checkFilm(film);
+    @PostMapping
+    public Film postFilm(@RequestBody Film film) {
+        filmValidator.checkFilm(film);
         film.setId(generateId());
         films.put(film.getId(), film);
         return film;
     }
 
-    @PutMapping("/films")
-    public Film updateFilm(@RequestBody @Validated Film film) {
+    @PutMapping
+    public Film putFilm(@RequestBody @Validated Film film) {
         if (!films.containsKey(film.getId())) {
             throw new FilmException("Фильма с id = " + film.getId() + " не существует");
         }
-        FilmValidator.checkFilm(film);
+        filmValidator.checkFilm(film);
         films.put(film.getId(), film);
         return film;
     }

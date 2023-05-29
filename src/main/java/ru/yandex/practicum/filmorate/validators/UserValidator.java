@@ -9,7 +9,7 @@ import java.time.LocalDate;
 @Slf4j
 public class UserValidator {
 
-    public static void checkUser(User user) {
+    public void checkUser(User user) {
 
         if (user.getLogin().contains(" ")) {
             log.debug("Login не должен содержать пробелы");
