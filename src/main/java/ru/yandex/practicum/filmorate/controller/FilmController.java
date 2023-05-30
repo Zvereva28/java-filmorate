@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.controller;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.exception.FilmException;
@@ -11,6 +12,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+@Slf4j
 @RestController
 @RequestMapping("/films")
 public class FilmController {
@@ -20,25 +22,35 @@ public class FilmController {
 
     @GetMapping
     public List<Film> getFilms() {
-        return new ArrayList<>(films.values());
+        var filmsList = new ArrayList<>(films.values());
+        log.debug("+ allFilms: {}", filmsList);
+        return filmsList;
     }
 
     @PostMapping
     public Film postFilm(@RequestBody Film film) {
+        log.debug("+ createFilm: {}", film);
         filmValidator.checkFilm(film);
         film.setId(generateId());
         films.put(film.getId(), film);
+        log.debug("- createFilm: {}", film);
         return film;
     }
 
     @PutMapping
     public Film putFilm(@RequestBody @Validated Film film) {
+        log.debug("+ updateFilm: {}", film);
         if (!films.containsKey(film.getId())) {
             throw new FilmException("Фильма с id = " + film.getId() + " не существует");
         }
         filmValidator.checkFilm(film);
-        films.put(film.getId(), film);
-        return film;
+        Film oldFilm = films.get(film.getId());
+        oldFilm.setName(film.getName());
+        oldFilm.setReleaseDate(film.getReleaseDate());
+        oldFilm.setDescription(film.getDescription());
+        oldFilm.setDuration(film.getDuration());
+        log.debug("- updateFilm: {}", oldFilm);
+        return oldFilm;
     }
 
     private Integer generateId() {

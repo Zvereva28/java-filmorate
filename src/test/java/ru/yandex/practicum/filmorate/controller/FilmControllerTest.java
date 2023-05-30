@@ -4,7 +4,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
-import org.springframework.boot.test.context.SpringBootTest;
 import ru.yandex.practicum.filmorate.exception.FilmException;
 import ru.yandex.practicum.filmorate.model.Film;
 
@@ -13,7 +12,6 @@ import java.time.LocalDate;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-@SpringBootTest
 class FilmControllerTest {
     private FilmController filmController;
 

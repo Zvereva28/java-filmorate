@@ -20,29 +20,35 @@ public class UserController {
 
     @GetMapping
     public List<User> getUsers() {
-        return new ArrayList<>(users.values());
+        var usersList = new ArrayList<>(users.values());
+        log.debug("+ allUsers: {}", usersList);
+        return usersList;
     }
 
     @PostMapping
     public User postUser(@RequestBody @Validated User user) {
-        userValidator.checkUser(user);
-        if (!Objects.nonNull(user.getName()) || user.getName().isEmpty() || user.getName().isBlank()) {
-            log.debug("Name не должен быть пустым ");
-            user.setName(user.getLogin());
-        }
-        user.setId(generateId());
-        users.put(user.getId(), user);
-        return user;
+        log.debug("+ createUser: {}", user);
+        User newUser = userValidator.checkUser(user);
+        newUser.setId(generateId());
+        users.put(newUser.getId(), newUser);
+        log.debug("- createUser: {}", newUser);
+        return newUser;
     }
 
     @PutMapping
     public User putUser(@RequestBody @Validated User user) {
+        log.debug("+ updateUser: {}", user);
         if (!users.containsKey(user.getId())) {
             throw new UserException("Пользователя с id = " + user.getId() + " не существует");
         }
-        userValidator.checkUser(user);
-        users.put(user.getId(), user);
-        return user;
+        User newUser = userValidator.checkUser(user);
+        User oldUser = users.get(newUser.getId());
+        oldUser.setName(newUser.getName());
+        oldUser.setBirthday(newUser.getBirthday());
+        oldUser.setLogin(newUser.getLogin());
+        oldUser.setEmail(newUser.getEmail());
+        log.debug("- updateUser: {}", oldUser);
+        return oldUser;
     }
 
     private Integer generateId() {

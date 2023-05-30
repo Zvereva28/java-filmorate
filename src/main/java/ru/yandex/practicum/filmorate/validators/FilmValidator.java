@@ -13,7 +13,7 @@ public class FilmValidator {
 
     public void checkFilm(Film film) {
 
-        if (film.getName().isEmpty() || film.getName().isBlank()) {
+        if (film.getName().isBlank()) {
             log.debug("Название фильма не должно быть пустым ");
             throw new FilmException("Название фильма не должно быть пустым");
         }

@@ -5,11 +5,12 @@ import ru.yandex.practicum.filmorate.exception.UserException;
 import ru.yandex.practicum.filmorate.model.User;
 
 import java.time.LocalDate;
+import java.util.Objects;
 
 @Slf4j
 public class UserValidator {
 
-    public void checkUser(User user) {
+    public User checkUser(User user) {
 
         if (user.getLogin().contains(" ")) {
             log.debug("Login не должен содержать пробелы");
@@ -20,5 +21,10 @@ public class UserValidator {
             throw new UserException("Не верная дата рождения");
         }
 
+        if (!Objects.nonNull(user.getName()) || user.getName().isEmpty() || user.getName().isBlank()) {
+            log.debug("Name не должен быть пустым ");
+            user.setName(user.getLogin());
+        }
+        return user;
     }
 }
