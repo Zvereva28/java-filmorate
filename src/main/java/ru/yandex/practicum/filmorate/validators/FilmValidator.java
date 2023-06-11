@@ -1,12 +1,14 @@
 package ru.yandex.practicum.filmorate.validators;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exception.FilmException;
 import ru.yandex.practicum.filmorate.model.Film;
 
 import java.time.LocalDate;
 
 @Slf4j
+@Component
 public class FilmValidator {
     private static int MAX_LENGTH_FILM_NAME = 200;
     private static LocalDate MIN_DATE_RELEASE_DATE = LocalDate.of(1895, 12, 28);
