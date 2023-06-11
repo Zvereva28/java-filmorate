@@ -50,13 +50,12 @@ public class FilmService implements FilmServiceInterface {
         var filmsList = filmStorage.getAllFilms();
         List<Film> popularFilms = new ArrayList<>();
         Collections.sort(filmsList, new LikesComparator());
-        log.debug("!!!!!!" + filmsList);
         for (int i = 0; i < filmsList.size(); i++) {
-            log.debug("i = " + i);
             if (i >= count) {
                 break;
             } else popularFilms.add(filmsList.get(i));
         }
+        log.debug("+ popularFilms: {}", popularFilms);
         return popularFilms;
     }
 
