@@ -1,10 +1,10 @@
-package ru.yandex.practicum.filmorate.service.user;
+package ru.yandex.practicum.filmorate.service;
 
 import ru.yandex.practicum.filmorate.model.User;
 
 import java.util.List;
 
-public interface UserServiceInterface {
+public interface UserService {
 
     User createUser(User newUser);
 

@@ -1,11 +1,12 @@
-package ru.yandex.practicum.filmorate.service.user;
+package ru.yandex.practicum.filmorate.service.impl;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.UserException;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.storage.user.UserStorage;
+import ru.yandex.practicum.filmorate.service.UserService;
+import ru.yandex.practicum.filmorate.storage.UserStorage;
 import ru.yandex.practicum.filmorate.validators.UserValidator;
 
 import java.util.ArrayList;
@@ -16,7 +17,7 @@ import java.util.stream.Collectors;
 @Slf4j
 @Service
 @AllArgsConstructor
-public class UserService implements UserServiceInterface {
+public class UserServiceImpl implements UserService {
     private UserStorage userStorage;
     private UserValidator userValidator;
 
@@ -39,14 +40,14 @@ public class UserService implements UserServiceInterface {
     @Override
     public List<User> getAllUsers() {
         List<User> users = userStorage.getAllUsers();
-        log.debug("+ allUsers: {}", users);
+        log.debug("- allUsers: {}", users);
         return users;
     }
 
     @Override
     public User getUser(int id) {
         User user = userStorage.getUser(id);
-        log.debug("+ user: {}", user);
+        log.debug("- user: {}", user);
         return user;
     }
 
@@ -90,16 +91,19 @@ public class UserService implements UserServiceInterface {
 
     @Override
     public List<User> getFriend(int id) {
+        log.debug("+ getFriend : {}", id);
         Set<Integer> friends = userStorage.getUser(id).getFriends();
         List<User> friendsList = new ArrayList<>();
         for (Integer friendsId : friends) {
             friendsList.add(userStorage.getUser(friendsId));
         }
+        log.debug("- getFriend : {}", friendsList);
         return friendsList;
     }
 
     @Override
     public List<User> getFriendsCommon(int id, int otherId) {
+        log.debug("+ getFriendsCommon : {} {}", id, otherId);
         Set<Integer> friends = userStorage.getUser(id).getFriends();
         Set<Integer> otherFriends = userStorage.getUser(otherId).getFriends();
         Set<Integer> common = friends.stream().filter(otherFriends::contains).collect(Collectors.toSet());
@@ -107,7 +111,7 @@ public class UserService implements UserServiceInterface {
         for (Integer friendsId : common) {
             friendsList.add(userStorage.getUser(friendsId));
         }
-        log.debug("+ getFriendsCommon : {}", friendsList);
+        log.debug("- getFriendsCommon : {}", friendsList);
         return friendsList;
     }
 }

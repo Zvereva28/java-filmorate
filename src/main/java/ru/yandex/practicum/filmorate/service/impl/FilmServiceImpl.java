@@ -1,14 +1,14 @@
-package ru.yandex.practicum.filmorate.service.film;
+package ru.yandex.practicum.filmorate.service.impl;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.FilmNotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
+import ru.yandex.practicum.filmorate.service.FilmService;
+import ru.yandex.practicum.filmorate.storage.FilmStorage;
 import ru.yandex.practicum.filmorate.validators.FilmValidator;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -16,7 +16,7 @@ import java.util.List;
 @Slf4j
 @Service
 @AllArgsConstructor
-public class FilmService implements FilmServiceInterface {
+public class FilmServiceImpl implements FilmService {
     private final FilmStorage filmStorage;
     private FilmValidator filmValidator;
 
@@ -41,28 +41,28 @@ public class FilmService implements FilmServiceInterface {
     @Override
     public List<Film> getAllFilms() {
         var filmsList = filmStorage.getAllFilms();
-        log.debug("+ allFilms: {}", filmsList);
+        log.debug("- allFilms: {}", filmsList);
         return filmsList;
     }
 
     @Override
     public List<Film> getPopularFilms(int count) {
         var filmsList = filmStorage.getAllFilms();
-        List<Film> popularFilms = new ArrayList<>();
         Collections.sort(filmsList, new LikesComparator());
-        for (int i = 0; i < filmsList.size(); i++) {
-            if (i >= count) {
-                break;
-            } else popularFilms.add(filmsList.get(i));
+        if (count > filmsList.size()) {
+            log.debug("- popularFilms: {}", filmsList);
+            return filmsList;
+        } else {
+            List<Film> popularFilms = filmsList.subList(0, count);
+            log.debug("- popularFilms: {}", popularFilms);
+            return popularFilms;
         }
-        log.debug("+ popularFilms: {}", popularFilms);
-        return popularFilms;
     }
 
     @Override
     public Film getFilm(int id) {
         Film film = filmStorage.getFilm(id);
-        log.debug("+ films: {}", film);
+        log.debug("- film: {}", film);
         return film;
     }
 
@@ -74,7 +74,7 @@ public class FilmService implements FilmServiceInterface {
         Film film = filmStorage.getFilm(id);
         film.getLikes().add(userId);
         filmStorage.updateFilm(film);
-        log.debug("+ putLikesFilm: {}", film);
+        log.debug("- putLikesFilm: {}", film);
         return film;
     }
 

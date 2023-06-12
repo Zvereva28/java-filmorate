@@ -1,10 +1,10 @@
-package ru.yandex.practicum.filmorate.service.film;
+package ru.yandex.practicum.filmorate.service;
 
 import ru.yandex.practicum.filmorate.model.Film;
 
 import java.util.List;
 
-public interface FilmServiceInterface {
+public interface FilmService {
 
     public Film addFilm(Film newFilm);
 
