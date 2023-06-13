@@ -10,40 +10,40 @@ public class ErrorHandler {
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorResponse handleUserException(final UserException e) {
-        return new ErrorResponse(
+    public ResponseBody handleUserException(final UserException e) {
+        return new ResponseBody(
                 e.getMessage()
         );
     }
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.NOT_FOUND)
-    public ErrorResponse handleUserNotFoundException(final UserNotFoundException e) {
-        return new ErrorResponse(
+    public ResponseBody handleUserNotFoundException(final UserNotFoundException e) {
+        return new ResponseBody(
                 e.getMessage()
         );
     }
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorResponse handleFilmException(final FilmException e) {
-        return new ErrorResponse(
+    public ResponseBody handleFilmException(final FilmException e) {
+        return new ResponseBody(
                 e.getMessage()
         );
     }
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.NOT_FOUND)
-    public ErrorResponse handleFilmNotFoundException(final FilmNotFoundException e) {
-        return new ErrorResponse(
+    public ResponseBody handleFilmNotFoundException(final FilmNotFoundException e) {
+        return new ResponseBody(
                 e.getMessage()
         );
     }
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    public ErrorResponse handleThrowable(final Throwable e) {
-        return new ErrorResponse(
+    public ResponseBody handleThrowable(final Throwable e) {
+        return new ResponseBody(
                 "Произошла непредвиденная ошибка."
         );
     }

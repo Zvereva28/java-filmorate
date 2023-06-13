@@ -18,7 +18,7 @@ import java.util.Map;
 @AllArgsConstructor
 @NoArgsConstructor
 public class InMemoryFilmStorage implements FilmStorage {
-    protected final Map<Integer, Film> films = new HashMap<>();
+    private final Map<Integer, Film> films = new HashMap<>();
     private int idManager = 0;
 
     @Override
@@ -43,8 +43,7 @@ public class InMemoryFilmStorage implements FilmStorage {
 
     @Override
     public List<Film> getAllFilms() {
-        var filmsList = new ArrayList<>(films.values());
-        return filmsList;
+        return new ArrayList<>(films.values());
     }
 
     @Override

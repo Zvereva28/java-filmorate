@@ -1,9 +1,9 @@
 package ru.yandex.practicum.filmorate.exception;
 
-public class ErrorResponse {
+public class ResponseBody {
     private final String error;
 
-    public ErrorResponse(String error) {
+    public ResponseBody(String error) {
         this.error = error;
     }
 

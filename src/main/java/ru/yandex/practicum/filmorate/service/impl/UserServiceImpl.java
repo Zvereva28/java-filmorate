@@ -60,14 +60,14 @@ public class UserServiceImpl implements UserService {
         userStorage.userExist(id);
         userStorage.userExist(friendId);
 
-        User user1 = userStorage.getUser(id);
-        user1.getFriends().add(friendId);
+        User user = userStorage.getUser(id);
+        user.getFriends().add(friendId);
 
-        User user2 = userStorage.getUser(friendId);
-        user2.getFriends().add(id);
+        User userFriend = userStorage.getUser(friendId);
+        userFriend.getFriends().add(id);
 
-        userStorage.updateUser(user1);
-        userStorage.updateUser(user2);
+        userStorage.updateUser(user);
+        userStorage.updateUser(userFriend);
     }
 
     @Override
@@ -79,14 +79,14 @@ public class UserServiceImpl implements UserService {
         userStorage.userExist(id);
         userStorage.userExist(friendId);
 
-        User user1 = userStorage.getUser(id);
-        user1.getFriends().remove(friendId);
+        User user = userStorage.getUser(id);
+        user.getFriends().remove(friendId);
 
-        User user2 = userStorage.getUser(friendId);
-        user2.getFriends().remove(id);
+        User userFriend = userStorage.getUser(friendId);
+        userFriend.getFriends().remove(id);
 
-        userStorage.updateUser(user1);
-        userStorage.updateUser(user2);
+        userStorage.updateUser(user);
+        userStorage.updateUser(userFriend);
     }
 
     @Override
@@ -106,7 +106,9 @@ public class UserServiceImpl implements UserService {
         log.debug("+ getFriendsCommon : {} {}", id, otherId);
         Set<Integer> friends = userStorage.getUser(id).getFriends();
         Set<Integer> otherFriends = userStorage.getUser(otherId).getFriends();
-        Set<Integer> common = friends.stream().filter(otherFriends::contains).collect(Collectors.toSet());
+        Set<Integer> common = friends.stream()
+                .filter(otherFriends::contains)
+                .collect(Collectors.toSet());
         List<User> friendsList = new ArrayList<>();
         for (Integer friendsId : common) {
             friendsList.add(userStorage.getUser(friendsId));
