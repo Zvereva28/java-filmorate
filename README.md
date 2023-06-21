@@ -73,6 +73,6 @@ ORDER BY count_likes
 
 **Список жанров фильма film_id = '?'**  
 SELECT d.name,     
-FROM film_genre AS fg
-INNER JOIN genre AS g ON fg.genre_id = g.id
+FROM film_genre AS fg  
+INNER JOIN genre AS g ON fg.genre_id = g.id  
 WHERE fg.film_id = '?'
