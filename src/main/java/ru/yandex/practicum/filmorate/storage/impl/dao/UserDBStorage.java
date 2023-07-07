@@ -12,7 +12,6 @@ import ru.yandex.practicum.filmorate.storage.UserStorage;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -74,10 +73,10 @@ public class UserDBStorage implements UserStorage {
     @Override
     public List<User> getAllUsers() {
         try {
-        return jdbcTemplate.queryForObject("SELECT id, user_name, email, login, birthday, f.friend_id as friends " +
-                "FROM users as u " +
-                "LEFT JOIN friends as f ON u.id=f.user_id " +
-                "ORDER BY id", usersRowMapper());
+            return jdbcTemplate.queryForObject("SELECT id, user_name, email, login, birthday, f.friend_id as friends " +
+                    "FROM users as u " +
+                    "LEFT JOIN friends as f ON u.id=f.user_id " +
+                    "ORDER BY id", usersRowMapper());
         } catch (RuntimeException e) {
             return new ArrayList<>();
         }
