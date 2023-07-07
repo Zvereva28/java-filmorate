@@ -18,7 +18,6 @@ public enum RatingFilms {
     NC_17("NC-17", 5);
     private String name;
     private Integer id;
-
     public static RatingFilms getById(int id) {
         return Arrays.stream(RatingFilms.values())
                 .filter(x -> id == (x.id)).findAny()
