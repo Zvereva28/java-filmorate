@@ -20,9 +20,9 @@ public enum RatingFilms {
     private Integer id;
 
     public static RatingFilms getById(int id) {
-        return Arrays.stream(RatingFilms.values()).
-                filter(x -> id == (x.id)).findAny().
-                orElseThrow(() -> new MpaNotFoundException(String.format("id = %s не найден", id)));
+        return Arrays.stream(RatingFilms.values())
+                .filter(x -> id == (x.id)).findAny()
+                .orElseThrow(() -> new MpaNotFoundException(String.format("id = %s не найден", id)));
     }
 
 }
