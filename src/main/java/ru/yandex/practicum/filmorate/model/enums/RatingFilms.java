@@ -4,7 +4,6 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import ru.yandex.practicum.filmorate.exception.MpaNotFoundException;
-
 import java.util.Arrays;
 
 @AllArgsConstructor
