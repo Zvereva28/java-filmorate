@@ -5,12 +5,16 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.test.annotation.DirtiesContext;
 import ru.yandex.practicum.filmorate.exception.FilmException;
 import ru.yandex.practicum.filmorate.exception.FilmNotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.service.impl.FilmServiceImpl;
-import ru.yandex.practicum.filmorate.storage.impl.InMemoryFilmStorage;
+import ru.yandex.practicum.filmorate.storage.impl.dao.FilmDBStorage;
 import ru.yandex.practicum.filmorate.validators.FilmValidator;
 
 import java.time.LocalDate;
@@ -18,15 +22,22 @@ import java.time.LocalDate;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-
+@SpringBootTest
+@AutoConfigureTestDatabase
+@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 class FilmControllerTest {
-
+    @Autowired
+    private final JdbcTemplate jdbcTemplate;
     @Autowired
     private FilmController filmController;
 
+    FilmControllerTest(@Autowired JdbcTemplate jdbcTemplate) {
+        this.jdbcTemplate = jdbcTemplate;
+    }
+
     @BeforeEach
     public void setUp() {
-        filmController = new FilmController(new FilmServiceImpl(new InMemoryFilmStorage(), new FilmValidator()));
+        filmController = new FilmController(new FilmServiceImpl(new FilmDBStorage(jdbcTemplate), new FilmValidator()));
     }
 
     @Test
@@ -121,7 +132,7 @@ class FilmControllerTest {
                 FilmNotFoundException.class,
                 generateExecutableIDError()
         );
-        assertEquals("Фильма с id = 99 не существует", exception.getMessage());
+        assertEquals("Фильм с id = 99 не существует", exception.getMessage());
     }
 
     private Executable generateExecutableIDError() {

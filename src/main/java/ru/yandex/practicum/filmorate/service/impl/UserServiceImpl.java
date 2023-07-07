@@ -1,8 +1,6 @@
 package ru.yandex.practicum.filmorate.service.impl;
 
-import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.UserException;
@@ -23,7 +21,7 @@ public class UserServiceImpl implements UserService {
     private UserStorage userStorage;
     private UserValidator userValidator;
 
-    public UserServiceImpl( @Qualifier("userDBStorage")UserStorage userStorage, UserValidator userValidator) {
+    public UserServiceImpl(@Qualifier("userDBStorage") UserStorage userStorage, UserValidator userValidator) {
         this.userStorage = userStorage;
         this.userValidator = userValidator;
     }
@@ -66,7 +64,7 @@ public class UserServiceImpl implements UserService {
         }
         userStorage.userExist(id);
         userStorage.userExist(friendId);
-        userStorage.addFriend(id,friendId);
+        userStorage.addFriend(id, friendId);
     }
 
     @Override
@@ -78,7 +76,7 @@ public class UserServiceImpl implements UserService {
         userStorage.userExist(id);
         userStorage.userExist(friendId);
 
-        userStorage.deleteFriend( id, friendId);
+        userStorage.deleteFriend(id, friendId);
     }
 
     @Override

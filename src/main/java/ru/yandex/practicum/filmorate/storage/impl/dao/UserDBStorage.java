@@ -20,8 +20,6 @@ import java.util.Map;
 @Component("userDBStorage")
 public class UserDBStorage implements UserStorage {
     private final JdbcTemplate jdbcTemplate;
-    private final Map<Integer, User> users = new HashMap<>();
-
 
     public UserDBStorage(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
@@ -75,10 +73,14 @@ public class UserDBStorage implements UserStorage {
 
     @Override
     public List<User> getAllUsers() {
+        try {
         return jdbcTemplate.queryForObject("SELECT id, user_name, email, login, birthday, f.friend_id as friends " +
                 "FROM users as u " +
                 "LEFT JOIN friends as f ON u.id=f.user_id " +
                 "ORDER BY id", usersRowMapper());
+        } catch (RuntimeException e) {
+            return new ArrayList<>();
+        }
     }
 
     @Override
