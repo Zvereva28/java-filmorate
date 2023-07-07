@@ -2,6 +2,8 @@ package ru.yandex.practicum.filmorate.service.impl;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.UserException;
 import ru.yandex.practicum.filmorate.model.User;
@@ -16,10 +18,15 @@ import java.util.stream.Collectors;
 
 @Slf4j
 @Service
-@AllArgsConstructor
 public class UserServiceImpl implements UserService {
+
     private UserStorage userStorage;
     private UserValidator userValidator;
+
+    public UserServiceImpl( @Qualifier("userDBStorage")UserStorage userStorage, UserValidator userValidator) {
+        this.userStorage = userStorage;
+        this.userValidator = userValidator;
+    }
 
     @Override
     public User createUser(User user) {
@@ -59,15 +66,7 @@ public class UserServiceImpl implements UserService {
         }
         userStorage.userExist(id);
         userStorage.userExist(friendId);
-
-        User user = userStorage.getUser(id);
-        user.getFriends().add(friendId);
-
-        User userFriend = userStorage.getUser(friendId);
-        userFriend.getFriends().add(id);
-
-        userStorage.updateUser(user);
-        userStorage.updateUser(userFriend);
+        userStorage.addFriend(id,friendId);
     }
 
     @Override
@@ -79,14 +78,7 @@ public class UserServiceImpl implements UserService {
         userStorage.userExist(id);
         userStorage.userExist(friendId);
 
-        User user = userStorage.getUser(id);
-        user.getFriends().remove(friendId);
-
-        User userFriend = userStorage.getUser(friendId);
-        userFriend.getFriends().remove(id);
-
-        userStorage.updateUser(user);
-        userStorage.updateUser(userFriend);
+        userStorage.deleteFriend( id, friendId);
     }
 
     @Override
