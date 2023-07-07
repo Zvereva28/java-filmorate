@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import ru.yandex.practicum.filmorate.exception.MpaNotFoundException;
+
 import java.util.Arrays;
 
 @AllArgsConstructor
@@ -15,7 +16,6 @@ public enum RatingFilms {
     PG_13("PG-13", 3),
     R("R", 4),
     NC_17("NC-17", 5);
-
     private String name;
     private Integer id;
 
