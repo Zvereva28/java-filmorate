@@ -1,7 +1,6 @@
 package ru.yandex.practicum.filmorate.service.impl;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.FilmNotFoundException;
@@ -22,7 +21,7 @@ public class FilmServiceImpl implements FilmService {
     private final FilmStorage filmStorage;
     private FilmValidator filmValidator;
 
-    public FilmServiceImpl( @Qualifier("filmDBStorage")FilmStorage filmStorage, FilmValidator filmValidator) {
+    public FilmServiceImpl(@Qualifier("filmDBStorage") FilmStorage filmStorage, FilmValidator filmValidator) {
         this.filmStorage = filmStorage;
         this.filmValidator = filmValidator;
     }
@@ -79,7 +78,7 @@ public class FilmServiceImpl implements FilmService {
             throw new FilmNotFoundException("Пользователя id = " + userId + " не может быть");
         }
         Film film = filmStorage.getFilm(id);
-        filmStorage.addLike( id, userId);
+        filmStorage.addLike(id, userId);
         Film film1 = filmStorage.updateFilm(film);
         log.debug("- putLikesFilm: {}", film1);
         return film1;
@@ -91,7 +90,7 @@ public class FilmServiceImpl implements FilmService {
             throw new FilmNotFoundException("Пользователя id = " + userId + " не может быть");
         }
         Film film = filmStorage.getFilm(id);
-        filmStorage.removeLike( id, userId);
+        filmStorage.removeLike(id, userId);
         filmStorage.updateFilm(film);
         log.debug("+ putLikesFilm: {}", film);
         return film;
@@ -100,7 +99,7 @@ public class FilmServiceImpl implements FilmService {
     class LikesComparator implements Comparator<Film> {
         @Override
         public int compare(Film a, Film b) {
-            return Integer.compare( b.getCountLikes(), a.getCountLikes());
+            return Integer.compare(b.getCountLikes(), a.getCountLikes());
         }
     }
 }
