@@ -21,7 +21,7 @@ public enum RatingFilms {
 
     public static RatingFilms getById(int id) {
         return Arrays.stream(RatingFilms.values())
-                .filter(x -> id == (x.id)).findAny()
+                .filter(value -> id == (value.id)).findAny()
                 .orElseThrow(() -> new MpaNotFoundException(String.format("id = %s не найден", id)));
     }
 

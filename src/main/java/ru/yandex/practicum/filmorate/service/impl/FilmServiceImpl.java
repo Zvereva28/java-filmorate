@@ -46,20 +46,20 @@ public class FilmServiceImpl implements FilmService {
 
     @Override
     public List<Film> getAllFilms() {
-        var filmsList = filmStorage.getAllFilms();
-        log.debug("- allFilms: {}", filmsList);
-        return filmsList;
+        var films = filmStorage.getAllFilms();
+        log.debug("- allFilms: {}", films);
+        return films;
     }
 
     @Override
     public List<Film> getPopularFilms(int count) {
-        var filmsList = filmStorage.getAllFilms();
-        Collections.sort(filmsList, new LikesComparator());
-        if (count > filmsList.size()) {
-            log.debug("- popularFilms: {}", filmsList);
-            return filmsList;
+        var films = filmStorage.getAllFilms();
+        Collections.sort(films, new LikesComparator());
+        if (count > films.size()) {
+            log.debug("- popularFilms: {}", films);
+            return films;
         } else {
-            List<Film> popularFilms = filmsList.subList(0, count);
+            List<Film> popularFilms = films.subList(0, count);
             log.debug("- popularFilms: {}", popularFilms);
             return popularFilms;
         }

@@ -23,10 +23,10 @@ public class MpaServiceImpl implements MpaService {
     @Override
     public List<Mpa> getAll() {
         RatingFilms[] ratingFilms = RatingFilms.values();
-        List<Mpa> listMpa = new ArrayList<>();
+        List<Mpa> mpaRatings = new ArrayList<>();
         for (RatingFilms rating : ratingFilms) {
-            listMpa.add(new Mpa(rating.getId()));
+            mpaRatings.add(new Mpa(rating.getId()));
         }
-        return listMpa;
+        return mpaRatings;
     }
 }

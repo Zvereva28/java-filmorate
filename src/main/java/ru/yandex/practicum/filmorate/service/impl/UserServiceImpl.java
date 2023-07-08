@@ -82,28 +82,28 @@ public class UserServiceImpl implements UserService {
     @Override
     public List<User> getFriend(int id) {
         log.debug("+ getFriend : {}", id);
-        Set<Integer> friends = userStorage.getUser(id).getFriends();
-        List<User> friendsList = new ArrayList<>();
-        for (Integer friendsId : friends) {
-            friendsList.add(userStorage.getUser(friendsId));
+        Set<Integer> friendsId = userStorage.getUser(id).getFriends();
+        List<User> friends = new ArrayList<>();
+        for (Integer friendId : friendsId) {
+            friends.add(userStorage.getUser(friendId));
         }
-        log.debug("- getFriend : {}", friendsList);
-        return friendsList;
+        log.debug("- getFriend : {}", friends);
+        return friends;
     }
 
     @Override
     public List<User> getFriendsCommon(int id, int otherId) {
         log.debug("+ getFriendsCommon : {} {}", id, otherId);
-        Set<Integer> friends = userStorage.getUser(id).getFriends();
+        Set<Integer> friendsId = userStorage.getUser(id).getFriends();
         Set<Integer> otherFriends = userStorage.getUser(otherId).getFriends();
-        Set<Integer> common = friends.stream()
+        Set<Integer> common = friendsId.stream()
                 .filter(otherFriends::contains)
                 .collect(Collectors.toSet());
-        List<User> friendsList = new ArrayList<>();
-        for (Integer friendsId : common) {
-            friendsList.add(userStorage.getUser(friendsId));
+        List<User> friends = new ArrayList<>();
+        for (Integer friendId : common) {
+            friends.add(userStorage.getUser(friendId));
         }
-        log.debug("- getFriendsCommon : {}", friendsList);
-        return friendsList;
+        log.debug("- getFriendsCommon : {}", friends);
+        return friends;
     }
 }

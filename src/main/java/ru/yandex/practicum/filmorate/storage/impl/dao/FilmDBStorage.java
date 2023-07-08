@@ -11,6 +11,8 @@ import ru.yandex.practicum.filmorate.model.Genres;
 import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.*;
 
 @Slf4j
@@ -32,17 +34,17 @@ public class FilmDBStorage implements FilmStorage {
                 "duration", film.getDuration().toString(),
                 "rating_mpa", film.getMpa().getId().toString());
         Number id = simpleJdbcInsert.executeAndReturnKey(params);
-        SimpleJdbcInsert simpleJdbcInsert2 = new SimpleJdbcInsert(jdbcTemplate.getDataSource())
+        simpleJdbcInsert = new SimpleJdbcInsert(jdbcTemplate.getDataSource())
                 .withTableName("film_genre");
-        Set<Genres> list = new HashSet<>(film.getGenres());
+        Set<Genres> genres = new HashSet<>(film.getGenres());
         film.getGenres().clear();
-        if (list.size() > 0) {
-            for (Genres genre : list) {
+        if (genres.size() > 0) {
+            for (Genres genre : genres) {
                 film.getGenres().add(genre);
-                Map<String, String> params2 = Map.of(
+                params = Map.of(
                         "genre_id", genre.getId().toString(),
                         "film_id", id.toString());
-                simpleJdbcInsert2.execute(params2);
+                simpleJdbcInsert.execute(params);
             }
         }
         film.setId(id.intValue());
@@ -67,14 +69,14 @@ public class FilmDBStorage implements FilmStorage {
 
         SimpleJdbcInsert simpleJdbcInsert = new SimpleJdbcInsert(Objects.requireNonNull(jdbcTemplate.getDataSource()))
                 .withTableName("film_genre");
-        Set<Genres> list = new HashSet<>(film.getGenres());
+        Set<Genres> genres = new HashSet<>(film.getGenres());
         film.getGenres().clear();
-        if (list.size() > 0) {
-            for (Genres genre : list) {
-                Map<String, String> params2 = Map.of(
+        if (genres.size() > 0) {
+            for (Genres genre : genres) {
+                Map<String, String> params = Map.of(
                         "genre_id", genre.getId().toString(),
                         "film_id", id.toString());
-                simpleJdbcInsert.execute(params2);
+                simpleJdbcInsert.execute(params);
             }
         }
         return getFilm(id);
@@ -127,14 +129,7 @@ public class FilmDBStorage implements FilmStorage {
 
     private RowMapper<Film> filmRowMapper() {
         return (rs, rowNum) -> {
-            Film film = new Film();
-            film.setId(rs.getInt("id"));
-            film.setName(rs.getString("name"));
-            film.setDescription(rs.getString("description"));
-            film.setReleaseDate(rs.getDate("release_date").toLocalDate());
-            film.setDuration(rs.getInt("duration"));
-            film.setMpa(new Mpa(rs.getInt("rating_mpa")));
-            film.setCountLikes(rs.getInt("count_likes"));
+            Film film = getColumns(rs);
             if (rs.getInt("genre_id") > 0) {
                 do {
                     film.getGenres().add(new Genres(rs.getInt("genre_id"), rs.getString("genre_name")));
@@ -150,35 +145,35 @@ public class FilmDBStorage implements FilmStorage {
             if (rs.wasNull()) {
                 return films;
             }
-            Film film = new Film();
-            film.setId(rs.getInt("id"));
-            film.setName(rs.getString("name"));
-            film.setDescription(rs.getString("description"));
-            film.setReleaseDate(rs.getDate("release_date").toLocalDate());
-            film.setDuration(rs.getInt("duration"));
-            film.setMpa(new Mpa(rs.getInt("rating_mpa")));
-            film.setCountLikes(rs.getInt("count_likes"));
-            if (rs.getInt("genre_id") > 0) {
-                film.getGenres().add(new Genres(rs.getInt("genre_id"), rs.getString("genre_name")));
-            }
+            Film film = createFilmFromDB(rs);
             while (rs.next()) {
                 if (film.getId() != rs.getInt("id")) {
                     films.add(film);
-                    film = new Film();
-                    film.setId(rs.getInt("id"));
-                    film.setName(rs.getString("name"));
-                    film.setDescription(rs.getString("description"));
-                    film.setReleaseDate(rs.getDate("release_date").toLocalDate());
-                    film.setDuration(rs.getInt("duration"));
-                    film.setMpa(new Mpa(rs.getInt("rating_mpa")));
-                    film.setCountLikes(rs.getInt("count_likes"));
-                    if (rs.getInt("genre_id") > 0) {
-                        film.getGenres().add(new Genres(rs.getInt("genre_id"), rs.getString("genre_name")));
-                    }
+                    film = createFilmFromDB(rs);
                 }
             }
             films.add(film);
             return films;
         };
+    }
+
+    private Film createFilmFromDB(ResultSet rs) throws SQLException {
+        Film film = getColumns(rs);
+        if (rs.getInt("genre_id") > 0) {
+            film.getGenres().add(new Genres(rs.getInt("genre_id"), rs.getString("genre_name")));
+        }
+        return film;
+    }
+
+    private Film getColumns(ResultSet rs) throws SQLException {
+        Film film = new Film();
+        film.setId(rs.getInt("id"));
+        film.setName(rs.getString("name"));
+        film.setDescription(rs.getString("description"));
+        film.setReleaseDate(rs.getDate("release_date").toLocalDate());
+        film.setDuration(rs.getInt("duration"));
+        film.setMpa(new Mpa(rs.getInt("rating_mpa")));
+        film.setCountLikes(rs.getInt("count_likes"));
+        return film;
     }
 }

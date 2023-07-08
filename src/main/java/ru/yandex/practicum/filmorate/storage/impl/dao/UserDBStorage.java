@@ -89,12 +89,7 @@ public class UserDBStorage implements UserStorage {
 
     private RowMapper<User> userRowMapper() {
         return (rs, rowNum) -> {
-            User user = new User();
-            user.setId(rs.getInt("id"));
-            user.setEmail(rs.getString("email"));
-            user.setLogin(rs.getString("login"));
-            user.setName(rs.getString("user_name"));
-            user.setBirthday(rs.getDate("birthday").toLocalDate());
+            User user = getColumns(rs);
             do {
                 if (rs.getInt("friends") > 0) {
                     user.getFriends().add(rs.getInt("friends"));
@@ -123,15 +118,20 @@ public class UserDBStorage implements UserStorage {
     }
 
     private User getUserFromBD(ResultSet rs) throws SQLException {
+        User user = getColumns(rs);
+        if (rs.getInt("friends") > 0) {
+            user.getFriends().add(rs.getInt("friends"));
+        }
+        return user;
+    }
+
+    private User getColumns(ResultSet rs) throws SQLException {
         User user = new User();
         user.setId(rs.getInt("id"));
         user.setEmail(rs.getString("email"));
         user.setLogin(rs.getString("login"));
         user.setName(rs.getString("user_name"));
         user.setBirthday(rs.getDate("birthday").toLocalDate());
-        if (rs.getInt("friends") > 0) {
-            user.getFriends().add(rs.getInt("friends"));
-        }
         return user;
     }
 }

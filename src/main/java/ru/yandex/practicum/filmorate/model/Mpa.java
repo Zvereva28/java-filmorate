@@ -10,11 +10,6 @@ public class Mpa {
     private Integer id;
     private String name;
 
-    public Mpa(RatingFilms ratingFilms) {
-        this.id = ratingFilms.getId();
-        this.name = ratingFilms.getName();
-    }
-
     public Mpa(Integer id) {
         this.id = id;
         this.name = RatingFilms.getById(id).getName();
