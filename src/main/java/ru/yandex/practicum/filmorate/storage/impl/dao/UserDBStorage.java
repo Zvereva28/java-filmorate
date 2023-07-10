@@ -1,6 +1,7 @@
 package ru.yandex.practicum.filmorate.storage.impl.dao;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
@@ -18,6 +19,12 @@ import java.util.Map;
 @Slf4j
 @Component("userDBStorage")
 public class UserDBStorage implements UserStorage {
+    private final static String SELECT_USER = "SELECT id, user_name, email, login, birthday, f.friend_id as friends " +
+            "FROM users as u LEFT JOIN friends as f ON u.id=f.user_id WHERE id = ?";
+    private final static String DELETE_FRIENDS = "DELETE FROM friends WHERE user_id = ? AND friend_id = ?";
+    private final static String UPDATE_USER = "UPDATE users set user_name=?, email=?, login=?, birthday=? WHERE id=?";
+    private final static String SELECT_ALL_USER = "SELECT id, user_name, email, login, birthday, f.friend_id as friends " +
+            "FROM users as u LEFT JOIN friends as f ON u.id=f.user_id ORDER BY id";
     private final JdbcTemplate jdbcTemplate;
 
     public UserDBStorage(JdbcTemplate jdbcTemplate) {
@@ -33,16 +40,14 @@ public class UserDBStorage implements UserStorage {
                 "login", user.getLogin(), "birthday", user.getBirthday().toString());
         Number id = simpleJdbcInsert.executeAndReturnKey(params);
         user.setId(id.intValue());
+
         return user;
     }
 
     @Override
     public User userExist(int id) {
-        List<User> users = jdbcTemplate.query("SELECT id, user_name, email, login, birthday, f.friend_id as friends " +
-                "FROM users as u " +
-                "LEFT JOIN friends as f ON u.id=f.user_id " +
-                "WHERE id = ?", userRowMapper(), id);
-        if (users.size() != 1) {
+        List<User> users = jdbcTemplate.query(SELECT_USER, userRowMapper(), id);
+        if (users.isEmpty()) {
             throw new UserNotFoundException("Пользователя с id = " + id + " не существует");
         }
         return users.get(0);
@@ -58,26 +63,25 @@ public class UserDBStorage implements UserStorage {
 
 
     public void deleteFriend(int id, int friendId) {
-        jdbcTemplate.update("DELETE FROM friends WHERE user_id = ? AND friend_id = ?",
+        jdbcTemplate.update(DELETE_FRIENDS,
                 id, friendId);
     }
 
     @Override
     public User updateUser(User user) {
         userExist(user.getId());
-        jdbcTemplate.update("UPDATE users set user_name=?, email=?, login=?, birthday=? WHERE id=?",
+        jdbcTemplate.update(UPDATE_USER,
                 user.getName(), user.getEmail(), user.getLogin(), user.getBirthday(), user.getId());
+
         return user;
     }
 
     @Override
     public List<User> getAllUsers() {
         try {
-            return jdbcTemplate.queryForObject("SELECT id, user_name, email, login, birthday, f.friend_id as friends " +
-                    "FROM users as u " +
-                    "LEFT JOIN friends as f ON u.id=f.user_id " +
-                    "ORDER BY id", usersRowMapper());
-        } catch (RuntimeException e) {
+            return jdbcTemplate.queryForObject(SELECT_ALL_USER, usersRowMapper());
+        } catch (EmptyResultDataAccessException e) {
+
             return new ArrayList<>();
         }
     }
@@ -95,6 +99,7 @@ public class UserDBStorage implements UserStorage {
                     user.getFriends().add(rs.getInt("friends"));
                 }
             } while (rs.next());
+
             return user;
         };
     }
@@ -113,6 +118,7 @@ public class UserDBStorage implements UserStorage {
                 }
             }
             users.add(user);
+
             return users;
         };
     }
@@ -132,6 +138,7 @@ public class UserDBStorage implements UserStorage {
         user.setLogin(rs.getString("login"));
         user.setName(rs.getString("user_name"));
         user.setBirthday(rs.getDate("birthday").toLocalDate());
+
         return user;
     }
 }

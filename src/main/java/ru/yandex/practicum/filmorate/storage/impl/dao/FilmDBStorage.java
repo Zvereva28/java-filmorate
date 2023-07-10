@@ -1,6 +1,7 @@
 package ru.yandex.practicum.filmorate.storage.impl.dao;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
@@ -18,6 +19,18 @@ import java.util.*;
 @Slf4j
 @Component("filmDBStorage")
 public class FilmDBStorage implements FilmStorage {
+    private final static String SELECT_COUNT_OF_LIKES = "SELECT count(*) AS count FROM film_likes where film_id = ?";
+    private final static String UPDATE_FILM = "UPDATE films SET  name=?, description=?, release_date=?, duration=?, rating_mpa=?, count_likes=? WHERE id=?";
+    private final static String DELETE_FILM_GENRE = "DELETE FROM film_genre WHERE film_id=?";
+    private final static String SELECT_ALL_FILMS = "SELECT f.id, name, description, release_date, duration, rating_mpa, count_likes, fg.genre_id AS genre_id, g.genre_name AS genre_name " +
+            "FROM films as f LEFT JOIN film_genre AS fg ON f.id=fg.film_id LEFT JOIN genre AS g ON fg.genre_id=g.id " +
+            "ORDER BY f.id, genre_id";
+    private final static String SELECT_FILM = "SELECT f.id, name, description, release_date, duration, rating_mpa, count_likes, fg.genre_id AS genre_id, g.genre_name AS genre_name " +
+            "FROM films as f LEFT JOIN film_genre AS fg ON f.id=fg.film_id LEFT JOIN genre AS g ON fg.genre_id=g.id " +
+            "WHERE f.id =? ORDER BY genre_id";
+    private final static String DELETE_LIKES = "DELETE FROM film_likes WHERE film_id=? AND user_id=?";
+
+
     private final JdbcTemplate jdbcTemplate;
 
     public FilmDBStorage(JdbcTemplate jdbcTemplate) {
@@ -48,6 +61,7 @@ public class FilmDBStorage implements FilmStorage {
             }
         }
         film.setId(id.intValue());
+
         return film;
     }
 
@@ -57,15 +71,15 @@ public class FilmDBStorage implements FilmStorage {
         filmExist(id);
         Integer countLikes;
         try {
-            countLikes = jdbcTemplate.queryForObject("SELECT count(*) AS count FROM film_likes where film_id = ?",
+            countLikes = jdbcTemplate.queryForObject(SELECT_COUNT_OF_LIKES,
                     (rs, rowNum) -> rs.getInt("count"), film.getId());
         } catch (RuntimeException e) {
             countLikes = 0;
         }
-        jdbcTemplate.update("UPDATE films SET  name=?, description=?, release_date=?, duration=?, rating_mpa=?, count_likes=? WHERE id=?",
+        jdbcTemplate.update(UPDATE_FILM,
                 film.getName(), film.getDescription(), film.getReleaseDate(), film.getDuration(), film.getMpa().getId(), countLikes, film.getId());
 
-        jdbcTemplate.update("DELETE FROM film_genre WHERE film_id=?", id);
+        jdbcTemplate.update(DELETE_FILM_GENRE, id);
 
         SimpleJdbcInsert simpleJdbcInsert = new SimpleJdbcInsert(Objects.requireNonNull(jdbcTemplate.getDataSource()))
                 .withTableName("film_genre");
@@ -85,12 +99,9 @@ public class FilmDBStorage implements FilmStorage {
     @Override
     public List<Film> getAllFilms() {
         try {
-            return jdbcTemplate.queryForObject("SELECT f.id, name, description, release_date, duration, rating_mpa, count_likes, fg.genre_id AS genre_id, g.genre_name AS genre_name " +
-                    "FROM films as f " +
-                    "LEFT JOIN film_genre AS fg ON f.id=fg.film_id " +
-                    "LEFT JOIN genre AS g ON fg.genre_id=g.id " +
-                    "ORDER BY f.id, genre_id", filmsRowMapper());
-        } catch (RuntimeException e) {
+            return jdbcTemplate.queryForObject(SELECT_ALL_FILMS, filmsRowMapper());
+        } catch (EmptyResultDataAccessException e) {
+
             return new ArrayList<>();
         }
     }
@@ -111,17 +122,14 @@ public class FilmDBStorage implements FilmStorage {
 
     @Override
     public void removeLike(Integer filmId, Integer userId) {
+        jdbcTemplate.update(DELETE_LIKES,
+                filmId, userId);
 
     }
 
     private Film filmExist(int id) {
-        List<Film> films = jdbcTemplate.query("SELECT f.id, name, description, release_date, duration, rating_mpa, count_likes, fg.genre_id AS genre_id, g.genre_name AS genre_name " +
-                "FROM films as f " +
-                "LEFT JOIN film_genre AS fg ON f.id=fg.film_id " +
-                "LEFT JOIN genre AS g ON fg.genre_id=g.id " +
-                "WHERE f.id =? " +
-                "ORDER BY genre_id", filmRowMapper(), id);
-        if (films.size() < 1) {
+        List<Film> films = jdbcTemplate.query(SELECT_FILM, filmRowMapper(), id);
+        if (films.isEmpty()) {
             throw new FilmNotFoundException("Фильм с id = " + id + " не существует");
         }
         return films.get(0);
