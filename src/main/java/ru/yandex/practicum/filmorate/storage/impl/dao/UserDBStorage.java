@@ -12,16 +12,18 @@ import ru.yandex.practicum.filmorate.storage.UserStorage;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 @Slf4j
 @Component("userDBStorage")
 public class UserDBStorage implements UserStorage {
-    private final static String SELECT_USER = "SELECT id, user_name, email, login, birthday, f.friend_id as friends " +
+    private final String SELECT_USER = "SELECT id, user_name, email, login, birthday, f.friend_id as friends " +
             "FROM users as u LEFT JOIN friends as f ON u.id=f.user_id WHERE id = ?";
-    private final static String DELETE_FRIENDS = "DELETE FROM friends WHERE user_id = ? AND friend_id = ?";
-    private final static String UPDATE_USER = "UPDATE users set user_name=?, email=?, login=?, birthday=? WHERE id=?";
-    private final static String SELECT_ALL_USER = "SELECT id, user_name, email, login, birthday, f.friend_id as friends " +
+    private final String DELETE_FRIENDS = "DELETE FROM friends WHERE user_id = ? AND friend_id = ?";
+    private final String UPDATE_USER = "UPDATE users set user_name=?, email=?, login=?, birthday=? WHERE id=?";
+    private final String SELECT_ALL_USER = "SELECT id, user_name, email, login, birthday, f.friend_id as friends " +
             "FROM users as u LEFT JOIN friends as f ON u.id=f.user_id ORDER BY id";
     private final JdbcTemplate jdbcTemplate;
 

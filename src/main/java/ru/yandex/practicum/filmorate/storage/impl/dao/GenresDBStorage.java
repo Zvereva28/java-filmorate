@@ -12,8 +12,8 @@ import java.util.List;
 @Slf4j
 @Service
 public class GenresDBStorage implements GenresStorage {
-    private final static String SELECT_GENRE = "SELECT  genre_name FROM genre WHERE id = ?";
-    private final static String SELECT_ALL_GENRES = "SELECT id, genre_name FROM genre";
+    private final String SELECT_GENRE = "SELECT  genre_name FROM genre WHERE id = ?";
+    private final String SELECT_ALL_GENRES = "SELECT id, genre_name FROM genre";
     private final JdbcTemplate jdbcTemplate;
 
     public GenresDBStorage(JdbcTemplate jdbcTemplate) {
