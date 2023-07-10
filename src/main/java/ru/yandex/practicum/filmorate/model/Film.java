@@ -6,18 +6,22 @@ import lombok.NoArgsConstructor;
 import org.springframework.lang.NonNull;
 
 import java.time.LocalDate;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 public class Film {
-    private final Set<Integer> likes = new HashSet<>();
+
+    private final List<Genres> genres = new ArrayList<>();
     private int id;
     @NonNull
     private String name;
     private String description;
     private LocalDate releaseDate;
-    private int duration;
+    private Integer duration;
+    private Mpa mpa = new Mpa();
+    private Integer countLikes = 0;
+
 }

@@ -10,8 +10,8 @@ import java.time.LocalDate;
 @Slf4j
 @Component
 public class FilmValidator {
-    private static int MAX_LENGTH_FILM_NAME = 200;
-    private static LocalDate MIN_DATE_RELEASE_DATE = LocalDate.of(1895, 12, 28);
+    private static final int MAX_LENGTH_FILM_NAME = 200;
+    private static final LocalDate MIN_DATE_RELEASE_DATE = LocalDate.of(1895, 12, 28);
 
     public void checkFilm(Film film) {
 

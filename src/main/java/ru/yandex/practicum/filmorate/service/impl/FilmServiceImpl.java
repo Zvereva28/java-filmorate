@@ -1,7 +1,7 @@
 package ru.yandex.practicum.filmorate.service.impl;
 
-import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.FilmNotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
@@ -15,10 +15,16 @@ import java.util.List;
 
 @Slf4j
 @Service
-@AllArgsConstructor
 public class FilmServiceImpl implements FilmService {
+
+
     private final FilmStorage filmStorage;
-    private FilmValidator filmValidator;
+    private final FilmValidator filmValidator;
+
+    public FilmServiceImpl(@Qualifier("filmDBStorage") FilmStorage filmStorage, FilmValidator filmValidator) {
+        this.filmStorage = filmStorage;
+        this.filmValidator = filmValidator;
+    }
 
     @Override
     public Film addFilm(Film film) {
@@ -40,20 +46,20 @@ public class FilmServiceImpl implements FilmService {
 
     @Override
     public List<Film> getAllFilms() {
-        var filmsList = filmStorage.getAllFilms();
-        log.debug("- allFilms: {}", filmsList);
-        return filmsList;
+        var films = filmStorage.getAllFilms();
+        log.debug("- allFilms: {}", films);
+        return films;
     }
 
     @Override
     public List<Film> getPopularFilms(int count) {
-        var filmsList = filmStorage.getAllFilms();
-        Collections.sort(filmsList, new LikesComparator());
-        if (count > filmsList.size()) {
-            log.debug("- popularFilms: {}", filmsList);
-            return filmsList;
+        var films = filmStorage.getAllFilms();
+        Collections.sort(films, new LikesComparator());
+        if (count > films.size()) {
+            log.debug("- popularFilms: {}", films);
+            return films;
         } else {
-            List<Film> popularFilms = filmsList.subList(0, count);
+            List<Film> popularFilms = films.subList(0, count);
             log.debug("- popularFilms: {}", popularFilms);
             return popularFilms;
         }
@@ -72,10 +78,10 @@ public class FilmServiceImpl implements FilmService {
             throw new FilmNotFoundException("Пользователя id = " + userId + " не может быть");
         }
         Film film = filmStorage.getFilm(id);
-        film.getLikes().add(userId);
-        filmStorage.updateFilm(film);
-        log.debug("- putLikesFilm: {}", film);
-        return film;
+        filmStorage.addLike(id, userId);
+        Film film1 = filmStorage.updateFilm(film);
+        log.debug("- putLikesFilm: {}", film1);
+        return film1;
     }
 
     @Override
@@ -84,7 +90,7 @@ public class FilmServiceImpl implements FilmService {
             throw new FilmNotFoundException("Пользователя id = " + userId + " не может быть");
         }
         Film film = filmStorage.getFilm(id);
-        film.getLikes().remove(userId);
+        filmStorage.removeLike(id, userId);
         filmStorage.updateFilm(film);
         log.debug("+ putLikesFilm: {}", film);
         return film;
@@ -93,7 +99,7 @@ public class FilmServiceImpl implements FilmService {
     class LikesComparator implements Comparator<Film> {
         @Override
         public int compare(Film a, Film b) {
-            return Integer.compare(b.getLikes().size(), a.getLikes().size());
+            return Integer.compare(b.getCountLikes(), a.getCountLikes());
         }
     }
 }
