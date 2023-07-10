@@ -6,8 +6,8 @@ import java.util.List;
 
 public interface GenresService {
 
-    public Genres getGenresById(int id);
+    Genres getGenresById(int id);
 
-    public List<Genres> getAll();
+    List<Genres> getAll();
 
 }

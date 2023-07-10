@@ -18,8 +18,8 @@ import java.util.stream.Collectors;
 @Service
 public class UserServiceImpl implements UserService {
 
-    private UserStorage userStorage;
-    private UserValidator userValidator;
+    private final UserStorage userStorage;
+    private final UserValidator userValidator;
 
     public UserServiceImpl(@Qualifier("userDBStorage") UserStorage userStorage, UserValidator userValidator) {
         this.userStorage = userStorage;

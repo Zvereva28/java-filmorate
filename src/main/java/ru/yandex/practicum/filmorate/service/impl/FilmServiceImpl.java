@@ -19,7 +19,7 @@ public class FilmServiceImpl implements FilmService {
 
 
     private final FilmStorage filmStorage;
-    private FilmValidator filmValidator;
+    private final FilmValidator filmValidator;
 
     public FilmServiceImpl(@Qualifier("filmDBStorage") FilmStorage filmStorage, FilmValidator filmValidator) {
         this.filmStorage = filmStorage;
