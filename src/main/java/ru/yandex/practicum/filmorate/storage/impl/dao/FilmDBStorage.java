@@ -1,7 +1,6 @@
 package ru.yandex.practicum.filmorate.storage.impl.dao;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
@@ -25,7 +24,7 @@ import java.util.Set;
 @Component("filmDBStorage")
 public class FilmDBStorage implements FilmStorage {
     private static final String SELECT_COUNT_OF_LIKES = "SELECT count(*) AS count FROM film_likes where film_id = ?";
-    private static  final String UPDATE_FILM = "UPDATE films SET  name=?, description=?, release_date=?, duration=?, rating_mpa=?, count_likes=? WHERE id=?";
+    private static final String UPDATE_FILM = "UPDATE films SET  name=?, description=?, release_date=?, duration=?, rating_mpa=?, count_likes=? WHERE id=?";
     private static final String DELETE_FILM_GENRE = "DELETE FROM film_genre WHERE film_id=?";
     private static final String SELECT_ALL_FILMS = "SELECT f.id, name, description, release_date, duration, rating_mpa, count_likes, fg.genre_id AS genre_id, g.genre_name AS genre_name " +
             "FROM films as f LEFT JOIN film_genre AS fg ON f.id=fg.film_id LEFT JOIN genre AS g ON fg.genre_id=g.id " +
@@ -103,13 +102,9 @@ public class FilmDBStorage implements FilmStorage {
 
     @Override
     public List<Film> getAllFilms() {
-        try {
-            return jdbcTemplate.queryForObject(SELECT_ALL_FILMS, filmsRowMapper());
-        } catch (EmptyResultDataAccessException e) {
-
-            return new ArrayList<>();
-        }
+        return jdbcTemplate.query(SELECT_ALL_FILMS, filmsRowMapper()).stream().findFirst().orElse(new ArrayList<>());
     }
+
 
     @Override
     public Film getFilm(int id) {
@@ -133,11 +128,9 @@ public class FilmDBStorage implements FilmStorage {
     }
 
     private Film filmExist(int id) {
-        List<Film> films = jdbcTemplate.query(SELECT_FILM, filmRowMapper(), id);
-        if (films.isEmpty()) {
-            throw new FilmNotFoundException("Фильм с id = " + id + " не существует");
-        }
-        return films.get(0);
+        return jdbcTemplate.query(SELECT_FILM, filmRowMapper(), id).stream()
+                .findFirst().orElseThrow(() -> new FilmNotFoundException("Фильм с id = " + id + " не существует"));
+
     }
 
     private RowMapper<Film> filmRowMapper() {
