@@ -19,6 +19,12 @@ import java.util.Map;
 @Slf4j
 @Component("userDBStorage")
 public class UserDBStorage implements UserStorage {
+    private static final String SELECT_USER = "SELECT id, user_name, email, login, birthday, f.friend_id as friends " +
+            "FROM users as u LEFT JOIN friends as f ON u.id=f.user_id WHERE id = ?";
+    private static final String DELETE_FRIENDS = "DELETE FROM friends WHERE user_id = ? AND friend_id = ?";
+    private static final String UPDATE_USER = "UPDATE users set user_name=?, email=?, login=?, birthday=? WHERE id=?";
+    private static final String SELECT_ALL_USER = "SELECT id, user_name, email, login, birthday, f.friend_id as friends " +
+            "FROM users as u LEFT JOIN friends as f ON u.id=f.user_id ORDER BY id";
     private final JdbcTemplate jdbcTemplate;
 
     public UserDBStorage(JdbcTemplate jdbcTemplate) {
@@ -40,8 +46,6 @@ public class UserDBStorage implements UserStorage {
 
     @Override
     public User userExist(int id) {
-        String SELECT_USER = "SELECT id, user_name, email, login, birthday, f.friend_id as friends " +
-                "FROM users as u LEFT JOIN friends as f ON u.id=f.user_id WHERE id = ?";
         List<User> users = jdbcTemplate.query(SELECT_USER, userRowMapper(), id);
         if (users.isEmpty()) {
             throw new UserNotFoundException("Пользователя с id = " + id + " не существует");
@@ -59,7 +63,6 @@ public class UserDBStorage implements UserStorage {
 
 
     public void deleteFriend(int id, int friendId) {
-        String DELETE_FRIENDS = "DELETE FROM friends WHERE user_id = ? AND friend_id = ?";
         jdbcTemplate.update(DELETE_FRIENDS,
                 id, friendId);
     }
@@ -67,7 +70,6 @@ public class UserDBStorage implements UserStorage {
     @Override
     public User updateUser(User user) {
         userExist(user.getId());
-        String UPDATE_USER = "UPDATE users set user_name=?, email=?, login=?, birthday=? WHERE id=?";
         jdbcTemplate.update(UPDATE_USER,
                 user.getName(), user.getEmail(), user.getLogin(), user.getBirthday(), user.getId());
 
@@ -77,8 +79,6 @@ public class UserDBStorage implements UserStorage {
     @Override
     public List<User> getAllUsers() {
         try {
-            String SELECT_ALL_USER = "SELECT id, user_name, email, login, birthday, f.friend_id as friends " +
-                    "FROM users as u LEFT JOIN friends as f ON u.id=f.user_id ORDER BY id";
             return jdbcTemplate.queryForObject(SELECT_ALL_USER, usersRowMapper());
         } catch (EmptyResultDataAccessException e) {
 

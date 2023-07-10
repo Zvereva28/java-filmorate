@@ -12,6 +12,8 @@ import java.util.List;
 @Slf4j
 @Service
 public class GenresDBStorage implements GenresStorage {
+    private static  final String SELECT_GENRE = "SELECT  genre_name FROM genre WHERE id = ?";
+    private static  final String SELECT_ALL_GENRES = "SELECT id, genre_name FROM genre";
     private final JdbcTemplate jdbcTemplate;
 
     public GenresDBStorage(JdbcTemplate jdbcTemplate) {
@@ -20,7 +22,6 @@ public class GenresDBStorage implements GenresStorage {
 
     @Override
     public Genres getGenresById(int id) {
-        String SELECT_GENRE = "SELECT  genre_name FROM genre WHERE id = ?";
         List<Genres> genres = jdbcTemplate.query(SELECT_GENRE,
                 (rs, rowNum) -> new Genres(id, rs.getString("genre_name")), id);
         if (genres.size() != 1) {
@@ -31,7 +32,6 @@ public class GenresDBStorage implements GenresStorage {
 
     @Override
     public List<Genres> getAll() {
-        String SELECT_ALL_GENRES = "SELECT id, genre_name FROM genre";
         List<Genres> genres = jdbcTemplate.query(SELECT_ALL_GENRES,
                 (rs, rowNum) -> new Genres(rs.getInt("id"), rs.getString("genre_name")));
         return genres;
