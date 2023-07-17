@@ -29,10 +29,21 @@ public class InMemoryUserStorage implements UserStorage {
     }
 
     @Override
-    public void userExist(int id) {
+    public User userExist(int id) {
         if (!users.containsKey(id)) {
             throw new UserNotFoundException("Пользователя с id = " + id + " не существует");
         }
+        return users.get(id);
+    }
+
+    @Override
+    public void addFriend(int id, int friendId) {
+
+    }
+
+    @Override
+    public void deleteFriend(int id, int friendId) {
+
     }
 
     @Override

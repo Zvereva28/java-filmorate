@@ -41,6 +41,22 @@ public class ErrorHandler {
     }
 
     @ExceptionHandler
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ResponseBody handleMpaNotFoundException(final MpaNotFoundException e) {
+        return new ResponseBody(
+                e.getMessage()
+        );
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ResponseBody handleMpaNotFoundException(final GenresNotFoundException e) {
+        return new ResponseBody(
+                e.getMessage()
+        );
+    }
+
+    @ExceptionHandler
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ResponseBody handleThrowable(final Throwable e) {
         return new ResponseBody(
