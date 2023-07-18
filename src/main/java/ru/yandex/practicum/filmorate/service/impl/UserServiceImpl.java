@@ -17,7 +17,6 @@ import java.util.stream.Collectors;
 @Slf4j
 @Service
 public class UserServiceImpl implements UserService {
-
     private final UserStorage userStorage;
     private final UserValidator userValidator;
 
