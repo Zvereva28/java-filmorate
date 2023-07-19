@@ -82,16 +82,16 @@ public class ReviewsServiceImpl implements ReviewsService {
     }
 
     @Override
-    public Review deleteLikefromReview(int id, int userId) {
-        log.info("- deleteLikefromReview: id{}, userId: {}", id, userId);
+    public Review deleteLikeFromReview(int id, int userId) {
+        log.info("- deleteLikeFromReview: id{}, userId: {}", id, userId);
         Review answer = reviewsStorage.decreaseUseful(id, userId);
         log.info("review id: {}: {}", id, answer);
         return answer;
     }
 
     @Override
-    public Review deleteDislikefromReview(int id, int userId) {
-        log.info("- deleteDislikefromReview: id{}, userId: {}", id, userId);
+    public Review deleteDislikeFromReview(int id, int userId) {
+        log.info("- deleteDislikeFromReview: id{}, userId: {}", id, userId);
         Review answer = reviewsStorage.increaseUseful(id, userId);
         log.info("review id: {}: {}", id, answer);
         return answer;

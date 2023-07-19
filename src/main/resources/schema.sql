@@ -49,7 +49,7 @@ content VARCHAR (200),
 isPositive boolean,
 userId INTEGER NOT NULL REFERENCES USERS(ID) ON DELETE CASCADE,
 filmId INTEGER NOT NULL REFERENCES FILMS(ID) ON DELETE CASCADE,
-useful INTEGER NOT NULL DEFAULT 0
+useful INTEGER DEFAULT 0
 );
 
 create table if not exists directors(
