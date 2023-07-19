@@ -71,11 +71,11 @@ public class ReviewsController {
 
     @DeleteMapping("/{id}/like/{userId}")
     public Review deleteLike(@PathVariable int id, @PathVariable int userId) {
-        return reviewsService.deleteLikefromReview(id, userId);
+        return reviewsService.deleteLikeFromReview(id, userId);
     }
 
     @DeleteMapping("/{id}/dislike/{userId}")
     public Review deleteDislike(@PathVariable int id, @PathVariable int userId) {
-        return reviewsService.deleteDislikefromReview(id, userId);
+        return reviewsService.deleteDislikeFromReview(id, userId);
     }
 }

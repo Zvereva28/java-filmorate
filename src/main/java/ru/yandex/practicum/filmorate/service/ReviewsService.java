@@ -21,7 +21,7 @@ public interface ReviewsService {
 
     Review addDislikeToReview(int id, int userId);
 
-    Review deleteLikefromReview(int id, int userId);
+    Review deleteLikeFromReview(int id, int userId);
 
-    Review deleteDislikefromReview(int id, int userId);
+    Review deleteDislikeFromReview(int id, int userId);
 }

@@ -2,40 +2,39 @@ package ru.yandex.practicum.filmorate.storage.impl.dao;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Component;
-import ru.yandex.practicum.filmorate.exception.FilmNotFoundException;
 import ru.yandex.practicum.filmorate.exception.ReviewNotFoundException;
-import ru.yandex.practicum.filmorate.exception.UserNotFoundException;
 import ru.yandex.practicum.filmorate.model.Review;
 import ru.yandex.practicum.filmorate.storage.ReviewsStorage;
+import ru.yandex.practicum.filmorate.validators.ReviewValidation;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Slf4j
 @Component()
 public class ReviewsDbStorage implements ReviewsStorage {
-    private static final String GET_ALL_REVIEWS = "SELECT * FROM reviews LIMIT";
-    private static final String ADD_REVIEW = "INSERT INTO reviews(content, isPositive, userId, filmId) VALUES(?, ?, ?, ?);";
-    private static final String UPDATE_REVIEW = "UPDATE reviews SET content = ?, isPositive = ? WHERE reviewId = ?;";
-    private static final String DELETE_REVIEW = "DELETE FROM reviews WHERE reviewId = ?;";
-    private static final String GET_REVIEW_BY_ID = "SELECT * FROM reviews WHERE reviewId = ";
-    private static final String GET_REVIEWS_BY_FILM_ID = "SELECT * FROM reviews WHERE filmId = ";
+    private static final String GET_ALL_REVIEWS = "SELECT reviewId, content, isPositive, userId, filmId, useful FROM reviews LIMIT";
+    private static final String UPDATE_REVIEW = "UPDATE reviews SET content = ?, isPositive = ? WHERE reviewId = ?";
+    private static final String DELETE_REVIEW = "DELETE FROM reviews WHERE reviewId = ?";
+    private static final String GET_REVIEW_BY_ID = "SELECT reviewId, content, isPositive, userId, filmId, useful FROM reviews WHERE reviewId = ";
+    private static final String GET_REVIEWS_BY_FILM_ID = "SELECT reviewId, content, isPositive, userId, filmId, useful FROM reviews WHERE filmId = ";
     private static final String LIMIT = " LIMIT ";
-    private static final String INCREASE_USEFUL = "UPDATE reviews SET useful = useful + 1 WHERE reviewId = ?;";
-    private static final String DECREASE_USEFUL = "UPDATE reviews SET useful = useful - 1 WHERE reviewId = ?;";
-    private static final String GET_ALL_FILM_IDS = "SELECT id FROM films;";
-    private static final String GET_ALL_USER_IDS = "SELECT id FROM users;";
-    private static final String GET_MAX_ID = "SELECT max(reviewId) as maxId FROM reviews;";
+    private static final String INCREASE_USEFUL = "UPDATE reviews SET useful = useful + 1 WHERE reviewId = ?";
+    private static final String DECREASE_USEFUL = "UPDATE reviews SET useful = useful - 1 WHERE reviewId = ?";
 
     private final JdbcTemplate jdbcTemplate;
+    private final ReviewValidation validation;
 
-    public ReviewsDbStorage(JdbcTemplate jdbcTemplate) {
+    public ReviewsDbStorage(JdbcTemplate jdbcTemplate, ReviewValidation validation) {
         this.jdbcTemplate = jdbcTemplate;
+        this.validation = validation;
     }
 
     @Override
@@ -45,15 +44,23 @@ public class ReviewsDbStorage implements ReviewsStorage {
 
     @Override
     public Review addReview(Review review) {
-        checkUserAndFilm(review.getFilmId(), review.getUserId());
-        int newId = getMaxId() + 1;
-        jdbcTemplate.update(ADD_REVIEW, review.getContent(), review.getIsPositive(), review.getUserId(), review.getFilmId());
-        return getReviewById(newId);
+        Number id = 0;
+        validation.checkUserAndFilm(review.getFilmId(), review.getUserId());
+        if (review.getFilmId() > 0 && review.getUserId() > 0) {
+            SimpleJdbcInsert simpleJdbcInsert = new SimpleJdbcInsert(validation.requireNonNull(jdbcTemplate.getDataSource(), "Add review error"))
+                    .withTableName("reviews")
+                    .usingGeneratedKeyColumns("reviewId");
+            Map<String, String> params = Map.of("content", review.getContent(), "isPositive", review.getIsPositive().toString(),
+                    "userId", review.getUserId().toString(), "filmId", review.getFilmId().toString(), "useful", "0");
+
+            id = simpleJdbcInsert.executeAndReturnKey(params);
+        }
+        return getReviewById((int)id);
     }
 
     @Override
     public Review updateReview(Review review) {
-        checkUserAndFilm(review.getFilmId(), review.getUserId());
+        validation.checkUserAndFilm(review.getFilmId(), review.getUserId());
         jdbcTemplate.update(UPDATE_REVIEW,
                 review.getContent(), review.getIsPositive(), review.getReviewId()
                 );
@@ -103,7 +110,6 @@ public class ReviewsDbStorage implements ReviewsStorage {
     }
 
     private Review createReview(ResultSet rs) {
-
         try {
             return new Review(
                     rs.getInt("reviewId"), rs.getString("content"),
@@ -113,33 +119,5 @@ public class ReviewsDbStorage implements ReviewsStorage {
         } catch (SQLException e) {
             throw new ReviewNotFoundException("Ошибка в БД.");
         }
-    }
-
-    private List<Integer> getIds(String sql, String idName, int id) {
-        List<Integer> filmIds = new ArrayList<>();
-        jdbcTemplate.query(sql, (rs, rowNum) -> {
-            do {
-                filmIds.add(rs.getInt("id"));
-            } while (rs.next());
-            return filmIds;
-        }).stream().findFirst().orElseThrow(() -> new FilmNotFoundException(idName + " с id = " + id + " не существует"));
-        return filmIds;
-    }
-
-    private void checkUserAndFilm(int filmId, int userId) {
-        if (!getIds(GET_ALL_FILM_IDS, "film_id", filmId).contains(filmId)) {
-            throw new FilmNotFoundException("Фильма с id = " + filmId + " не существует");
-        }
-        if (!getIds(GET_ALL_USER_IDS, "user_id", userId).contains(userId)) {
-            throw new UserNotFoundException("Юзера с id = " + userId + " не существует");
-        }
-    }
-
-    private int getMaxId() {
-        Integer maxId = jdbcTemplate.queryForObject(GET_MAX_ID, (rs, rowNum) -> rs.getInt("maxId"));
-        if (maxId != null) {
-            return maxId;
-        }
-        return 0;
     }
 }
