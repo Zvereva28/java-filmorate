@@ -2,8 +2,6 @@ package ru.yandex.practicum.filmorate.service.impl;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.exception.FilmNotFoundException;
-import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Review;
 import ru.yandex.practicum.filmorate.service.ReviewsService;
 import ru.yandex.practicum.filmorate.storage.ReviewsStorage;
@@ -20,9 +18,9 @@ public class ReviewsServiceImpl implements ReviewsService {
     }
 
     @Override
-    public List<Review> getAllReviews() {
+    public List<Review> getAllReviews(int count) {
         log.info("getAllReviews");
-        List<Review> answer = reviewsStorage.getAllReviews();
+        List<Review> answer = reviewsStorage.getAllReviews(count);
         log.info("all reviews: {}", answer);
         return answer;
     }
@@ -55,32 +53,47 @@ public class ReviewsServiceImpl implements ReviewsService {
     public Review getReviewById(int id) {
         log.info("+ getReviewById: {}", id);
         Review answer = reviewsStorage.getReviewById(id);
-        log.info("user id: {}: {}", id, answer);
+        log.info("review id: {}: {}", id, answer);
         return answer;
     }
 
     @Override
     public List<Review> getReviewsByFilmId(int id, int count) {
-        return reviewsStorage.getReviewsByFilmId(id, count);
+        log.info("+ getReviewsByFilmId: id{}, count: {}", id, count);
+        List<Review> answer = reviewsStorage.getReviewsByFilmId(id, count);
+        log.info("review id: {}: {}", id, answer);
+        return answer;
     }
 
     @Override
     public Review addLikeToReview(int id, int userId) {
-        return reviewsStorage.increaseUseful(id, userId);
+        log.info("+ addLikeToReview: id{}, userId: {}", id, userId);
+        Review answer = reviewsStorage.increaseUseful(id, userId);
+        log.info("review id: {}: {}", id, answer);
+        return answer;
     }
 
     @Override
     public Review addDislikeToReview(int id, int userId) {
-        return reviewsStorage.decreaseUseful(id, userId);
+        log.info("+ addDislikeToReview: id{}, userId: {}", id, userId);
+        Review answer = reviewsStorage.decreaseUseful(id, userId);
+        log.info("review id: {}: {}", id, answer);
+        return answer;
     }
 
     @Override
     public Review deleteLikefromReview(int id, int userId) {
-        return reviewsStorage.decreaseUseful(id, userId);
+        log.info("- deleteLikefromReview: id{}, userId: {}", id, userId);
+        Review answer = reviewsStorage.decreaseUseful(id, userId);
+        log.info("review id: {}: {}", id, answer);
+        return answer;
     }
 
     @Override
     public Review deleteDislikefromReview(int id, int userId) {
-        return reviewsStorage.increaseUseful(id, userId);
+        log.info("- deleteDislikefromReview: id{}, userId: {}", id, userId);
+        Review answer = reviewsStorage.increaseUseful(id, userId);
+        log.info("review id: {}: {}", id, answer);
+        return answer;
     }
 }

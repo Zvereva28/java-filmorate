@@ -5,7 +5,7 @@ import ru.yandex.practicum.filmorate.model.Review;
 import java.util.List;
 
 public interface ReviewsService {
-    List<Review> getAllReviews();
+    List<Review> getAllReviews(int count);
 
     Review addReview(Review review);
 
