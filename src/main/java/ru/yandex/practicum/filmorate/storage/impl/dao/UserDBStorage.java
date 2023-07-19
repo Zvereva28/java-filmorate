@@ -47,6 +47,7 @@ public class UserDBStorage implements UserStorage {
     public User userExist(int id) {
         return jdbcTemplate.query(SELECT_USER, userRowMapper(), id).stream()
                 .findFirst().orElseThrow(() -> new UserNotFoundException("Пользователя с id = " + id + " не существует"));
+
     }
 
     @Override
