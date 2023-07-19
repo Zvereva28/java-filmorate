@@ -3,10 +3,9 @@ package ru.yandex.practicum.filmorate.storage;
 import ru.yandex.practicum.filmorate.model.Review;
 
 import java.util.List;
-import java.util.Optional;
 
 public interface ReviewsStorage {
-    List<Review> getAllReviews();
+    List<Review> getAllReviews(int count);
 
     Review addReview(Review review);
 

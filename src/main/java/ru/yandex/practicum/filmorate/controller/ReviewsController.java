@@ -2,7 +2,6 @@ package ru.yandex.practicum.filmorate.controller;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -12,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import ru.yandex.practicum.filmorate.exception.FilmNotFoundException;
 import ru.yandex.practicum.filmorate.model.Review;
 import ru.yandex.practicum.filmorate.service.ReviewsService;
 
@@ -31,8 +31,17 @@ public class ReviewsController {
     }
 
     @GetMapping
-    public List<Review> getAllReviews() {
-        return reviewsService.getAllReviews();
+    public List<Review> getAllReviews(@RequestParam(value = "filmId", required = false) Integer filmId,
+                                      @RequestParam(value = "count", defaultValue = "10", required = false) Integer count) {
+        if (filmId == null) {
+            return reviewsService.getAllReviews(count);
+        }
+
+        if (filmId == 0) {
+            throw new FilmNotFoundException("Фильма с id = 0 не может быть");
+        }
+
+        return reviewsService.getReviewsByFilmId(filmId, count);
     }
 
     @PutMapping
@@ -48,13 +57,6 @@ public class ReviewsController {
     @GetMapping("/{id}")
     public Review getReviewById(@PathVariable int id) {
         return reviewsService.getReviewById(id);
-    }
-
-    @GetMapping("?filmId={filmId}&count={count}")
-    public List<Review> getReviewsByFilmId(@RequestParam String filmId, @RequestParam String count) {
-        System.out.println(filmId);
-        System.out.println(count);
-        return reviewsService.getReviewsByFilmId(Integer.parseInt(filmId), Integer.parseInt(count));
     }
 
     @PutMapping("/{id}/like/{userId}")

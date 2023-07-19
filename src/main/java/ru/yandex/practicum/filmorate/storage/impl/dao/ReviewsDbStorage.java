@@ -5,25 +5,27 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exception.FilmNotFoundException;
 import ru.yandex.practicum.filmorate.exception.ReviewNotFoundException;
+import ru.yandex.practicum.filmorate.exception.UserNotFoundException;
 import ru.yandex.practicum.filmorate.model.Review;
 import ru.yandex.practicum.filmorate.storage.ReviewsStorage;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 
 @Slf4j
 @Component()
 public class ReviewsDbStorage implements ReviewsStorage {
-    private static final String GET_ALL_REVIEWS = "SELECT * FROM reviews";
+    private static final String GET_ALL_REVIEWS = "SELECT * FROM reviews LIMIT";
     private static final String ADD_REVIEW = "INSERT INTO reviews(content, isPositive, userId, filmId) VALUES(?, ?, ?, ?);";
-    private static final String UPDATE_REVIEW = "UPDATE reviews SET content = ?, isPositive = ?, useful = ? WHERE reviewId = ?;";
-    private static final String DELETE_REVIEW = "UPDATE FROM reviews WHERE reviewId = ?;";
+    private static final String UPDATE_REVIEW = "UPDATE reviews SET content = ?, isPositive = ? WHERE reviewId = ?;";
+    private static final String DELETE_REVIEW = "DELETE FROM reviews WHERE reviewId = ?;";
     private static final String GET_REVIEW_BY_ID = "SELECT * FROM reviews WHERE reviewId = ";
     private static final String GET_REVIEWS_BY_FILM_ID = "SELECT * FROM reviews WHERE filmId = ";
-    private static final String GET_REVIEWS_BY_FILM_ID_LIMIT = " LIMIT = ";
+    private static final String LIMIT = " LIMIT ";
     private static final String INCREASE_USEFUL = "UPDATE reviews SET useful = useful + 1 WHERE reviewId = ?;";
     private static final String DECREASE_USEFUL = "UPDATE reviews SET useful = useful - 1 WHERE reviewId = ?;";
     private static final String GET_ALL_FILM_IDS = "SELECT id FROM films;";
@@ -37,8 +39,8 @@ public class ReviewsDbStorage implements ReviewsStorage {
     }
 
     @Override
-    public List<Review> getAllReviews() {
-        return getReviews(GET_ALL_REVIEWS, "");
+    public List<Review> getAllReviews(int count) {
+        return getReviews(GET_ALL_REVIEWS, Integer.toString(count));
     }
 
     @Override
@@ -46,7 +48,6 @@ public class ReviewsDbStorage implements ReviewsStorage {
         checkUserAndFilm(review.getFilmId(), review.getUserId());
         int newId = getMaxId() + 1;
         jdbcTemplate.update(ADD_REVIEW, review.getContent(), review.getIsPositive(), review.getUserId(), review.getFilmId());
-
         return getReviewById(newId);
     }
 
@@ -54,9 +55,8 @@ public class ReviewsDbStorage implements ReviewsStorage {
     public Review updateReview(Review review) {
         checkUserAndFilm(review.getFilmId(), review.getUserId());
         jdbcTemplate.update(UPDATE_REVIEW,
-                review.getContent(), review.getIsPositive(), review.getUseful(), review.getReviewId()
+                review.getContent(), review.getIsPositive(), review.getReviewId()
                 );
-
         return getReviewById(review.getReviewId());
     }
 
@@ -64,7 +64,6 @@ public class ReviewsDbStorage implements ReviewsStorage {
     public Review deleteReview(int id) {
         Review review = getReviewById(id);
         jdbcTemplate.update(DELETE_REVIEW, id);
-
         return review;
     }
 
@@ -76,24 +75,19 @@ public class ReviewsDbStorage implements ReviewsStorage {
 
     @Override
     public List<Review> getReviewsByFilmId(int id, int count) {
-        System.out.println(count);
-        if (count == 0) {
-            return getReviews(GET_REVIEWS_BY_FILM_ID, Integer.toString(id));
-        } else {
-            return getReviews(GET_REVIEWS_BY_FILM_ID + GET_REVIEWS_BY_FILM_ID_LIMIT + count, Integer.toString(id));
-        }
-    }
+        return getReviews(GET_REVIEWS_BY_FILM_ID + id + LIMIT, Integer.toString(count));
+   }
 
     @Override
     public Review increaseUseful(int reviewId, int userId) {
-        int id = jdbcTemplate.update(INCREASE_USEFUL, reviewId);
-        return getReviewById(id);
+        jdbcTemplate.update(INCREASE_USEFUL, reviewId);
+        return getReviewById(reviewId);
     }
 
     @Override
     public Review decreaseUseful(int reviewId, int userId) {
-        int id = jdbcTemplate.update(DECREASE_USEFUL, reviewId);
-        return getReviewById(id);
+        jdbcTemplate.update(DECREASE_USEFUL, reviewId);
+        return getReviewById(reviewId);
     }
 
     private List<Review> getReviews(String sql, String param) {
@@ -102,9 +96,9 @@ public class ReviewsDbStorage implements ReviewsStorage {
             do {
                 reviews.add(createReview(rs));
             } while (rs.next());
+            reviews.sort(Comparator.comparingInt(Review::getUseful).reversed());
             return reviews;
         }).stream().findFirst();
-
         return reviewsOpt.orElse(new ArrayList<>());
     }
 
@@ -132,12 +126,12 @@ public class ReviewsDbStorage implements ReviewsStorage {
         return filmIds;
     }
 
-    private void checkUserAndFilm(int filmId, int userId){
+    private void checkUserAndFilm(int filmId, int userId) {
         if (!getIds(GET_ALL_FILM_IDS, "film_id", filmId).contains(filmId)) {
             throw new FilmNotFoundException("Фильма с id = " + filmId + " не существует");
         }
         if (!getIds(GET_ALL_USER_IDS, "user_id", userId).contains(userId)) {
-            throw new FilmNotFoundException("Юзера с id = " + userId + " не существует");
+            throw new UserNotFoundException("Юзера с id = " + userId + " не существует");
         }
     }
 
