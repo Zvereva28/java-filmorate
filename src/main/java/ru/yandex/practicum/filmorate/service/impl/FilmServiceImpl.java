@@ -96,6 +96,12 @@ public class FilmServiceImpl implements FilmService {
         return film;
     }
 
+    @Override
+    public List<Film> getDirectorFilms(int id, String string) {
+
+        return filmStorage.getDirectorFilms(id, string);
+    }
+
     class LikesComparator implements Comparator<Film> {
         @Override
         public int compare(Film a, Film b) {

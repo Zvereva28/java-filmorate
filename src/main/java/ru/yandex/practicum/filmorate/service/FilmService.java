@@ -19,4 +19,6 @@ public interface FilmService {
     Film putLikesFilm(int id, int userId);
 
     Film deleteLikesFilm(int id, int userId);
+
+    List<Film> getDirectorFilms(int id, String string);
 }

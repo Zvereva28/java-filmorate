@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.service.FilmService;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Slf4j
@@ -58,6 +59,12 @@ public class FilmController {
     @DeleteMapping("/{id}/like/{userId}")
     public Film deleteLikesFilmById(@PathVariable int id, @PathVariable int userId) {
         return filmService.deleteLikesFilm(id, userId);
+    }
+
+    @GetMapping("/director/{directorId}")
+    public List<Film> getFilmsByYearOrLikes(@PathVariable int directorId, @RequestParam String sortBy) {
+
+        return filmService.getDirectorFilms(directorId, sortBy);
     }
 
 }
