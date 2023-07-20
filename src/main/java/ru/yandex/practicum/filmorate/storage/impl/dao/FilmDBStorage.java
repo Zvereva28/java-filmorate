@@ -16,27 +16,22 @@ import ru.yandex.practicum.filmorate.storage.FilmStorage;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 
 @Slf4j
 @Component("filmDBStorage")
 public class FilmDBStorage implements FilmStorage {
-    private static final String SELECT_COUNT_OF_LIKES = "SELECT count(*) AS count FROM film_likes where film_id = ?";
+    private static final String GET_COUNT_OF_LIKES = "SELECT count(*) AS count FROM film_likes where film_id = ?";
     private static final String UPDATE_FILM = "UPDATE films SET  name=?, description=?, release_date=?, duration=?, rating_mpa=?, count_likes=? WHERE id=?";
     private static final String DELETE_FILM_GENRE = "DELETE FROM film_genre WHERE film_id=?";
     private static final String DELETE_FILM_DIRECTOR = "DELETE FROM film_director WHERE film_id=?";
-    private static final String SELECT_ALL_FILMS = "SELECT f.id, name, description, release_date, duration, rating_mpa, count_likes, fg.genre_id AS genre_id, g.genre_name AS genre_name, " +
+    private static final String GET_ALL_FILMS = "SELECT f.id, name, description, release_date, duration, rating_mpa, count_likes, fg.genre_id AS genre_id, g.genre_name AS genre_name, " +
             "fd.director_id AS director_id, d.director_name AS director_name " +
             "FROM films as f LEFT JOIN film_genre AS fg ON f.id=fg.film_id LEFT JOIN genre AS g ON fg.genre_id=g.id " +
             "LEFT JOIN film_director AS fd ON f.id=fd.film_id " +
             "LEFT JOIN directors AS d ON fd.director_id=d.director_id " +
             "ORDER BY f.id, genre_id";
-    private static final String SELECT_FILM = "SELECT f.id, name, description, release_date, duration, rating_mpa, count_likes, fg.genre_id AS genre_id, g.genre_name AS genre_name, " +
+    private static final String GET_FILM = "SELECT f.id, name, description, release_date, duration, rating_mpa, count_likes, fg.genre_id AS genre_id, g.genre_name AS genre_name, " +
             "fd.director_id AS director_id, d.director_name AS director_name " +
             "FROM films as f LEFT JOIN film_genre AS fg ON f.id=fg.film_id LEFT JOIN genre AS g ON fg.genre_id=g.id " +
             "LEFT JOIN film_director AS fd ON f.id=fd.film_id LEFT JOIN directors AS d ON fd.director_id=d.director_id " +
@@ -132,7 +127,7 @@ public class FilmDBStorage implements FilmStorage {
         filmExist(id);
         Integer countLikes;
         try {
-            countLikes = jdbcTemplate.queryForObject(SELECT_COUNT_OF_LIKES,
+            countLikes = jdbcTemplate.queryForObject(GET_COUNT_OF_LIKES,
                     (rs, rowNum) -> rs.getInt("count"), film.getId());
         } catch (RuntimeException e) {
             countLikes = 0;
@@ -175,7 +170,7 @@ public class FilmDBStorage implements FilmStorage {
 
     @Override
     public List<Film> getAllFilms() {
-        return jdbcTemplate.query(SELECT_ALL_FILMS, filmsRowMapper()).stream().findFirst().orElse(new ArrayList<>());
+        return jdbcTemplate.query(GET_ALL_FILMS, filmsRowMapper()).stream().findFirst().orElse(new ArrayList<>());
     }
 
 
@@ -215,7 +210,7 @@ public class FilmDBStorage implements FilmStorage {
     }
 
     private Film filmExist(int id) {
-        return jdbcTemplate.query(SELECT_FILM, filmRowMapper(), id).stream()
+        return jdbcTemplate.query(GET_FILM, filmRowMapper(), id).stream()
                 .findFirst().orElseThrow(() -> new FilmNotFoundException("Фильм с id = " + id + " не существует"));
 
     }
@@ -239,6 +234,7 @@ public class FilmDBStorage implements FilmStorage {
     }
 
     private RowMapper<List<Film>> filmsRowMapper() {
+
         return (rs, rowNum) -> {
             List<Film> films = new ArrayList<>();
             if (rs.wasNull()) {
@@ -250,10 +246,17 @@ public class FilmDBStorage implements FilmStorage {
                     films.add(film);
                     film = createFilmFromDB(rs);
                 }
+                if (rs.getInt("genre_id") != 0) {
+                    Genres genre = new Genres(rs.getInt("genre_id"), rs.getString("genre_name"));
+                    if (!film.getGenres().contains(genre)) {
+                        film.getGenres().add(genre);
+                    }
+                }
             }
             films.add(film);
             return films;
         };
+
     }
 
     private Film createFilmFromDB(ResultSet rs) throws SQLException {

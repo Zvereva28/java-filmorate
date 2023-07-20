@@ -16,4 +16,8 @@ public class Director {
     private Integer id;
     @NotBlank(message = "Имя не может быть пустым")
     private String name;
+
+    public Director(String name) {
+        this.name = name;
+    }
 }
