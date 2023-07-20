@@ -13,12 +13,8 @@ import ru.yandex.practicum.filmorate.storage.FilmStorage;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Component("filmDBStorage")
@@ -181,5 +177,61 @@ public class FilmDBStorage implements FilmStorage {
         film.setMpa(new Mpa(rs.getInt("rating_mpa")));
         film.setCountLikes(rs.getInt("count_likes"));
         return film;
+    }
+    @Override
+    public List<Film> getSharedMovies(int userId, int friendId) {
+        List<Film> sharedMovies = new ArrayList<>();
+        List<Film> userFilms = new ArrayList<>();
+        List<Film> friendFilms = new ArrayList<>();
+
+       userFilms.add( jdbcTemplate.queryForObject("select(*) from films f left join film_likes fl on" +
+                       " f.id =fl.film_id where fl.user_id = ?",
+        new RowMapper<Film>() {
+            @Override
+            public Film mapRow(ResultSet rs, int rowNum) throws SQLException {
+                Film film = new Film();
+                film.setId(rs.getInt("id"));
+                film.setName(rs.getString("name"));
+                film.setDescription(rs.getString("description"));
+                film.setReleaseDate(rs.getDate("release_date").toLocalDate());
+                film.setDuration(rs.getInt("duration"));
+                film.setMpa(new Mpa(rs.getInt("rating_mpa")));
+                film.setCountLikes(rs.getInt("count_likes"));
+                userFilms.add(film);
+                return film;
+            }
+            }, userId));
+
+        friendFilms.add( jdbcTemplate.queryForObject("select(*) from films f left join film_likes fl on" +
+                        " f.id =fl.film_id where fl.user_id = ?",
+                new RowMapper<Film>() {
+                    @Override
+                    public Film mapRow(ResultSet rs, int rowNum) throws SQLException {
+                        Film film = new Film();
+                        film.setId(rs.getInt("id"));
+                        film.setName(rs.getString("name"));
+                        film.setDescription(rs.getString("description"));
+                        film.setReleaseDate(rs.getDate("release_date").toLocalDate());
+                        film.setDuration(rs.getInt("duration"));
+                        film.setMpa(new Mpa(rs.getInt("rating_mpa")));
+                        film.setCountLikes(rs.getInt("count_likes"));
+                        friendFilms.add(film);
+                        return film;
+                    }
+                }, friendId));
+
+        for (Film i: userFilms) {
+            for (Film y: friendFilms) {
+                if (y.getId() == i.getId()) {
+                    sharedMovies.add(y);
+                }
+            }
+        }
+
+        List<Film> sortedSharedMovies = sharedMovies.
+                stream().
+                sorted(Comparator.comparingInt(Film::getCountLikes)).
+                collect(Collectors.toList());
+        return sortedSharedMovies;
     }
 }

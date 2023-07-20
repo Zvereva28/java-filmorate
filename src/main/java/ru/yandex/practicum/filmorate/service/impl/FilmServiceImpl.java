@@ -102,4 +102,8 @@ public class FilmServiceImpl implements FilmService {
             return Integer.compare(b.getCountLikes(), a.getCountLikes());
         }
     }
+
+    public List<Film> getSharedMovies(int userId, int friendId) {
+        return filmStorage.getSharedMovies(userId, friendId);
+    }
 }
