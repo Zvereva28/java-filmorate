@@ -20,7 +20,7 @@ import java.util.Optional;
 @Slf4j
 @Component()
 public class ReviewsDbStorage implements ReviewsStorage {
-    private static final String GET_ALL_REVIEWS = "SELECT reviewId, content, isPositive, userId, filmId, useful FROM reviews LIMIT";
+    private static final String GET_ALL_REVIEWS = "SELECT reviewId, content, isPositive, userId, filmId, useful FROM reviews LIMIT ";
     private static final String UPDATE_REVIEW = "UPDATE reviews SET content = ?, isPositive = ? WHERE reviewId = ?";
     private static final String DELETE_REVIEW = "DELETE FROM reviews WHERE reviewId = ?";
     private static final String GET_REVIEW_BY_ID = "SELECT reviewId, content, isPositive, userId, filmId, useful FROM reviews WHERE reviewId = ";
@@ -45,7 +45,7 @@ public class ReviewsDbStorage implements ReviewsStorage {
     @Override
     public Review addReview(Review review) {
         Number id = 0;
-        validation.checkUserAndFilm(review.getFilmId(), review.getUserId());
+        validation.checkFilmAndUser(review.getFilmId(), review.getUserId());
         if (review.getFilmId() > 0 && review.getUserId() > 0) {
             SimpleJdbcInsert simpleJdbcInsert = new SimpleJdbcInsert(validation.requireNonNull(jdbcTemplate.getDataSource(), "Add review error"))
                     .withTableName("reviews")
@@ -60,7 +60,7 @@ public class ReviewsDbStorage implements ReviewsStorage {
 
     @Override
     public Review updateReview(Review review) {
-        validation.checkUserAndFilm(review.getFilmId(), review.getUserId());
+        validation.checkFilmAndUser(review.getFilmId(), review.getUserId());
         jdbcTemplate.update(UPDATE_REVIEW,
                 review.getContent(), review.getIsPositive(), review.getReviewId()
                 );
@@ -82,17 +82,20 @@ public class ReviewsDbStorage implements ReviewsStorage {
 
     @Override
     public List<Review> getReviewsByFilmId(int id, int count) {
+        validation.checkFilm(id);
         return getReviews(GET_REVIEWS_BY_FILM_ID + id + LIMIT, Integer.toString(count));
    }
 
     @Override
     public Review increaseUseful(int reviewId, int userId) {
+        validation.checkUserAndReview(userId, reviewId);
         jdbcTemplate.update(INCREASE_USEFUL, reviewId);
         return getReviewById(reviewId);
     }
 
     @Override
     public Review decreaseUseful(int reviewId, int userId) {
+        validation.checkUserAndReview(userId, reviewId);
         jdbcTemplate.update(DECREASE_USEFUL, reviewId);
         return getReviewById(reviewId);
     }
