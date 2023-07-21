@@ -14,7 +14,9 @@ import ru.yandex.practicum.filmorate.exception.FilmNotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.service.impl.FilmServiceImpl;
+import ru.yandex.practicum.filmorate.storage.impl.dao.FeedDbStorage;
 import ru.yandex.practicum.filmorate.storage.impl.dao.FilmDBStorage;
+import ru.yandex.practicum.filmorate.validators.FeedValidator;
 import ru.yandex.practicum.filmorate.validators.FilmValidator;
 
 import java.time.LocalDate;
@@ -37,7 +39,7 @@ class FilmControllerTest {
 
     @BeforeEach
     public void setUp() {
-        filmController = new FilmController(new FilmServiceImpl(new FilmDBStorage(jdbcTemplate), new FilmValidator()));
+        filmController = new FilmController(new FilmServiceImpl(new FilmDBStorage(jdbcTemplate), new FeedDbStorage(jdbcTemplate, new FeedValidator(jdbcTemplate)), new FilmValidator()));
     }
 
     @Test

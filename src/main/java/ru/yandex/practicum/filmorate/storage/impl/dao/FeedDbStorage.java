@@ -4,7 +4,6 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exception.DbException;
-import ru.yandex.practicum.filmorate.exception.EventNotFoundException;
 import ru.yandex.practicum.filmorate.model.FeedEvent;
 import ru.yandex.practicum.filmorate.model.enums.FeedEventType;
 import ru.yandex.practicum.filmorate.model.enums.FeedOperation;
@@ -24,7 +23,6 @@ import java.util.Optional;
 public class FeedDbStorage implements FeedStorage {
     private final JdbcTemplate jdbcTemplate;
     private final FeedValidator validator;
-    private static final String GET_FEED_EVENT_BY_ID = "SELECT event_id, timestamp, user_id, event_type, operation, entity_id FROM feed WHERE event_id = ";
     private static final String GET_FEED_EVENT_BY_USER_ID = "SELECT event_id, timestamp, user_id, event_type, operation, entity_id FROM feed WHERE user_id = ";
 
     public FeedDbStorage(JdbcTemplate jdbcTemplate, FeedValidator validator) {
@@ -33,7 +31,7 @@ public class FeedDbStorage implements FeedStorage {
     }
 
     @Override
-    public FeedEvent addToFeedDb(Integer userId, FeedEventType eventType, FeedOperation operation, Integer entityId) {
+    public void addToFeedDb(Integer userId, FeedEventType eventType, FeedOperation operation, Integer entityId) {
         String time = String.valueOf(java.time.LocalDateTime.now());
 
         SimpleJdbcInsert simpleJdbcInsert = new SimpleJdbcInsert(Objects.requireNonNull(jdbcTemplate.getDataSource()))
@@ -43,17 +41,7 @@ public class FeedDbStorage implements FeedStorage {
         Map<String, String> params = Map.of("timestamp", time, "user_id", userId.toString(),
                 "event_type", eventType.toString(), "operation", operation.toString(), "entity_id", entityId.toString());
 
-        System.out.println("params " + params);
-        Number id = simpleJdbcInsert.executeAndReturnKey(params);
-
-        return getFeedEventById((Integer) id);
-    }
-
-    @Override
-    public FeedEvent getFeedEventById(Integer id) {
-        validator.checkEvent(id);
-        Optional<FeedEvent> feedEventOpt = jdbcTemplate.query(GET_FEED_EVENT_BY_ID + id, (rs, rowNum) -> createEvent(rs)).stream().findFirst();
-        return feedEventOpt.orElseThrow(() -> new EventNotFoundException("События с id: " + id + " нет"));
+        simpleJdbcInsert.executeAndReturnKey(params);
     }
 
     @Override

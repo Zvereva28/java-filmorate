@@ -7,9 +7,7 @@ import ru.yandex.practicum.filmorate.model.enums.FeedOperation;
 import java.util.List;
 
 public interface FeedStorage {
-    FeedEvent addToFeedDb(Integer userId, FeedEventType eventType, FeedOperation operation, Integer entityId);
-
-    FeedEvent getFeedEventById(Integer id);
+    void addToFeedDb(Integer userId, FeedEventType eventType, FeedOperation operation, Integer entityId);
 
     List<FeedEvent> getFeedByUserId(int id);
 }

@@ -2,7 +2,6 @@ package ru.yandex.practicum.filmorate.validators;
 
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
-import ru.yandex.practicum.filmorate.exception.EventNotFoundException;
 import ru.yandex.practicum.filmorate.exception.UserNotFoundException;
 
 @Component
@@ -23,11 +22,4 @@ public class FeedValidator {
         }
     }
 
-    public void checkEvent(int id) {
-        Integer count = jdbcTemplate.queryForObject(
-                CHECK_EVENT + id, Integer.class);
-        if (count == null || count == 0) {
-            throw new EventNotFoundException("События с id = " + id + " нет");
-        }
-    }
 }

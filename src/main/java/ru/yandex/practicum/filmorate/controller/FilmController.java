@@ -13,9 +13,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.model.enums.FeedEventType;
-import ru.yandex.practicum.filmorate.model.enums.FeedOperation;
-import ru.yandex.practicum.filmorate.service.FeedService;
 import ru.yandex.practicum.filmorate.service.FilmService;
 
 import java.util.List;
@@ -26,7 +23,6 @@ import java.util.List;
 @AllArgsConstructor
 public class FilmController {
     private final FilmService filmService;
-    private final FeedService feedService;
 
     @GetMapping
     public List<Film> getFilms() {
@@ -56,16 +52,12 @@ public class FilmController {
 
     @PutMapping("/{id}/like/{userId}")
     public Film putLikesFilmById(@PathVariable int id, @PathVariable int userId) {
-        Film answer = filmService.putLikesFilm(id, userId);
-        feedService.addToFeed(userId, FeedEventType.LIKE, FeedOperation.ADD, id);
-        return answer;
+        return filmService.putLikesFilm(id, userId);
     }
 
     @DeleteMapping("/{id}/like/{userId}")
     public Film deleteLikesFilmById(@PathVariable int id, @PathVariable int userId) {
-        Film answer = filmService.deleteLikesFilm(id, userId);
-        feedService.addToFeed(userId, FeedEventType.LIKE, FeedOperation.REMOVE, id);
-        return answer;
+        return filmService.deleteLikesFilm(id, userId);
     }
 
 }

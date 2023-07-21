@@ -11,7 +11,6 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.annotation.DirtiesContext;
 import ru.yandex.practicum.filmorate.exception.UserException;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.service.impl.FeedServiceImpl;
 import ru.yandex.practicum.filmorate.service.impl.UserServiceImpl;
 import ru.yandex.practicum.filmorate.storage.impl.dao.FeedDbStorage;
 import ru.yandex.practicum.filmorate.storage.impl.dao.FilmDBStorage;
@@ -40,7 +39,7 @@ class UserControllerTest {
 
     @BeforeEach
     public void setUp() {
-        userController = new UserController(new UserServiceImpl(new UserDBStorage(jdbcTemplate), new LikesDBStorage(jdbcTemplate, new FilmDBStorage(jdbcTemplate)), new UserValidator()), new FeedServiceImpl(new FeedDbStorage(jdbcTemplate, new FeedValidator(jdbcTemplate))));
+        userController = new UserController(new UserServiceImpl(new UserDBStorage(jdbcTemplate), new LikesDBStorage(jdbcTemplate, new FilmDBStorage(jdbcTemplate)), new FeedDbStorage(jdbcTemplate, new FeedValidator(jdbcTemplate)), new UserValidator()));
     }
 
     @Test
