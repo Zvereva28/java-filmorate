@@ -24,35 +24,30 @@ public class DirectorController {
     /** Получаем всех режиссеров */
     @GetMapping()
     public List<Director> getAllDirectors() {
-        log.info("Получен список всех режиссеров");
         return directorService.getAllDirectors();
     }
 
     /** Получаем режиссера по id */
     @GetMapping("/{id}")
     public Director getDirectorById(@PathVariable int id) {
-        log.info("Получен режиссер с id '{}'", id);
         return directorService.getDirector(id);
     }
 
     /** Создаем режиссера */
     @PostMapping
     public Director createDirector(@Validated  @RequestBody Director director) {
-        log.info("Добавлен новый режиссер: id - '{}', name - '{}'", director.getId(), director.getName());
         return directorService.addDirector(director);
     }
 
     /** Обновляем режиссера */
     @PutMapping
     public Director updateDirector(@Validated  @RequestBody Director director) {
-        log.info("Режиссер - '{}', обновлен ", director);
         return directorService.updateDirector(director);
     }
 
     /** Удаляем режиссера */
     @DeleteMapping("/{id}")
     public void deleteDirector(@PathVariable int id) {
-        log.info("Режиссер c id - '{}', удален ", id);
         directorService.deleteDirector(id);
     }
 }
