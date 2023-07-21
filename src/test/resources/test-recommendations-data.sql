@@ -16,13 +16,20 @@ INSERT INTO FILMS (NAME, DESCRIPTION, RELEASE_DATE, DURATION, rating_mpa, count_
     VALUES
         ('Film Name1', 'Description1', '2000-10-11', '120', '1', '0'),
         ('Film Name2', 'Description2', '2000-10-12', '140', '2', '0'),
-        ('Film Name3', 'Description3', '2000-10-13', '180', '3', '0');
+        ('Film Name3', 'Description3', '2000-10-13', '180', '3', '0'),
+        ('Film Name4', 'Description4', '2000-10-11', '120', '1', '0'),
+        ('Film Name5', 'Description5', '2000-10-12', '140', '2', '0'),
+        ('Film Name6', 'Description6', '2000-10-13', '180', '3', '0');
 
 INSERT INTO film_likes (film_id, user_id)
     VALUES
         (1, 1),
-        (1, 2),
         (2, 1),
-        (3, 1),
+
+        (1, 2),
         (3, 2),
-        (3, 3);
+
+        (1, 3),
+        (2, 3),
+        (4, 3),
+        (5, 3);

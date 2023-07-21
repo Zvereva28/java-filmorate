@@ -4,8 +4,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.UserException;
+import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.UserService;
+import ru.yandex.practicum.filmorate.storage.LikesStorage;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
 import ru.yandex.practicum.filmorate.validators.UserValidator;
 
@@ -18,11 +20,13 @@ import java.util.stream.Collectors;
 @Service
 public class UserServiceImpl implements UserService {
     private final UserStorage userStorage;
+    private final LikesStorage likesStorage;
     private final UserValidator userValidator;
 
-    public UserServiceImpl(@Qualifier("userDBStorage") UserStorage userStorage, UserValidator userValidator) {
+    public UserServiceImpl(@Qualifier("userDBStorage") UserStorage userStorage, LikesStorage likesStorage, UserValidator userValidator) {
         this.userStorage = userStorage;
         this.userValidator = userValidator;
+        this.likesStorage = likesStorage;
     }
 
     @Override
@@ -104,5 +108,10 @@ public class UserServiceImpl implements UserService {
         }
         log.debug("- getFriendsCommon : {}", friends);
         return friends;
+    }
+
+    @Override
+    public List<Film> getRecommendations(int userId) {
+        return likesStorage.getFilmsByUserId(userId);
     }
 }

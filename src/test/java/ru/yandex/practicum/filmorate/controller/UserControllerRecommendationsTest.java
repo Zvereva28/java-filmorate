@@ -1,32 +1,31 @@
 package ru.yandex.practicum.filmorate.controller;
 
 import lombok.RequiredArgsConstructor;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.jdbc.Sql;
-import ru.yandex.practicum.filmorate.storage.impl.dao.LikesDBStorage;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @SpringBootTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
-@Sql({"/schema.sql", "/test-likes-data.sql"})
-public class LikesDBStorageTest {
-    private final LikesDBStorage likesDBStorage;
+@Sql({"/schema.sql", "/test-recommendations-data.sql"})
+public class UserControllerRecommendationsTest {
+    private final UserController userController;
 
     @Test
-    @DisplayName("Получение списка фильмов по id пользователя")
-    void getFilm() {
-        assertEquals(3, likesDBStorage.getFilmIdByUserId(1).size());
+    void getRecommendations() {
+        assertEquals(3, userController.getRecommendations(1).size());
     }
 
     @Test
-    @DisplayName("Получение списка пользователей по id фильма")
-    void getUser() {
-        assertEquals(2, likesDBStorage.getUserIdByFilmId(1).size());
+    void getRecommendationsWhenFilm() {
+        assertEquals(4, userController.getRecommendations(1).get(0).getId());
+        assertEquals(5, userController.getRecommendations(1).get(1).getId());
+        assertEquals(3, userController.getRecommendations(1).get(2).getId());
     }
 }
