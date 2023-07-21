@@ -5,6 +5,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Component;
+import ru.yandex.practicum.filmorate.exception.DbException;
 import ru.yandex.practicum.filmorate.exception.FilmNotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genres;
@@ -163,12 +164,16 @@ public class FilmDBStorage implements FilmStorage {
         };
     }
 
-    private Film createFilmFromDB(ResultSet rs) throws SQLException {
-        Film film = getColumns(rs);
-        if (rs.getInt("genre_id") > 0) {
-            film.getGenres().add(new Genres(rs.getInt("genre_id"), rs.getString("genre_name")));
+    private Film createFilmFromDB(ResultSet rs) {
+        try {
+            Film film = getColumns(rs);
+            if (rs.getInt("genre_id") > 0) {
+                film.getGenres().add(new Genres(rs.getInt("genre_id"), rs.getString("genre_name")));
+            }
+            return film;
+        } catch (SQLException e) {
+            throw new DbException("Ошибка в БД");
         }
-        return film;
     }
 
     private Film getColumns(ResultSet rs) throws SQLException {
