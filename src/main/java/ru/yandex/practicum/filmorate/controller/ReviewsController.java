@@ -13,6 +13,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import ru.yandex.practicum.filmorate.exception.FilmNotFoundException;
 import ru.yandex.practicum.filmorate.model.Review;
+import ru.yandex.practicum.filmorate.model.enums.FeedEventType;
+import ru.yandex.practicum.filmorate.model.enums.FeedOperation;
+import ru.yandex.practicum.filmorate.service.FeedService;
 import ru.yandex.practicum.filmorate.service.ReviewsService;
 
 import javax.validation.Valid;
@@ -24,10 +27,13 @@ import java.util.List;
 @AllArgsConstructor
 public class ReviewsController {
     private final ReviewsService reviewsService;
+    private final FeedService feedService;
 
     @PostMapping
     public Review addReview(@Valid @RequestBody Review review) {
-        return reviewsService.addReview(review);
+        Review answer = reviewsService.addReview(review);
+        feedService.addToFeed(answer.getUserId(), FeedEventType.REVIEW, FeedOperation.ADD, answer.getReviewId());
+        return answer;
     }
 
     @GetMapping
@@ -46,12 +52,16 @@ public class ReviewsController {
 
     @PutMapping
     public Review updateReview(@Valid @RequestBody Review review) {
-        return reviewsService.updateReview(review);
+        Review answer = reviewsService.updateReview(review);
+        feedService.addToFeed(answer.getUserId(), FeedEventType.REVIEW, FeedOperation.UPDATE, answer.getReviewId());
+        return answer;
     }
 
     @DeleteMapping("/{id}")
     public Review deleteReview(@PathVariable int id) {
-        return reviewsService.deleteReview(id);
+        Review answer = reviewsService.deleteReview(id);
+        feedService.addToFeed(answer.getUserId(), FeedEventType.REVIEW, FeedOperation.REMOVE, answer.getReviewId());
+        return answer;
     }
 
     @GetMapping("/{id}")

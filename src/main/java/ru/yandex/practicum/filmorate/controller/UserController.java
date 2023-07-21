@@ -11,8 +11,12 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import ru.yandex.practicum.filmorate.model.FeedEvent;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.model.enums.FeedEventType;
+import ru.yandex.practicum.filmorate.model.enums.FeedOperation;
+import ru.yandex.practicum.filmorate.service.FeedService;
 import ru.yandex.practicum.filmorate.service.UserService;
 
 import java.util.List;
@@ -23,6 +27,7 @@ import java.util.List;
 @AllArgsConstructor
 public class UserController {
     private UserService userService;
+    private FeedService feedService;
 
     @GetMapping
     public List<User> getUsers() {
@@ -47,11 +52,13 @@ public class UserController {
     @PutMapping("/{id}/friends/{friendId}")
     public void putFriends(@PathVariable int id, @PathVariable int friendId) {
         userService.putFriend(id, friendId);
+        feedService.addToFeed(id, FeedEventType.FRIEND, FeedOperation.ADD, friendId);
     }
 
     @DeleteMapping("/{id}/friends/{friendId}")
     public void deleteFriends(@PathVariable int id, @PathVariable int friendId) {
         userService.deleteFriend(id, friendId);
+        feedService.addToFeed(id, FeedEventType.FRIEND, FeedOperation.REMOVE, friendId);
     }
 
     @GetMapping("/{id}/friends")
@@ -67,5 +74,10 @@ public class UserController {
     @GetMapping("/{id}/recommendations")
     public List<Film> getRecommendations(@PathVariable int id) {
         return userService.getRecommendations(id);
+    }
+
+    @GetMapping("/{id}/feed")
+    public List<FeedEvent> getFeedByUserId(@PathVariable int id) {
+        return feedService.getFeedByUserId(id);
     }
 }
