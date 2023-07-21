@@ -7,6 +7,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Component;
+import ru.yandex.practicum.filmorate.exception.DbException;
 import ru.yandex.practicum.filmorate.exception.FilmNotFoundException;
 import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.model.Film;
@@ -228,13 +229,11 @@ public class FilmDBStorage implements FilmStorage {
                             rs.getString("genre_name")));
                 } while (rs.next());
             }
-
             return film;
         };
     }
 
     private RowMapper<List<Film>> filmsRowMapper() {
-
         return (rs, rowNum) -> {
             List<Film> films = new ArrayList<>();
             if (rs.wasNull()) {
@@ -256,20 +255,22 @@ public class FilmDBStorage implements FilmStorage {
             films.add(film);
             return films;
         };
-
     }
 
-    private Film createFilmFromDB(ResultSet rs) throws SQLException {
-        Film film = getColumns(rs);
-        if (rs.getInt("director_id") > 0) {
-            film.getDirectors().add(new Director(rs.getInt("director_id"),
-                    rs.getString("director_name")));
+    private Film createFilmFromDB(ResultSet rs) {
+        try {
+            Film film = getColumns(rs);
+            if (rs.getInt("director_id") > 0) {
+                film.getDirectors().add(new Director(rs.getInt("director_id"),
+                        rs.getString("director_name")));
+            }
+            if (rs.getInt("genre_id") > 0) {
+                film.getGenres().add(new Genres(rs.getInt("genre_id"), rs.getString("genre_name")));
+            }
+            return film;
+        } catch (SQLException e) {
+            throw new DbException("Ошибка в БД");
         }
-        if (rs.getInt("genre_id") > 0) {
-            film.getGenres().add(new Genres(rs.getInt("genre_id"),
-                    rs.getString("genre_name")));
-        }
-        return film;
     }
 
     private Film getColumns(ResultSet rs) throws SQLException {
