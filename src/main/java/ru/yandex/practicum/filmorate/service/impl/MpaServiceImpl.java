@@ -14,7 +14,6 @@ import java.util.List;
 @Service
 @AllArgsConstructor
 public class MpaServiceImpl implements MpaService {
-
     @Override
     public Mpa getMpaById(int id) {
         return new Mpa(id);
