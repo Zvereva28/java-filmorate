@@ -64,6 +64,11 @@ public class InMemoryFilmStorage implements FilmStorage {
 
     }
 
+    @Override
+    public List<Film> getSharedMovies(int userId, int friendId) {
+        return null;
+    }
+
     private Integer generateId() {
         idManager++;
         return idManager;

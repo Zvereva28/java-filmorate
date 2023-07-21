@@ -29,6 +29,14 @@ public class FilmDBStorage implements FilmStorage {
             "FROM films as f LEFT JOIN film_genre AS fg ON f.id=fg.film_id LEFT JOIN genre AS g ON fg.genre_id=g.id " +
             "WHERE f.id =? ORDER BY genre_id";
     private static final String DELETE_LIKES = "DELETE FROM film_likes WHERE film_id=? AND user_id=?";
+    private static final String GET_FILMS_SHARED = "SELECT f.id, f.name, " +
+            "f.description, " +
+            "f.release_date, " +
+            "f.duration, " +
+            "f.rating_mpa, " +
+            "f.count_likes" +
+            " FROM films f LEFT JOIN film_likes fl on f.id =fl.film_id " +
+            "WHERE fl.user_id = ?";
 
 
     private final JdbcTemplate jdbcTemplate;
@@ -184,39 +192,19 @@ public class FilmDBStorage implements FilmStorage {
         List<Film> userFilms = new ArrayList<>();
         List<Film> friendFilms = new ArrayList<>();
 
-       userFilms.add( jdbcTemplate.queryForObject("select(*) from films f left join film_likes fl on" +
-                       " f.id =fl.film_id where fl.user_id = ?",
+       userFilms.add( jdbcTemplate.queryForObject(GET_FILMS_SHARED,
         new RowMapper<Film>() {
             @Override
             public Film mapRow(ResultSet rs, int rowNum) throws SQLException {
-                Film film = new Film();
-                film.setId(rs.getInt("id"));
-                film.setName(rs.getString("name"));
-                film.setDescription(rs.getString("description"));
-                film.setReleaseDate(rs.getDate("release_date").toLocalDate());
-                film.setDuration(rs.getInt("duration"));
-                film.setMpa(new Mpa(rs.getInt("rating_mpa")));
-                film.setCountLikes(rs.getInt("count_likes"));
-                userFilms.add(film);
-                return film;
+              return getColumns(rs);
             }
             }, userId));
 
-        friendFilms.add( jdbcTemplate.queryForObject("select(*) from films f left join film_likes fl on" +
-                        " f.id =fl.film_id where fl.user_id = ?",
+        friendFilms.add( jdbcTemplate.queryForObject(GET_FILMS_SHARED,
                 new RowMapper<Film>() {
                     @Override
                     public Film mapRow(ResultSet rs, int rowNum) throws SQLException {
-                        Film film = new Film();
-                        film.setId(rs.getInt("id"));
-                        film.setName(rs.getString("name"));
-                        film.setDescription(rs.getString("description"));
-                        film.setReleaseDate(rs.getDate("release_date").toLocalDate());
-                        film.setDuration(rs.getInt("duration"));
-                        film.setMpa(new Mpa(rs.getInt("rating_mpa")));
-                        film.setCountLikes(rs.getInt("count_likes"));
-                        friendFilms.add(film);
-                        return film;
+                        return getColumns(rs);
                     }
                 }, friendId));
 
