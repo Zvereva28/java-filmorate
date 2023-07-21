@@ -6,19 +6,12 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exception.FilmNotFoundException;
-import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.model.Genres;
-import ru.yandex.practicum.filmorate.model.Mpa;
+import ru.yandex.practicum.filmorate.model.*;
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 
 @Slf4j
 @Component("filmDBStorage")
@@ -29,6 +22,24 @@ public class FilmDBStorage implements FilmStorage {
     private static final String SELECT_ALL_FILMS = "SELECT f.id, name, description, release_date, duration, rating_mpa, count_likes, fg.genre_id AS genre_id, g.genre_name AS genre_name " +
             "FROM films as f LEFT JOIN film_genre AS fg ON f.id=fg.film_id LEFT JOIN genre AS g ON fg.genre_id=g.id " +
             "ORDER BY f.id, genre_id";
+    private static final String GET_POPULAR_FILMS = "SELECT f.id, name, description, release_date, duration, rating_mpa, count_likes, fg.genre_id AS genre_id, g.genre_name AS genre_name  " +
+            "FROM films as f LEFT JOIN film_genre AS fg ON f.id=fg.film_id LEFT JOIN genre AS g ON fg.genre_id=g.id  " +
+            "WHERE f.id IN (%s) " +
+            "ORDER BY count_likes DESC, f.id ASC, genre_id ASC";
+    private static final String GET_ID_FILMS_WITH_LIMITS = String.format(GET_POPULAR_FILMS, "SELECT id FROM films ORDER BY count_likes DESC LIMIT ? ");
+
+    private static final String GET_ID_FILMS_WITH_GENRES = String.format(GET_POPULAR_FILMS, "SELECT f.id " +
+            "FROM films as f LEFT JOIN film_genre AS fg ON f.id=fg.film_id " +
+            "WHERE fg.genre_id = ?" +
+            " ORDER BY count_likes DESC LIMIT ?");
+    private static final String GET_ID_FILMS_WITH_GENRES_YEAR = String.format(GET_POPULAR_FILMS, "SELECT f.id " +
+            "FROM films as f LEFT JOIN film_genre AS fg ON f.id=fg.film_id " +
+            "WHERE fg.genre_id = ? AND release_date between ? and ? " +
+            " ORDER BY count_likes DESC LIMIT ?");
+    private static final String GET_ID_FILMS_WITH_YEAR = String.format(GET_POPULAR_FILMS, "SELECT f.id " +
+            "FROM films as f LEFT JOIN film_genre AS fg ON f.id=fg.film_id " +
+            "WHERE release_date between ? and ? " +
+            " ORDER BY count_likes DESC LIMIT ?");
     private static final String SELECT_FILM = "SELECT f.id, name, description, release_date, duration, rating_mpa, count_likes, fg.genre_id AS genre_id, g.genre_name AS genre_name " +
             "FROM films as f LEFT JOIN film_genre AS fg ON f.id=fg.film_id LEFT JOIN genre AS g ON fg.genre_id=g.id " +
             "WHERE f.id =? ORDER BY genre_id";
@@ -105,6 +116,37 @@ public class FilmDBStorage implements FilmStorage {
         return jdbcTemplate.query(SELECT_ALL_FILMS, filmsRowMapper()).stream().findFirst().orElse(new ArrayList<>());
     }
 
+    @Override
+    public List<Film> getPopularFilms(int count, int genreId, int year) {
+        if (genreId == 0 & year == 0) {
+            System.out.println();
+            System.out.println(GET_ID_FILMS_WITH_LIMITS);
+            System.out.println();
+            return jdbcTemplate.query(GET_ID_FILMS_WITH_LIMITS, filmsRowMapper(), count).stream().findFirst().orElse(new ArrayList<>());
+        } else if (genreId == 0) {
+            System.out.println();
+            System.out.println(GET_ID_FILMS_WITH_YEAR);
+            System.out.println();
+            return jdbcTemplate.query(GET_ID_FILMS_WITH_YEAR, filmsRowMapper(), getStartYear(year), getEndYear(year), count).stream().findFirst().orElse(new ArrayList<>());
+        } else if (year == 0) {
+            System.out.println();
+            System.out.println(GET_ID_FILMS_WITH_GENRES);
+            System.out.println();
+            return jdbcTemplate.query(GET_ID_FILMS_WITH_GENRES, filmsRowMapper(), genreId, count).stream().findFirst().orElse(new ArrayList<>());
+        } else
+            System.out.println();
+        System.out.println(GET_ID_FILMS_WITH_GENRES_YEAR);
+        System.out.println();
+        return jdbcTemplate.query(GET_ID_FILMS_WITH_GENRES_YEAR, filmsRowMapper(), genreId, getStartYear(year), getEndYear(year), count).stream().findFirst().orElse(new ArrayList<>());
+    }
+
+    private String getStartYear(int year) {
+        return year + "-01-01";
+    }
+
+    private String getEndYear(int year) {
+        return year + "-12-31";
+    }
 
     @Override
     public Film getFilm(int id) {
@@ -151,15 +193,23 @@ public class FilmDBStorage implements FilmStorage {
             if (rs.wasNull()) {
                 return films;
             }
-            Film film = createFilmFromDB(rs);
-            while (rs.next()) {
-                if (film.getId() != rs.getInt("id")) {
-                    films.add(film);
-                    film = createFilmFromDB(rs);
+            do {
+                Film film = createFilmFromDB(rs);
+                films.add(film);
+
+            } while (rs.next());
+            Map<Integer, Film> filmsHash = new HashMap<>();
+
+            for (Film film1 : films) {
+                if (filmsHash.containsKey(film1.getId())) {
+                    Film filmWithGenres = filmsHash.get(film1.getId());
+                    filmWithGenres.getGenres().add(film1.getGenres().get(0));
+                    filmsHash.put(filmWithGenres.getId(), filmWithGenres);
+                } else {
+                    filmsHash.put(film1.getId(), film1);
                 }
             }
-            films.add(film);
-            return films;
+            return new ArrayList<>(filmsHash.values());
         };
     }
 
@@ -167,6 +217,7 @@ public class FilmDBStorage implements FilmStorage {
         Film film = getColumns(rs);
         if (rs.getInt("genre_id") > 0) {
             film.getGenres().add(new Genres(rs.getInt("genre_id"), rs.getString("genre_name")));
+
         }
         return film;
     }

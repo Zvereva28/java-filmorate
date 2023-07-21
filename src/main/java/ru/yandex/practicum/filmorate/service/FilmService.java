@@ -12,7 +12,7 @@ public interface FilmService {
 
     List<Film> getAllFilms();
 
-    List<Film> getPopularFilms(int count);
+    List<Film> getPopularFilms(int count, int genreId, int year);
 
     Film getFilm(int id);
 

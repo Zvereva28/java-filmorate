@@ -7,7 +7,7 @@ description varchar (200),
 release_date date,
 duration integer,
 rating_mpa varchar(20),
-count_likes integer,
+count_likes integer default 0,
 created timestamp default now()
 );
 

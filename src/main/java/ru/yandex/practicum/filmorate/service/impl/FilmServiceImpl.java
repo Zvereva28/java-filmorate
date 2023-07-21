@@ -52,8 +52,8 @@ public class FilmServiceImpl implements FilmService {
     }
 
     @Override
-    public List<Film> getPopularFilms(int count) {
-        var films = filmStorage.getAllFilms();
+    public List<Film> getPopularFilms(int count, int genreId, int year) {
+        var films = filmStorage.getPopularFilms(count, genreId, year);
         Collections.sort(films, new LikesComparator());
         if (count > films.size()) {
             log.debug("- popularFilms: {}", films);
