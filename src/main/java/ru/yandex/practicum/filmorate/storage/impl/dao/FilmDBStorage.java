@@ -6,9 +6,7 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exception.FilmNotFoundException;
-import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.model.Genres;
-import ru.yandex.practicum.filmorate.model.Mpa;
+import ru.yandex.practicum.filmorate.model.*;
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
 
 import java.sql.ResultSet;
@@ -34,7 +32,7 @@ public class FilmDBStorage implements FilmStorage {
             "f.release_date, " +
             "f.duration, " +
             "f.rating_mpa, " +
-            "f.count_likes" +
+            "f.count_likes " +
             " FROM films f LEFT JOIN film_likes fl on f.id =fl.film_id " +
             "WHERE fl.user_id = ?";
 
@@ -186,40 +184,24 @@ public class FilmDBStorage implements FilmStorage {
         film.setCountLikes(rs.getInt("count_likes"));
         return film;
     }
+
     @Override
     public List<Film> getSharedMovies(int userId, int friendId) {
         List<Film> sharedMovies = new ArrayList<>();
-        List<Film> userFilms = new ArrayList<>();
-        List<Film> friendFilms = new ArrayList<>();
 
-       userFilms.add( jdbcTemplate.queryForObject(GET_FILMS_SHARED,
-        new RowMapper<Film>() {
-            @Override
-            public Film mapRow(ResultSet rs, int rowNum) throws SQLException {
-              return getColumns(rs);
-            }
-            }, userId));
+        List<Film> userFilms = jdbcTemplate.query(GET_FILMS_SHARED,
+                filmsRowMapper(), userId).stream().findFirst().orElse(new ArrayList<>());
 
-        friendFilms.add( jdbcTemplate.queryForObject(GET_FILMS_SHARED,
-                new RowMapper<Film>() {
-                    @Override
-                    public Film mapRow(ResultSet rs, int rowNum) throws SQLException {
-                        return getColumns(rs);
-                    }
-                }, friendId));
+        List<Film> friendFilms = jdbcTemplate.query(GET_FILMS_SHARED,
+                filmsRowMapper(), friendId).stream().findFirst().orElse(new ArrayList<>());
 
-        for (Film i: userFilms) {
-            for (Film y: friendFilms) {
+        for (Film i : userFilms) {
+            for (Film y : friendFilms) {
                 if (y.getId() == i.getId()) {
                     sharedMovies.add(y);
                 }
             }
         }
-
-        List<Film> sortedSharedMovies = sharedMovies.
-                stream().
-                sorted(Comparator.comparingInt(Film::getCountLikes)).
-                collect(Collectors.toList());
-        return sortedSharedMovies;
+        return sharedMovies;
     }
 }

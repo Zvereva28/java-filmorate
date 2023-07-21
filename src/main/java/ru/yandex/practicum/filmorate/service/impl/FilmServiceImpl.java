@@ -104,6 +104,8 @@ public class FilmServiceImpl implements FilmService {
     }
 
     public List<Film> getSharedMovies(int userId, int friendId) {
-        return filmStorage.getSharedMovies(userId, friendId);
+        var films = filmStorage.getSharedMovies(userId, friendId);
+        Collections.sort(films, new LikesComparator());
+        return films;
     }
 }
