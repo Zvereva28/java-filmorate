@@ -293,7 +293,7 @@ public class FilmDBStorage implements FilmStorage {
     }
 
     @Override
-    public List<Film> getSharedMovies(int userId, int friendId) {
+    public List<Film> getSharedFilms(int userId, int friendId) {
         return jdbcTemplate.query(GET_FILMS_SHARED, filmsRowMapper(), userId, friendId).stream().findFirst().orElse(new ArrayList<>());
     }
 

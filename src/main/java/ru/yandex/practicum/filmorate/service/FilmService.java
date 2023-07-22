@@ -22,5 +22,5 @@ public interface FilmService {
 
     List<Film> getDirectorFilms(int id, String string);
 
-    List<Film> getSharedMovies(int userId, int friendId);
+    List<Film> getSharedFilms(int userId, int friendId);
 }

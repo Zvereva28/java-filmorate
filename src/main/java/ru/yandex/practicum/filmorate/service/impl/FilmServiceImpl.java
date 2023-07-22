@@ -9,9 +9,7 @@ import ru.yandex.practicum.filmorate.service.FilmService;
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
 import ru.yandex.practicum.filmorate.validators.FilmValidator;
 
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 
 @Slf4j
 @Service
@@ -107,13 +105,13 @@ public class FilmServiceImpl implements FilmService {
         }
     }
 
-    public List<Film> getSharedMovies(int userId, int friendId) {
+    public List<Film> getSharedFilms(int userId, int friendId) {
         if (userId <= 0) {
             throw new FilmNotFoundException("Пользователя id = " + userId + " не может быть");
         }
         if (friendId <= 0) {
             throw new FilmNotFoundException("Пользователя id = " + userId + " не может быть");
         }
-        return filmStorage.getSharedMovies(userId, friendId);
+        return filmStorage.getSharedFilms(userId, friendId);
     }
 }
