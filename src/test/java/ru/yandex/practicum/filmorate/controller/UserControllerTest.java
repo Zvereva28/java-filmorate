@@ -17,7 +17,10 @@ import ru.yandex.practicum.filmorate.service.impl.UserServiceImpl;
 import ru.yandex.practicum.filmorate.storage.impl.dao.FilmDBStorage;
 import ru.yandex.practicum.filmorate.storage.impl.dao.LikesDBStorage;
 import ru.yandex.practicum.filmorate.storage.impl.dao.UserDBStorage;
+import ru.yandex.practicum.filmorate.storage.impl.dao.FeedDbStorage;
 import ru.yandex.practicum.filmorate.validators.UserValidator;
+import ru.yandex.practicum.filmorate.validators.FeedValidator;
+
 
 import java.time.LocalDate;
 
