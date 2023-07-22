@@ -9,6 +9,7 @@ import ru.yandex.practicum.filmorate.service.FilmService;
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
 import ru.yandex.practicum.filmorate.validators.FilmValidator;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -98,6 +99,13 @@ public class FilmServiceImpl implements FilmService {
     public List<Film> getDirectorFilms(int id, String string) {
 
         return filmStorage.getDirectorFilms(id, string);
+    }
+
+    @Override
+    public List<Film> searchFilms(String query, String by) {
+        log.debug("Вы выполнили поиск фильмов по запросу '" + query + "' по полю '" + by + "'");
+        List<Film> films = new ArrayList<>();
+        return films;
     }
 
     class LikesComparator implements Comparator<Film> {

@@ -21,4 +21,6 @@ public interface FilmService {
     Film deleteLikesFilm(int id, int userId);
 
     List<Film> getDirectorFilms(int id, String string);
+
+    List<Film> searchFilms(String query, String by);
 }

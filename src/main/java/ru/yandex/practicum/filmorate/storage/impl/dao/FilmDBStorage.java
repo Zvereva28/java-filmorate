@@ -210,6 +210,19 @@ public class FilmDBStorage implements FilmStorage {
         return null;
     }
 
+    public List<Film> searchFilms(String query, String by) {
+        String sqlQuery = "SELECT * FROM films WHERE " + by + " LIKE ?";
+        String searchTerm = "%" + query + "%";
+
+        List<Film> films = jdbcTemplate.query(sqlQuery, new Object[]{searchTerm}, (resultSet, rowNum) -> {
+            String title = resultSet.getString("title");
+            String director = resultSet.getString("director");
+            return new Film();
+        });
+
+        return films;
+    }
+
     private Film filmExist(int id) {
         return jdbcTemplate.query(GET_FILM, filmRowMapper(), id).stream()
                 .findFirst().orElseThrow(() -> new FilmNotFoundException("Фильм с id = " + id + " не существует"));
