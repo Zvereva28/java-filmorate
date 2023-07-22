@@ -63,4 +63,20 @@ public class ErrorHandler {
                 "Произошла непредвиденная ошибка."
         );
     }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ResponseBody reviewNotFoundException(final ReviewNotFoundException e) {
+        return new ResponseBody(
+                e.getMessage()
+        );
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ResponseBody directorNotFoundException(final DirectorNotFoundException e) {
+        return new ResponseBody(
+                e.getMessage()
+        );
+    }
 }

@@ -73,4 +73,9 @@ public class InMemoryFilmStorage implements FilmStorage {
         idManager++;
         return idManager;
     }
+
+    @Override
+    public List<Film> getDirectorFilms(int id, String string) {
+        return null;
+    }
 }

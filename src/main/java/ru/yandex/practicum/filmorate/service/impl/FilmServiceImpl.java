@@ -16,7 +16,6 @@ import java.util.List;
 @Slf4j
 @Service
 public class FilmServiceImpl implements FilmService {
-
     private final FilmStorage filmStorage;
     private final FilmValidator filmValidator;
 
@@ -93,6 +92,12 @@ public class FilmServiceImpl implements FilmService {
         filmStorage.updateFilm(film);
         log.debug("+ putLikesFilm: {}", film);
         return film;
+    }
+
+    @Override
+    public List<Film> getDirectorFilms(int id, String string) {
+
+        return filmStorage.getDirectorFilms(id, string);
     }
 
     class LikesComparator implements Comparator<Film> {
