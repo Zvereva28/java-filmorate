@@ -5,22 +5,25 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.FilmNotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.enums.FeedEventType;
+import ru.yandex.practicum.filmorate.model.enums.FeedOperation;
 import ru.yandex.practicum.filmorate.service.FilmService;
+import ru.yandex.practicum.filmorate.storage.FeedStorage;
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
 import ru.yandex.practicum.filmorate.validators.FilmValidator;
 
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 
 @Slf4j
 @Service
 public class FilmServiceImpl implements FilmService {
     private final FilmStorage filmStorage;
+    private final FeedStorage feedStorage;
     private final FilmValidator filmValidator;
 
-    public FilmServiceImpl(@Qualifier("filmDBStorage") FilmStorage filmStorage, FilmValidator filmValidator) {
+    public FilmServiceImpl(@Qualifier("filmDBStorage") FilmStorage filmStorage, FeedStorage feedStorage, FilmValidator filmValidator) {
         this.filmStorage = filmStorage;
+        this.feedStorage = feedStorage;
         this.filmValidator = filmValidator;
     }
 
@@ -79,6 +82,7 @@ public class FilmServiceImpl implements FilmService {
         filmStorage.addLike(id, userId);
         Film film1 = filmStorage.updateFilm(film);
         log.debug("- putLikesFilm: {}", film1);
+        feedStorage.addToFeedDb(userId, FeedEventType.LIKE, FeedOperation.ADD, id);
         return film1;
     }
 
@@ -91,6 +95,7 @@ public class FilmServiceImpl implements FilmService {
         filmStorage.removeLike(id, userId);
         filmStorage.updateFilm(film);
         log.debug("+ putLikesFilm: {}", film);
+        feedStorage.addToFeedDb(userId, FeedEventType.LIKE, FeedOperation.REMOVE, id);
         return film;
     }
 
@@ -105,5 +110,15 @@ public class FilmServiceImpl implements FilmService {
         public int compare(Film a, Film b) {
             return Integer.compare(b.getCountLikes(), a.getCountLikes());
         }
+    }
+
+    public List<Film> getSharedFilms(int userId, int friendId) {
+        if (userId <= 0) {
+            throw new FilmNotFoundException("Пользователя id = " + userId + " не может быть");
+        }
+        if (friendId <= 0) {
+            throw new FilmNotFoundException("Пользователя id = " + userId + " не может быть");
+        }
+        return filmStorage.getSharedFilms(userId, friendId);
     }
 }

@@ -11,11 +11,7 @@ import ru.yandex.practicum.filmorate.validators.ReviewValidation;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 @Slf4j
 @Component()
@@ -55,7 +51,7 @@ public class ReviewsDbStorage implements ReviewsStorage {
 
             id = simpleJdbcInsert.executeAndReturnKey(params);
         }
-        return getReviewById((int)id);
+        return getReviewById((int) id);
     }
 
     @Override
@@ -63,7 +59,7 @@ public class ReviewsDbStorage implements ReviewsStorage {
         validation.checkFilmAndUser(review.getFilmId(), review.getUserId());
         jdbcTemplate.update(UPDATE_REVIEW,
                 review.getContent(), review.getIsPositive(), review.getReviewId()
-                );
+        );
         return getReviewById(review.getReviewId());
     }
 
@@ -84,7 +80,7 @@ public class ReviewsDbStorage implements ReviewsStorage {
     public List<Review> getReviewsByFilmId(int id, int count) {
         validation.checkFilm(id);
         return getReviews(GET_REVIEWS_BY_FILM_ID + id + LIMIT, Integer.toString(count));
-   }
+    }
 
     @Override
     public Review increaseUseful(int reviewId, int userId) {
@@ -118,7 +114,7 @@ public class ReviewsDbStorage implements ReviewsStorage {
                     rs.getInt("reviewId"), rs.getString("content"),
                     rs.getBoolean("isPositive"), rs.getInt("userId"),
                     rs.getInt("filmId"), rs.getInt("useful")
-                    );
+            );
         } catch (SQLException e) {
             throw new ReviewNotFoundException("Ошибка в БД.");
         }
