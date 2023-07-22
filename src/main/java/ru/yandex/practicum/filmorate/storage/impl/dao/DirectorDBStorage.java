@@ -26,7 +26,7 @@ public class DirectorDBStorage implements DirectorStorage {
 
     private static final String DELETE_DIRECTOR = "DELETE FROM directors WHERE director_id = ?";
 
-    private static final String GET_DIRECTOR = "SELECT * FROM directors WHERE director_id = ?";
+    private static final String GET_DIRECTOR = "SELECT director_id, director_name FROM directors WHERE director_id = ?";
 
     @Override
     public Director addDirector(Director director) {

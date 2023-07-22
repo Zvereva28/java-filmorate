@@ -17,9 +17,6 @@ public class DirectorServiceImpl implements DirectorService {
 
     private final DirectorStorage directorStorage;
 
-    /**
-     * Получаем всех режиссеров
-     */
     @Override
     public List<Director> getAllDirectors() {
         List<Director> directors = directorStorage.getAllDirectors();
@@ -27,9 +24,6 @@ public class DirectorServiceImpl implements DirectorService {
         return directors;
     }
 
-    /**
-     * Создаем режиссера
-     */
     @Override
     public Director addDirector(Director director) {
         directorStorage.addDirector(director);
@@ -37,9 +31,6 @@ public class DirectorServiceImpl implements DirectorService {
         return director;
     }
 
-    /**
-     * Обновляем режиссера
-     */
     @Override
     public Director updateDirector(Director director) {
         directorStorage.updateDirector(director);
@@ -47,9 +38,6 @@ public class DirectorServiceImpl implements DirectorService {
         return director;
     }
 
-    /**
-     * Получаем режиссера по id
-     */
     @Override
     public Director getDirector(int id) {
         Director director = directorStorage.getDirector(id);
@@ -57,9 +45,6 @@ public class DirectorServiceImpl implements DirectorService {
         return director;
     }
 
-    /**
-     * Удаляем режиссера
-     */
     @Override
     public void deleteDirector(int id) {
         directorStorage.deleteDirector(id);
