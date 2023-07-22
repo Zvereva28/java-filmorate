@@ -22,21 +22,17 @@ public class FilmController {
         return filmService.getAllFilms();
     }
 
-
-   @GetMapping ("/common?userId={userId}&friendId={friendId}")
-    public Optional<List<Film>> getSharedMovies(int userId, int friendId ) {
-       List<Film> sharedMovies = filmService.getSharedMovies(userId, friendId);
-
-        return Optional.ofNullable(sharedMovies);
-    }
-
-
-
-
     @GetMapping("/popular")
     public List<Film> getPopularFilms(
             @RequestParam(value = "count", defaultValue = "10", required = false) Integer count) {
         return filmService.getPopularFilms(count);
+    }
+
+    @GetMapping("/common")
+    public List<Film> getSharedFilms(
+            @RequestParam(value = "userId", required = true) Integer userId,
+            @RequestParam(value = "friendId", required = true) Integer friendId ) {
+        return filmService.getSharedMovies(userId, friendId);
     }
 
     @GetMapping("/{id}")

@@ -9,10 +9,7 @@ import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exception.DbException;
 import ru.yandex.practicum.filmorate.exception.FilmNotFoundException;
-import ru.yandex.practicum.filmorate.model.Director;
-import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.model.Genres;
-import ru.yandex.practicum.filmorate.model.Mpa;
+import ru.yandex.practicum.filmorate.model.*;
 import ru.yandex.practicum.filmorate.storage.DirectorStorage;
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
 
@@ -43,20 +40,13 @@ public class FilmDBStorage implements FilmStorage {
 
     private static final String DELETE_LIKES = "DELETE FROM film_likes WHERE film_id=? AND user_id=?";
     private static final String GET_FILMS_SHARED =
-            "SELECT f.id, " +
-                    "name, " +
-                    "description, " +
-                    "release_date, " +
-                    "duration, " +
-                    "rating_mpa, " +
-                    "count_likes, " +
-                    "fg.genre_id AS genre_id, " +
-                    "g.genre_name AS genre_name " +
-                    "FROM films as f " +
-                    "LEFT JOIN film_genre AS fg ON f.id=fg.film_id " +
-                    "LEFT JOIN genre AS g ON fg.genre_id=g.id  " +
+            "SELECT f.id, name, description, release_date, duration, rating_mpa, count_likes, fg.genre_id AS genre_id, g.genre_name AS genre_name, " +
+                    "fd.director_id AS director_id, d.director_name AS director_name " +
+                    "FROM films as f LEFT JOIN film_genre AS fg ON f.id=fg.film_id LEFT JOIN genre AS g ON fg.genre_id=g.id " +
+                    "LEFT JOIN film_director AS fd ON f.id=fd.film_id " +
+                    "LEFT JOIN directors AS d ON fd.director_id=d.director_id " +
                     "WHERE f.id IN (SELECT t.film_id FROM (SELECT film_id, COUNT(film_id) AS count FROM public.film_likes " +
-                    "WHERE user_id IN (?,?) " +
+                    "WHERE user_id IN (?, ?) " +
                     "GROUP BY film_id) AS t " +
                     "WHERE t.count=2) ORDER BY count_likes DESC, f.id ASC, genre_id ASC";
 
@@ -301,23 +291,10 @@ public class FilmDBStorage implements FilmStorage {
         film.setCountLikes(rs.getInt("count_likes"));
         return film;
     }
+
     @Override
     public List<Film> getSharedMovies(int userId, int friendId) {
-
-         List<Film> sharedMovies = jdbcTemplate.query(GET_FILMS_SHARED, objectFilmRowMapper(), userId, friendId);
-
-         return sharedMovies;
-}
-
-private RowMapper<Film> objectFilmRowMapper() {
-    return (rs, rowNum) -> new Film(
-            rs.getInt("id"),
-            rs.getString("name"),
-            rs.getString("description"),
-            rs.getDate("release_date").toLocalDate(),
-            rs.getInt("duration"),
-            new Mpa(rs.getInt("rating_mpa")),
-            rs.getInt("count_likes")
-         );
+        return jdbcTemplate.query(GET_FILMS_SHARED, filmsRowMapper(), userId, friendId).stream().findFirst().orElse(new ArrayList<>());
     }
+
 }

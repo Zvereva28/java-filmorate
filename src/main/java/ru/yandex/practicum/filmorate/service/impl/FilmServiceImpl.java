@@ -111,7 +111,7 @@ public class FilmServiceImpl implements FilmService {
         if (userId <= 0) {
             throw new FilmNotFoundException("Пользователя id = " + userId + " не может быть");
         }
-        if (userId <= friendId) {
+        if (friendId <= 0) {
             throw new FilmNotFoundException("Пользователя id = " + userId + " не может быть");
         }
         return filmStorage.getSharedMovies(userId, friendId);
