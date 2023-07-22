@@ -17,7 +17,6 @@ import java.util.List;
 @Service
 public class FilmServiceImpl implements FilmService {
 
-
     private final FilmStorage filmStorage;
     private final FilmValidator filmValidator;
 
@@ -104,6 +103,12 @@ public class FilmServiceImpl implements FilmService {
     }
 
     public List<Film> getSharedMovies(int userId, int friendId) {
+        if (userId <= 0) {
+            throw new FilmNotFoundException("Пользователя id = " + userId + " не может быть");
+        }
+        if (userId <= friendId) {
+            throw new FilmNotFoundException("Пользователя id = " + userId + " не может быть");
+        }
         return filmStorage.getSharedMovies(userId, friendId);
     }
 }
