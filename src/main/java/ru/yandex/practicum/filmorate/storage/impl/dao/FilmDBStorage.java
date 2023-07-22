@@ -29,14 +29,23 @@ public class FilmDBStorage implements FilmStorage {
             "FROM films as f LEFT JOIN film_genre AS fg ON f.id=fg.film_id LEFT JOIN genre AS g ON fg.genre_id=g.id " +
             "WHERE f.id =? ORDER BY genre_id";
     private static final String DELETE_LIKES = "DELETE FROM film_likes WHERE film_id=? AND user_id=?";
-    private static final String GET_FILMS_SHARED = "SELECT f.id, f.name, " +
-            "f.description, " +
-            "f.release_date, " +
-            "f.duration, " +
-            "f.rating_mpa, " +
-            "f.count_likes" +
-            " FROM films f LEFT JOIN film_likes fl on f.id =fl.film_id " +
-            "WHERE fl.user_id = ?";
+    private static final String GET_FILMS_SHARED =
+            "SELECT f.id, " +
+                    "name, " +
+                    "description, " +
+                    "release_date, " +
+                    "duration, " +
+                    "rating_mpa, " +
+                    "count_likes, " +
+                    "fg.genre_id AS genre_id, " +
+                    "g.genre_name AS genre_name " +
+                    "FROM films as f " +
+                    "LEFT JOIN film_genre AS fg ON f.id=fg.film_id " +
+                    "LEFT JOIN genre AS g ON fg.genre_id=g.id  " +
+                    "WHERE f.id IN (SELECT t.film_id FROM (SELECT film_id, COUNT(film_id) AS count FROM public.film_likes " +
+                    "WHERE user_id IN (?,?) " +
+                    "GROUP BY film_id) AS t " +
+                    "WHERE t.count=2) ORDER BY count_likes DESC, f.id ASC, genre_id ASC";
 
 
     private final JdbcTemplate jdbcTemplate;
@@ -188,38 +197,21 @@ public class FilmDBStorage implements FilmStorage {
     }
     @Override
     public List<Film> getSharedMovies(int userId, int friendId) {
-        List<Film> sharedMovies = new ArrayList<>();
-        List<Film> userFilms = new ArrayList<>();
-        List<Film> friendFilms = new ArrayList<>();
 
-       userFilms.add( jdbcTemplate.queryForObject(GET_FILMS_SHARED,
-        new RowMapper<Film>() {
-            @Override
-            public Film mapRow(ResultSet rs, int rowNum) throws SQLException {
-              return getColumns(rs);
-            }
-            }, userId));
+         List<Film> sharedMovies = jdbcTemplate.query(GET_FILMS_SHARED, objectFilmRowMapper(), userId, friendId);
 
-        friendFilms.add( jdbcTemplate.queryForObject(GET_FILMS_SHARED,
-                new RowMapper<Film>() {
-                    @Override
-                    public Film mapRow(ResultSet rs, int rowNum) throws SQLException {
-                        return getColumns(rs);
-                    }
-                }, friendId));
+         return sharedMovies;
+}
 
-        for (Film i: userFilms) {
-            for (Film y: friendFilms) {
-                if (y.getId() == i.getId()) {
-                    sharedMovies.add(y);
-                }
-            }
-        }
-
-        List<Film> sortedSharedMovies = sharedMovies.
-                stream().
-                sorted(Comparator.comparingInt(Film::getCountLikes)).
-                collect(Collectors.toList());
-        return sortedSharedMovies;
+private RowMapper<Film> objectFilmRowMapper() {
+    return (rs, rowNum) -> new Film(
+            rs.getInt("id"),
+            rs.getString("name"),
+            rs.getString("description"),
+            rs.getDate("release_date").toLocalDate(),
+            rs.getInt("duration"),
+            new Mpa(rs.getInt("rating_mpa")),
+            rs.getInt("count_likes")
+         );
     }
 }
