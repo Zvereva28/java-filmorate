@@ -51,7 +51,6 @@ public class FeedDbStorage implements FeedStorage {
     }
 
     private FeedEvent createEvent(ResultSet rs) {
-        System.out.println("createEvent" + rs.toString());
         try {
             return new FeedEvent(
                     rs.getInt("event_id"), rs.getTimestamp("timeStamp").getTime(),
