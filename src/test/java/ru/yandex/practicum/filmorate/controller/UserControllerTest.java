@@ -1,8 +1,6 @@
 package ru.yandex.practicum.filmorate.controller;
 
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.function.Executable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
@@ -14,13 +12,9 @@ import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.model.enums.FeedEventType;
 import ru.yandex.practicum.filmorate.model.enums.FeedOperation;
 import ru.yandex.practicum.filmorate.service.impl.UserServiceImpl;
-import ru.yandex.practicum.filmorate.storage.impl.dao.FilmDBStorage;
-import ru.yandex.practicum.filmorate.storage.impl.dao.LikesDBStorage;
-import ru.yandex.practicum.filmorate.storage.impl.dao.UserDBStorage;
-import ru.yandex.practicum.filmorate.storage.impl.dao.FeedDbStorage;
-import ru.yandex.practicum.filmorate.validators.UserValidator;
+import ru.yandex.practicum.filmorate.storage.impl.dao.*;
 import ru.yandex.practicum.filmorate.validators.FeedValidator;
-
+import ru.yandex.practicum.filmorate.validators.UserValidator;
 
 import java.time.LocalDate;
 

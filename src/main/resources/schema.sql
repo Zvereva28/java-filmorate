@@ -70,6 +70,5 @@ create table if not exists film_director(
 film_id  integer not null references films(id) on delete cascade,
 director_id integer not null references directors(director_id) on delete cascade,
 UNIQUE (film_id, director_id)
-=========
->>>>>>>>> Temporary merge branch 2
+
 );

@@ -9,20 +9,13 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.annotation.DirtiesContext;
 import ru.yandex.practicum.filmorate.exception.FilmException;
 import ru.yandex.practicum.filmorate.exception.FilmNotFoundException;
-import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.model.Mpa;
-import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.model.*;
 import ru.yandex.practicum.filmorate.model.enums.FeedEventType;
 import ru.yandex.practicum.filmorate.model.enums.FeedOperation;
 import ru.yandex.practicum.filmorate.service.impl.FilmServiceImpl;
 import ru.yandex.practicum.filmorate.service.impl.UserServiceImpl;
-import ru.yandex.practicum.filmorate.storage.impl.dao.FeedDbStorage;
-import ru.yandex.practicum.filmorate.storage.impl.dao.FilmDBStorage;
-import ru.yandex.practicum.filmorate.storage.impl.dao.LikesDBStorage;
-import ru.yandex.practicum.filmorate.storage.impl.dao.UserDBStorage;
-import ru.yandex.practicum.filmorate.validators.FeedValidator;
-import ru.yandex.practicum.filmorate.validators.FilmValidator;
-import ru.yandex.practicum.filmorate.validators.UserValidator;
+import ru.yandex.practicum.filmorate.storage.impl.dao.*;
+import ru.yandex.practicum.filmorate.validators.*;
 
 import java.time.LocalDate;
 
