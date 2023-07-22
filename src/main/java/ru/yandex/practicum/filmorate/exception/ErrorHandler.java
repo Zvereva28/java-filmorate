@@ -71,4 +71,12 @@ public class ErrorHandler {
                 e.getMessage()
         );
     }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ResponseBody directorNotFoundException(final DirectorNotFoundException e) {
+        return new ResponseBody(
+                e.getMessage()
+        );
+    }
 }
