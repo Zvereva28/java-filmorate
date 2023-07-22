@@ -1,6 +1,8 @@
 package ru.yandex.practicum.filmorate.controller;
 
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
@@ -9,8 +11,12 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.annotation.DirtiesContext;
 import ru.yandex.practicum.filmorate.exception.UserException;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.model.enums.FeedEventType;
+import ru.yandex.practicum.filmorate.model.enums.FeedOperation;
 import ru.yandex.practicum.filmorate.service.impl.UserServiceImpl;
-import ru.yandex.practicum.filmorate.storage.impl.dao.*;
+import ru.yandex.practicum.filmorate.storage.impl.dao.FilmDBStorage;
+import ru.yandex.practicum.filmorate.storage.impl.dao.LikesDBStorage;
+import ru.yandex.practicum.filmorate.storage.impl.dao.UserDBStorage;
 import ru.yandex.practicum.filmorate.validators.UserValidator;
 
 import java.time.LocalDate;
@@ -26,6 +32,8 @@ class UserControllerTest {
     private final JdbcTemplate jdbcTemplate;
     @Autowired
     private UserController userController;
+    @Autowired
+    private FeedDbStorage feedDbStorage;
 
     UserControllerTest(@Autowired JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
@@ -33,7 +41,7 @@ class UserControllerTest {
 
     @BeforeEach
     public void setUp() {
-        userController = new UserController(new UserServiceImpl(new UserDBStorage(jdbcTemplate), new LikesDBStorage(jdbcTemplate, new FilmDBStorage(jdbcTemplate)), new UserValidator()));
+        userController = new UserController(new UserServiceImpl(new UserDBStorage(jdbcTemplate), new LikesDBStorage(jdbcTemplate, new FilmDBStorage(jdbcTemplate)), new FeedDbStorage(jdbcTemplate, new FeedValidator(jdbcTemplate)), new UserValidator()));
     }
 
     @Test
@@ -129,6 +137,31 @@ class UserControllerTest {
                 generateUpdateExecutableIDError()
         );
         assertEquals("Пользователя с id = 99 не существует", exception.getMessage());
+    }
+
+    @Test
+    void putFriendsTestFeed() {
+        userController.postUser(new User(1, "dolore", "NickName", "Nick Name", LocalDate.of(1995, 11, 28)));
+        userController.postUser(new User(2, "dolore2", "NickName2", "Nick Name2", LocalDate.of(1995, 11, 28)));
+        userController.putFriends(1, 2);
+        assertEquals(FeedEventType.FRIEND, feedDbStorage.getFeedByUserId(1).get(0).getEventType());
+    }
+
+    @Test
+    void deleteFriendsTestFeed() {
+        userController.postUser(new User(1, "dolore", "NickName", "Nick Name", LocalDate.of(1995, 11, 28)));
+        userController.postUser(new User(2, "dolore2", "NickName2", "Nick Name2", LocalDate.of(1995, 11, 28)));
+        userController.putFriends(1, 2);
+        userController.deleteFriends(1, 2);
+        assertEquals(FeedOperation.REMOVE, feedDbStorage.getFeedByUserId(1).get(1).getOperation());
+    }
+
+    @Test
+    void getFeedByUserId() {
+        userController.postUser(new User(1, "dolore", "NickName", "Nick Name", LocalDate.of(1995, 11, 28)));
+        userController.postUser(new User(2, "dolore2", "NickName2", "Nick Name2", LocalDate.of(1995, 11, 28)));
+        userController.putFriends(1, 2);
+        assertEquals(1, feedDbStorage.getFeedByUserId(1).size());
     }
 
     private Executable generateUpdateExecutableIDError() {

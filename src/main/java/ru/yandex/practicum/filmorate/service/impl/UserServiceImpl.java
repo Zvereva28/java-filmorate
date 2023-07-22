@@ -4,9 +4,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.UserException;
+import ru.yandex.practicum.filmorate.model.FeedEvent;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.model.enums.FeedEventType;
+import ru.yandex.practicum.filmorate.model.enums.FeedOperation;
 import ru.yandex.practicum.filmorate.service.UserService;
+import ru.yandex.practicum.filmorate.storage.FeedStorage;
 import ru.yandex.practicum.filmorate.storage.LikesStorage;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
 import ru.yandex.practicum.filmorate.validators.UserValidator;
@@ -19,10 +23,12 @@ import java.util.stream.Collectors;
 public class UserServiceImpl implements UserService {
     private final UserStorage userStorage;
     private final LikesStorage likesStorage;
+    private final FeedStorage feedStorage;
     private final UserValidator userValidator;
 
-    public UserServiceImpl(@Qualifier("userDBStorage") UserStorage userStorage, LikesStorage likesStorage, UserValidator userValidator) {
+    public UserServiceImpl(@Qualifier("userDBStorage") UserStorage userStorage, LikesStorage likesStorage, FeedStorage feedStorage, UserValidator userValidator) {
         this.userStorage = userStorage;
+        this.feedStorage = feedStorage;
         this.userValidator = userValidator;
         this.likesStorage = likesStorage;
     }
@@ -66,6 +72,7 @@ public class UserServiceImpl implements UserService {
         userStorage.userExist(id);
         userStorage.userExist(friendId);
         userStorage.addFriend(id, friendId);
+        feedStorage.addToFeedDb(id, FeedEventType.FRIEND, FeedOperation.ADD, friendId);
     }
 
     @Override
@@ -76,7 +83,7 @@ public class UserServiceImpl implements UserService {
         }
         userStorage.userExist(id);
         userStorage.userExist(friendId);
-
+        feedStorage.addToFeedDb(id, FeedEventType.FRIEND, FeedOperation.REMOVE, friendId);
         userStorage.deleteFriend(id, friendId);
     }
 
@@ -111,5 +118,10 @@ public class UserServiceImpl implements UserService {
     @Override
     public List<Film> getRecommendations(int userId) {
         return likesStorage.getFilmsByUserId(userId);
+    }
+
+    @Override
+    public List<FeedEvent> getFeedByUserId(int id) {
+        return feedStorage.getFeedByUserId(id);
     }
 }

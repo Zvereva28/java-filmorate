@@ -3,7 +3,10 @@ package ru.yandex.practicum.filmorate.service.impl;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.model.Review;
+import ru.yandex.practicum.filmorate.model.enums.FeedEventType;
+import ru.yandex.practicum.filmorate.model.enums.FeedOperation;
 import ru.yandex.practicum.filmorate.service.ReviewsService;
+import ru.yandex.practicum.filmorate.storage.FeedStorage;
 import ru.yandex.practicum.filmorate.storage.ReviewsStorage;
 
 import java.util.List;
@@ -12,9 +15,11 @@ import java.util.List;
 @Service
 public class ReviewsServiceImpl implements ReviewsService {
     private final ReviewsStorage reviewsStorage;
+    private final FeedStorage feedStorage;
 
-    public ReviewsServiceImpl(ReviewsStorage reviewsStorage) {
+    public ReviewsServiceImpl(ReviewsStorage reviewsStorage, FeedStorage feedStorage) {
         this.reviewsStorage = reviewsStorage;
+        this.feedStorage = feedStorage;
     }
 
     @Override
@@ -30,6 +35,7 @@ public class ReviewsServiceImpl implements ReviewsService {
         log.info("+ addReview: {}", review);
         Review answer = reviewsStorage.addReview(review);
         log.info("created review: {}", answer);
+        feedStorage.addToFeedDb(answer.getUserId(), FeedEventType.REVIEW, FeedOperation.ADD, answer.getReviewId());
         return answer;
     }
 
@@ -38,6 +44,7 @@ public class ReviewsServiceImpl implements ReviewsService {
         log.info("updateReview: {}", review);
         Review answer = reviewsStorage.updateReview(review);
         log.info("updated review: {}", answer);
+        feedStorage.addToFeedDb(answer.getUserId(), FeedEventType.REVIEW, FeedOperation.UPDATE, answer.getReviewId());
         return answer;
     }
 
@@ -46,6 +53,7 @@ public class ReviewsServiceImpl implements ReviewsService {
         log.info("-deleteReview id: {}", id);
         Review answer = reviewsStorage.deleteReview(id);
         log.info("deleted review: {}", answer);
+        feedStorage.addToFeedDb(answer.getUserId(), FeedEventType.REVIEW, FeedOperation.REMOVE, answer.getReviewId());
         return answer;
     }
 
