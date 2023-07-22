@@ -65,7 +65,7 @@ public class DirectorControllerTest {
     void updateDirector() {
 
         final int id = directorStorage.addDirector(director).getId();
-        final Director upgatedDirector = new Director(1,"Kubrick");
+        final Director upgatedDirector = new Director(1, "Kubrick");
 
         assertEquals(upgatedDirector,
                 directorStorage.updateDirector(upgatedDirector), "Режиссеры разные");
