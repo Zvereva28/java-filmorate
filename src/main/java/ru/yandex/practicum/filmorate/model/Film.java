@@ -23,5 +23,9 @@ public class Film {
     private Integer duration;
     private Mpa mpa = new Mpa();
     private Integer countLikes = 0;
+    private final List<Director> directors = new ArrayList<>();
 
+    public void addDirector(Director director) {
+        directors.add(director);
+    }
 }
