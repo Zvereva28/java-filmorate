@@ -8,7 +8,6 @@ import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.service.FilmService;
 
 import java.util.List;
-import java.util.Optional;
 
 @Slf4j
 @RestController
@@ -31,7 +30,7 @@ public class FilmController {
     @GetMapping("/common")
     public List<Film> getSharedFilms(
             @RequestParam(value = "userId", required = true) Integer userId,
-            @RequestParam(value = "friendId", required = true) Integer friendId ) {
+            @RequestParam(value = "friendId", required = true) Integer friendId) {
         return filmService.getSharedMovies(userId, friendId);
     }
 
