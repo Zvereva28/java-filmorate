@@ -19,41 +19,26 @@ public class DirectorController {
 
     private final DirectorService directorService;
 
-    /**
-     * Получаем всех режиссеров
-     */
     @GetMapping()
     public List<Director> getAllDirectors() {
         return directorService.getAllDirectors();
     }
 
-    /**
-     * Получаем режиссера по id
-     */
     @GetMapping("/{id}")
     public Director getDirectorById(@PathVariable int id) {
         return directorService.getDirector(id);
     }
 
-    /**
-     * Создаем режиссера
-     */
     @PostMapping
     public Director createDirector(@Validated @RequestBody Director director) {
         return directorService.addDirector(director);
     }
 
-    /**
-     * Обновляем режиссера
-     */
     @PutMapping
     public Director updateDirector(@Validated @RequestBody Director director) {
         return directorService.updateDirector(director);
     }
 
-    /**
-     * Удаляем режиссера
-     */
     @DeleteMapping("/{id}")
     public void deleteDirector(@PathVariable int id) {
         directorService.deleteDirector(id);

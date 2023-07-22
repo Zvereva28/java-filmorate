@@ -22,8 +22,8 @@ public class DirectorServiceImpl implements DirectorService {
      */
     @Override
     public List<Director> getAllDirectors() {
-        log.info("Получаем список всех режиссеров");
         List<Director> directors = directorStorage.getAllDirectors();
+        log.info("Получаем список всех режиссеров");
         return directors;
     }
 
@@ -32,8 +32,9 @@ public class DirectorServiceImpl implements DirectorService {
      */
     @Override
     public Director addDirector(Director director) {
+        directorStorage.addDirector(director);
         log.info("Добавлен новый режиссер: id - '{}', name - '{}'", director.getId(), director.getName());
-        return directorStorage.addDirector(director);
+        return director;
     }
 
     /**
@@ -41,8 +42,9 @@ public class DirectorServiceImpl implements DirectorService {
      */
     @Override
     public Director updateDirector(Director director) {
+        directorStorage.updateDirector(director);
         log.info("Режиссер - '{}', обновлен ", director);
-        return directorStorage.updateDirector(director);
+        return director;
     }
 
     /**
@@ -50,8 +52,9 @@ public class DirectorServiceImpl implements DirectorService {
      */
     @Override
     public Director getDirector(int id) {
+        Director director = directorStorage.getDirector(id);
         log.info("Получаем режиссера с id '{}'", id);
-        return directorStorage.getDirector(id);
+        return director;
     }
 
     /**
@@ -59,7 +62,7 @@ public class DirectorServiceImpl implements DirectorService {
      */
     @Override
     public void deleteDirector(int id) {
-        log.info("Режиссер c id - '{}', удален ", id);
         directorStorage.deleteDirector(id);
+        log.info("Режиссер c id - '{}', удален ", id);
     }
 }

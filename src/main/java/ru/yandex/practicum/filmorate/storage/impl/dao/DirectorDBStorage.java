@@ -12,6 +12,7 @@ import ru.yandex.practicum.filmorate.storage.DirectorStorage;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 @Component
 @RequiredArgsConstructor
@@ -19,7 +20,7 @@ public class DirectorDBStorage implements DirectorStorage {
 
     private final JdbcTemplate jdbcTemplate;
 
-    private static final String GET_ALL_DIRECTORS = "SELECT * FROM directors";
+    private static final String GET_ALL_DIRECTORS = "SELECT director_id, director_name FROM directors";
 
     private static final String UPDATE_DIRECTOR = "UPDATE directors SET director_name = ? WHERE director_id = ?";
 
@@ -29,7 +30,7 @@ public class DirectorDBStorage implements DirectorStorage {
 
     @Override
     public Director addDirector(Director director) {
-        SimpleJdbcInsert simpleJdbcInsert = new SimpleJdbcInsert(jdbcTemplate.getDataSource())
+        SimpleJdbcInsert simpleJdbcInsert = new SimpleJdbcInsert(Objects.requireNonNull(jdbcTemplate.getDataSource()))
                 .withTableName("directors")
                 .usingGeneratedKeyColumns("director_id");
         Map<String, Object> params = new HashMap<>();
@@ -37,7 +38,7 @@ public class DirectorDBStorage implements DirectorStorage {
         Number id = simpleJdbcInsert.executeAndReturnKey(params);
         director.setId(id.intValue());
 
-        return director;
+        return directorExist(director.getId());
     }
 
     @Override
@@ -56,7 +57,7 @@ public class DirectorDBStorage implements DirectorStorage {
         jdbcTemplate.update(UPDATE_DIRECTOR,
                 director.getName(),
                 director.getId());
-        return director;
+        return directorExist(director.getId());
     }
 
     @Override
