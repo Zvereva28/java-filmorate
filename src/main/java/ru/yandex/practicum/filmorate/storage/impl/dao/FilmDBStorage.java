@@ -1,6 +1,7 @@
 package ru.yandex.practicum.filmorate.storage.impl.dao;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
@@ -8,8 +9,10 @@ import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exception.DbException;
 import ru.yandex.practicum.filmorate.exception.FilmNotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.model.Genres;
 import ru.yandex.practicum.filmorate.model.Mpa;
+import ru.yandex.practicum.filmorate.storage.DirectorStorage;
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
 
 import java.sql.ResultSet;
@@ -29,8 +32,11 @@ public class FilmDBStorage implements FilmStorage {
             "LEFT JOIN film_director AS fd ON f.id=fd.film_id " +
             "LEFT JOIN directors AS d ON fd.director_id=d.director_id " +
             "ORDER BY f.id, genre_id";
-    private static final String GET_POPULAR_FILMS = "SELECT f.id, name, description, release_date, duration, rating_mpa, count_likes, fg.genre_id AS genre_id, g.genre_name AS genre_name  " +
+    private static final String GET_POPULAR_FILMS = "SELECT f.id, name, description, release_date, duration, rating_mpa, count_likes, fg.genre_id AS genre_id, g.genre_name AS genre_name,  " +
+            "fd.director_id AS director_id, d.director_name AS director_name " +
             "FROM films as f LEFT JOIN film_genre AS fg ON f.id=fg.film_id LEFT JOIN genre AS g ON fg.genre_id=g.id  " +
+            "LEFT JOIN film_director AS fd ON f.id=fd.film_id " +
+            "LEFT JOIN directors AS d ON fd.director_id=d.director_id " +
             "WHERE f.id IN (%s) " +
             "ORDER BY count_likes DESC, f.id ASC, genre_id ASC";
     private static final String GET_ID_FILMS_WITH_LIMITS = String.format(GET_POPULAR_FILMS, "SELECT id FROM films ORDER BY count_likes DESC LIMIT ? ");
