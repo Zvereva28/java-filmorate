@@ -26,8 +26,8 @@ import java.util.Objects;
 import java.util.Set;
 
 @Slf4j
-@Component("filmDBStorage")
 @Getter
+@Component("filmDBStorage")
 public class FilmDBStorage implements FilmStorage {
     private static final String GET_COUNT_OF_LIKES = "SELECT count(*) AS count FROM film_likes where film_id = ?";
     private static final String UPDATE_FILM = "UPDATE films SET  name=?, description=?, release_date=?, duration=?, rating_mpa=?, count_likes=? WHERE id=?";
@@ -67,6 +67,7 @@ public class FilmDBStorage implements FilmStorage {
             "WHERE f.id =? " +
             "ORDER BY genre_id";
 
+
     private static final String DELETE_LIKES = "DELETE FROM film_likes WHERE film_id=? AND user_id=?";
     private static final String GET_FILMS_SHARED =
             "SELECT f.id, name, description, release_date, duration, rating_mpa, count_likes, fg.genre_id AS genre_id, g.genre_name AS genre_name, " +
@@ -102,6 +103,22 @@ public class FilmDBStorage implements FilmStorage {
                     "LEFT JOIN directors AS d ON fd.director_id=d.director_id " +
                     "WHERE d.director_id=? " +
                     "ORDER BY count_likes DESC";
+
+    private static final String GET_SEARCH_FILMS =
+            "SELECT f.id, f.name, f.description, f.release_date, f.duration, f.rating_mpa, f.count_likes, " +
+                    "fg.genre_id AS genre_id, g.genre_name AS genre_name, " +
+                    "fd.director_id AS director_id, d.director_name AS director_name " +
+                    "FROM films f " +
+                    "LEFT JOIN film_genre AS fg ON f.id=fg.film_id " +
+                    "LEFT JOIN genre AS g ON fg.genre_id=g.id " +
+                    "LEFT JOIN film_director AS fd ON f.id=fd.film_id " +
+                    "LEFT JOIN directors AS d ON fd.director_id=d.director_id " +
+                    "%s " +
+                    "ORDER BY f.count_likes DESC";
+
+    private static final String SEARCH_BY_FILMS = "WHERE LOWER(f.name) LIKE LOWER(?)";
+    private static final String SEARCH_BY_DIRECTORS = "WHERE LOWER(d.director_name) LIKE LOWER(?)";
+    private static final String SEARCH_BY_FILMS_AND_DIRECTORS = "WHERE LOWER(f.name) LIKE LOWER(?) OR LOWER(d.director_name) LIKE LOWER(?)";
 
     private final JdbcTemplate jdbcTemplate;
 
@@ -263,6 +280,21 @@ public class FilmDBStorage implements FilmStorage {
                     .stream().findFirst().orElse(new ArrayList<>());
         }
         return null;
+    }
+
+    @Override
+    public List<Film> searchFilms(String query, List<String> by) {
+        String queryParam = "%" + query + "%";
+        if (by.size() == 1 && by.get(0).equals("director")) {
+            return jdbcTemplate.query(String.format(GET_SEARCH_FILMS, SEARCH_BY_DIRECTORS),
+                    filmsRowMapper(), queryParam).stream().findFirst().orElse(new ArrayList<>());
+        } else if (by.size() == 1 && by.get(0).equals("title")) {
+            return jdbcTemplate.query(String.format(GET_SEARCH_FILMS, SEARCH_BY_FILMS),
+                    filmsRowMapper(), queryParam).stream().findFirst().orElse(new ArrayList<>());
+        } else {
+            return jdbcTemplate.query(String.format(GET_SEARCH_FILMS, SEARCH_BY_FILMS_AND_DIRECTORS),
+                    filmsRowMapper(), queryParam, queryParam).stream().findFirst().orElse(new ArrayList<>());
+        }
     }
 
     private Film filmExist(int id) {

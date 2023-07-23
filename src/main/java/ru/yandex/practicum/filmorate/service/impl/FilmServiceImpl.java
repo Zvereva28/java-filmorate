@@ -98,6 +98,7 @@ public class FilmServiceImpl implements FilmService {
         return filmStorage.getDirectorFilms(id, string);
     }
 
+    @Override
     public List<Film> getSharedFilms(int userId, int friendId) {
         if (userId <= 0) {
             throw new FilmNotFoundException("Пользователя id = " + userId + " не может быть");
@@ -106,5 +107,11 @@ public class FilmServiceImpl implements FilmService {
             throw new FilmNotFoundException("Пользователя id = " + userId + " не может быть");
         }
         return filmStorage.getSharedFilms(userId, friendId);
+    }
+
+    @Override
+    public List<Film> searchFilms(String query, List<String> by) {
+        log.debug("Вы выполнили поиск фильмов по запросу '" + query + "' по полю '" + by + "'");
+        return filmStorage.searchFilms(query, by);
     }
 }
