@@ -9,13 +9,21 @@ import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exception.DbException;
 import ru.yandex.practicum.filmorate.exception.FilmNotFoundException;
-import ru.yandex.practicum.filmorate.model.*;
+import ru.yandex.practicum.filmorate.model.Director;
+import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.Genres;
+import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.storage.DirectorStorage;
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 
 @Slf4j
 @Component("filmDBStorage")
@@ -205,25 +213,13 @@ public class FilmDBStorage implements FilmStorage {
     @Override
     public List<Film> getPopularFilms(int count, int genreId, int year) {
         if (genreId == 0 & year == 0) {
-            System.out.println();
-            System.out.println(GET_ID_FILMS_WITH_LIMITS);
-            System.out.println();
             return jdbcTemplate.query(GET_ID_FILMS_WITH_LIMITS, filmsRowMapper(), count).stream().findFirst().orElse(new ArrayList<>());
         } else if (genreId == 0) {
-            System.out.println();
-            System.out.println(GET_ID_FILMS_WITH_YEAR);
-            System.out.println();
             return jdbcTemplate.query(GET_ID_FILMS_WITH_YEAR, filmsRowMapper(), getStartYear(year), getEndYear(year), count).stream().findFirst().orElse(new ArrayList<>());
         } else if (year == 0) {
-            System.out.println();
-            System.out.println(GET_ID_FILMS_WITH_GENRES);
-            System.out.println();
             return jdbcTemplate.query(GET_ID_FILMS_WITH_GENRES, filmsRowMapper(), genreId, count).stream().findFirst().orElse(new ArrayList<>());
         } else
-            System.out.println();
-        System.out.println(GET_ID_FILMS_WITH_GENRES_YEAR);
-        System.out.println();
-        return jdbcTemplate.query(GET_ID_FILMS_WITH_GENRES_YEAR, filmsRowMapper(), genreId, getStartYear(year), getEndYear(year), count).stream().findFirst().orElse(new ArrayList<>());
+            return jdbcTemplate.query(GET_ID_FILMS_WITH_GENRES_YEAR, filmsRowMapper(), genreId, getStartYear(year), getEndYear(year), count).stream().findFirst().orElse(new ArrayList<>());
     }
 
     private String getStartYear(int year) {
