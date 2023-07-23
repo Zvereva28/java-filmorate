@@ -6,24 +6,22 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.annotation.DirtiesContext;
 import ru.yandex.practicum.filmorate.exception.DirectorNotFoundException;
 import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.storage.DirectorStorage;
-import ru.yandex.practicum.filmorate.storage.impl.dao.DirectorDBStorage;
 
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @SpringBootTest
 @AutoConfigureTestDatabase
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 public class DirectorControllerTest {
-
-    //private final JdbcTemplate jdbcTemplate;
 
     private final DirectorStorage directorStorage;
 
@@ -51,6 +49,17 @@ public class DirectorControllerTest {
     }
 
     @Test
+    @DisplayName("Получаем режиссера по не существующему id")
+    void getDirectorByNotExistId() {
+        final int id = 99;
+        final DirectorNotFoundException e = assertThrows(
+                DirectorNotFoundException.class,
+                () -> directorStorage.getDirector(id)
+        );
+        assertEquals("Режиссера с id = " + id + " не существует", e.getMessage());
+    }
+
+    @Test
     @DisplayName("Создаем режиссера")
     void createDirector() {
         final Director createdDirector = directorStorage.addDirector(director);
@@ -63,8 +72,7 @@ public class DirectorControllerTest {
     @Test
     @DisplayName("Обновляем режиссера")
     void updateDirector() {
-
-        final int id = directorStorage.addDirector(director).getId();
+        directorStorage.addDirector(director).getId();
         final Director upgatedDirector = new Director(1, "Kubrick");
 
         assertEquals(upgatedDirector,
@@ -74,7 +82,6 @@ public class DirectorControllerTest {
     @Test
     @DisplayName("Удаляем режиссера")
     void deleteDirector() {
-
         final int id = directorStorage.addDirector(director).getId();
         directorStorage.deleteDirector(director.getId());
 

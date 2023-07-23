@@ -5,22 +5,25 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.FilmNotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.enums.FeedEventType;
+import ru.yandex.practicum.filmorate.model.enums.FeedOperation;
 import ru.yandex.practicum.filmorate.service.FilmService;
+import ru.yandex.practicum.filmorate.storage.FeedStorage;
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
 import ru.yandex.practicum.filmorate.validators.FilmValidator;
 
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 
 @Slf4j
 @Service
 public class FilmServiceImpl implements FilmService {
     private final FilmStorage filmStorage;
+    private final FeedStorage feedStorage;
     private final FilmValidator filmValidator;
 
-    public FilmServiceImpl(@Qualifier("filmDBStorage") FilmStorage filmStorage, FilmValidator filmValidator) {
+    public FilmServiceImpl(@Qualifier("filmDBStorage") FilmStorage filmStorage, FeedStorage feedStorage, FilmValidator filmValidator) {
         this.filmStorage = filmStorage;
+        this.feedStorage = feedStorage;
         this.filmValidator = filmValidator;
     }
 
@@ -50,17 +53,10 @@ public class FilmServiceImpl implements FilmService {
     }
 
     @Override
-    public List<Film> getPopularFilms(int count) {
-        var films = filmStorage.getAllFilms();
-        Collections.sort(films, new LikesComparator());
-        if (count > films.size()) {
-            log.debug("- popularFilms: {}", films);
-            return films;
-        } else {
-            List<Film> popularFilms = films.subList(0, count);
-            log.debug("- popularFilms: {}", popularFilms);
-            return popularFilms;
-        }
+    public List<Film> getPopularFilms(int count, int genreId, int year) {
+        var films = filmStorage.getPopularFilms(count, genreId, year);
+        log.debug("- popularFilms: {}", films);
+        return films;
     }
 
     @Override
@@ -79,6 +75,7 @@ public class FilmServiceImpl implements FilmService {
         filmStorage.addLike(id, userId);
         Film film1 = filmStorage.updateFilm(film);
         log.debug("- putLikesFilm: {}", film1);
+        feedStorage.addToFeedDb(userId, FeedEventType.LIKE, FeedOperation.ADD, id);
         return film1;
     }
 
@@ -91,6 +88,7 @@ public class FilmServiceImpl implements FilmService {
         filmStorage.removeLike(id, userId);
         filmStorage.updateFilm(film);
         log.debug("+ putLikesFilm: {}", film);
+        feedStorage.addToFeedDb(userId, FeedEventType.LIKE, FeedOperation.REMOVE, id);
         return film;
     }
 
@@ -100,16 +98,19 @@ public class FilmServiceImpl implements FilmService {
         return filmStorage.getDirectorFilms(id, string);
     }
 
+    public List<Film> getSharedFilms(int userId, int friendId) {
+        if (userId <= 0) {
+            throw new FilmNotFoundException("Пользователя id = " + userId + " не может быть");
+        }
+        if (friendId <= 0) {
+            throw new FilmNotFoundException("Пользователя id = " + userId + " не может быть");
+        }
+        return filmStorage.getSharedFilms(userId, friendId);
+    }
+
     @Override
     public List<Film> searchFilms(String query, List<String> by) {
         log.debug("Вы выполнили поиск фильмов по запросу '" + query + "' по полю '" + by + "'");
         return filmStorage.searchFilms(query, by);
-    }
-
-    class LikesComparator implements Comparator<Film> {
-        @Override
-        public int compare(Film a, Film b) {
-            return Integer.compare(b.getCountLikes(), a.getCountLikes());
-        }
     }
 }

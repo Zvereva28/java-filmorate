@@ -18,7 +18,12 @@ import ru.yandex.practicum.filmorate.storage.FilmStorage;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 
 @Slf4j
 @Getter
@@ -34,6 +39,27 @@ public class FilmDBStorage implements FilmStorage {
             "LEFT JOIN film_director AS fd ON f.id=fd.film_id " +
             "LEFT JOIN directors AS d ON fd.director_id=d.director_id " +
             "ORDER BY f.id, genre_id";
+    private static final String GET_POPULAR_FILMS = "SELECT f.id, name, description, release_date, duration, rating_mpa, count_likes, fg.genre_id AS genre_id, g.genre_name AS genre_name,  " +
+            "fd.director_id AS director_id, d.director_name AS director_name " +
+            "FROM films as f LEFT JOIN film_genre AS fg ON f.id=fg.film_id LEFT JOIN genre AS g ON fg.genre_id=g.id  " +
+            "LEFT JOIN film_director AS fd ON f.id=fd.film_id " +
+            "LEFT JOIN directors AS d ON fd.director_id=d.director_id " +
+            "WHERE f.id IN (%s) " +
+            "ORDER BY count_likes DESC, f.id ASC, genre_id ASC";
+    private static final String GET_ID_FILMS_WITH_LIMITS = String.format(GET_POPULAR_FILMS, "SELECT id FROM films ORDER BY count_likes DESC LIMIT ? ");
+
+    private static final String GET_ID_FILMS_WITH_GENRES = String.format(GET_POPULAR_FILMS, "SELECT f.id " +
+            "FROM films as f LEFT JOIN film_genre AS fg ON f.id=fg.film_id " +
+            "WHERE fg.genre_id = ?" +
+            " ORDER BY count_likes DESC LIMIT ?");
+    private static final String GET_ID_FILMS_WITH_GENRES_YEAR = String.format(GET_POPULAR_FILMS, "SELECT f.id " +
+            "FROM films as f LEFT JOIN film_genre AS fg ON f.id=fg.film_id " +
+            "WHERE fg.genre_id = ? AND release_date between ? and ? " +
+            " ORDER BY count_likes DESC LIMIT ?");
+    private static final String GET_ID_FILMS_WITH_YEAR = String.format(GET_POPULAR_FILMS, "SELECT f.id " +
+            "FROM films as f LEFT JOIN film_genre AS fg ON f.id=fg.film_id " +
+            "WHERE release_date between ? and ? " +
+            " ORDER BY count_likes DESC LIMIT ?");
     private static final String GET_FILM = "SELECT f.id, name, description, release_date, duration, rating_mpa, count_likes, fg.genre_id AS genre_id, g.genre_name AS genre_name, " +
             "fd.director_id AS director_id, d.director_name AS director_name " +
             "FROM films as f LEFT JOIN film_genre AS fg ON f.id=fg.film_id LEFT JOIN genre AS g ON fg.genre_id=g.id " +
@@ -41,7 +67,18 @@ public class FilmDBStorage implements FilmStorage {
             "WHERE f.id =? " +
             "ORDER BY genre_id";
 
+
     private static final String DELETE_LIKES = "DELETE FROM film_likes WHERE film_id=? AND user_id=?";
+    private static final String GET_FILMS_SHARED =
+            "SELECT f.id, name, description, release_date, duration, rating_mpa, count_likes, fg.genre_id AS genre_id, g.genre_name AS genre_name, " +
+                    "fd.director_id AS director_id, d.director_name AS director_name " +
+                    "FROM films as f LEFT JOIN film_genre AS fg ON f.id=fg.film_id LEFT JOIN genre AS g ON fg.genre_id=g.id " +
+                    "LEFT JOIN film_director AS fd ON f.id=fd.film_id " +
+                    "LEFT JOIN directors AS d ON fd.director_id=d.director_id " +
+                    "WHERE f.id IN (SELECT t.film_id FROM (SELECT film_id, COUNT(film_id) AS count FROM public.film_likes " +
+                    "WHERE user_id IN (?, ?) " +
+                    "GROUP BY film_id) AS t " +
+                    "WHERE t.count=2) ORDER BY count_likes DESC, f.id ASC, genre_id ASC";
 
     private static final String GET_DIRECTOR_FILMS_ORDERBY_YEAR =
             "SELECT f.id, name, description, release_date, duration, rating_mpa, count_likes, " +
@@ -190,6 +227,25 @@ public class FilmDBStorage implements FilmStorage {
         return jdbcTemplate.query(GET_ALL_FILMS, filmsRowMapper()).stream().findFirst().orElse(new ArrayList<>());
     }
 
+    @Override
+    public List<Film> getPopularFilms(int count, int genreId, int year) {
+        if (genreId == 0 & year == 0) {
+            return jdbcTemplate.query(GET_ID_FILMS_WITH_LIMITS, filmsRowMapper(), count).stream().findFirst().orElse(new ArrayList<>());
+        } else if (genreId == 0) {
+            return jdbcTemplate.query(GET_ID_FILMS_WITH_YEAR, filmsRowMapper(), getStartYear(year), getEndYear(year), count).stream().findFirst().orElse(new ArrayList<>());
+        } else if (year == 0) {
+            return jdbcTemplate.query(GET_ID_FILMS_WITH_GENRES, filmsRowMapper(), genreId, count).stream().findFirst().orElse(new ArrayList<>());
+        } else
+            return jdbcTemplate.query(GET_ID_FILMS_WITH_GENRES_YEAR, filmsRowMapper(), genreId, getStartYear(year), getEndYear(year), count).stream().findFirst().orElse(new ArrayList<>());
+    }
+
+    private String getStartYear(int year) {
+        return year + "-01-01";
+    }
+
+    private String getEndYear(int year) {
+        return year + "-12-31";
+    }
 
     @Override
     public Film getFilm(int id) {
@@ -286,6 +342,7 @@ public class FilmDBStorage implements FilmStorage {
             films.add(film);
             return films;
         };
+
     }
 
     private Film createFilmFromDB(ResultSet rs) {
@@ -315,4 +372,10 @@ public class FilmDBStorage implements FilmStorage {
         film.setCountLikes(rs.getInt("count_likes"));
         return film;
     }
+
+    @Override
+    public List<Film> getSharedFilms(int userId, int friendId) {
+        return jdbcTemplate.query(GET_FILMS_SHARED, filmsRowMapper(), userId, friendId).stream().findFirst().orElse(new ArrayList<>());
+    }
+
 }
