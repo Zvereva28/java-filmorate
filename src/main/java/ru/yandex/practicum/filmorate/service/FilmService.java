@@ -20,6 +20,8 @@ public interface FilmService {
 
     Film deleteLikesFilm(int id, int userId);
 
+    void deleteFilmById(int id);
+
     List<Film> getDirectorFilms(int id, String string);
 
     List<Film> getSharedFilms(int userId, int friendId);

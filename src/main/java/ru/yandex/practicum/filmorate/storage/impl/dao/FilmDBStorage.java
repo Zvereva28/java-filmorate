@@ -252,6 +252,15 @@ public class FilmDBStorage implements FilmStorage {
     }
 
     @Override
+    public void deleteFilmById(int id) {
+        String sqlQuery = "delete from film where id = ?";
+        int upd = jdbcTemplate.update(sqlQuery, id);
+        if (upd == 0) {
+            throw new FilmNotFoundException("Фильм с Id " + id + " не найден");
+        }
+    }
+
+    @Override
     public List<Film> getDirectorFilms(int id, String string) {
         directorStorage.directorExist(id);
         if (string.equals("year")) {
