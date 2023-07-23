@@ -126,4 +126,9 @@ public class UserServiceImpl implements UserService {
     public List<FeedEvent> getFeedByUserId(int id) {
         return feedStorage.getFeedByUserId(id);
     }
+
+    @Override
+    public void deleteUser(int id) {
+        userStorage.deleteUser(id);
+    }
 }

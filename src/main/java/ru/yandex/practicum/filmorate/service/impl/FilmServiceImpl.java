@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.FilmNotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.Genres;
 import ru.yandex.practicum.filmorate.model.enums.FeedEventType;
 import ru.yandex.practicum.filmorate.model.enums.FeedOperation;
 import ru.yandex.practicum.filmorate.service.FilmService;
@@ -12,6 +13,7 @@ import ru.yandex.practicum.filmorate.storage.FeedStorage;
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
 import ru.yandex.practicum.filmorate.validators.FilmValidator;
 
+import java.util.Comparator;
 import java.util.List;
 
 @Slf4j
@@ -31,9 +33,11 @@ public class FilmServiceImpl implements FilmService {
     public Film addFilm(Film film) {
         log.debug("+ createFilm: {}", film);
         filmValidator.checkFilm(film);
-        Film newFilm = filmStorage.addFilm(film);
+        int id = filmStorage.addFilm(film).getId();
+        film.setId(id);
+        film.getGenres().sort(Comparator.comparingInt(Genres::getId));
         log.debug("- createFilm: {}", film);
-        return newFilm;
+        return film;
     }
 
     @Override
@@ -106,5 +110,11 @@ public class FilmServiceImpl implements FilmService {
             throw new FilmNotFoundException("Пользователя id = " + userId + " не может быть");
         }
         return filmStorage.getSharedFilms(userId, friendId);
+    }
+
+    @Override
+    public void deleteFilm(int id) {
+        log.debug("- deleteFilm: {}", id);
+        filmStorage.deleteFilm(id);
     }
 }

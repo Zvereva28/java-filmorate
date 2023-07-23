@@ -27,4 +27,6 @@ public interface UserService {
     List<Film> getRecommendations(int userId);
 
     List<FeedEvent> getFeedByUserId(int id);
+
+    void deleteUser(int id);
 }
