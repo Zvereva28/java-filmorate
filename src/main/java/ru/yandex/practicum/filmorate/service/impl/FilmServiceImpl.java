@@ -98,6 +98,7 @@ public class FilmServiceImpl implements FilmService {
         return filmStorage.getDirectorFilms(id, string);
     }
 
+    @Override
     public List<Film> getSharedFilms(int userId, int friendId) {
         if (userId <= 0) {
             throw new FilmNotFoundException("Пользователя id = " + userId + " не может быть");
