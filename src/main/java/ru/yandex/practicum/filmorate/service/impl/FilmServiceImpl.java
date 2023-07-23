@@ -12,7 +12,7 @@ import ru.yandex.practicum.filmorate.storage.FeedStorage;
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
 import ru.yandex.practicum.filmorate.validators.FilmValidator;
 
-import java.util.*;
+import java.util.List;
 
 @Slf4j
 @Service
@@ -53,17 +53,10 @@ public class FilmServiceImpl implements FilmService {
     }
 
     @Override
-    public List<Film> getPopularFilms(int count) {
-        var films = filmStorage.getAllFilms();
-        Collections.sort(films, new LikesComparator());
-        if (count > films.size()) {
-            log.debug("- popularFilms: {}", films);
-            return films;
-        } else {
-            List<Film> popularFilms = films.subList(0, count);
-            log.debug("- popularFilms: {}", popularFilms);
-            return popularFilms;
-        }
+    public List<Film> getPopularFilms(int count, int genreId, int year) {
+        var films = filmStorage.getPopularFilms(count, genreId, year);
+        log.debug("- popularFilms: {}", films);
+        return films;
     }
 
     @Override
@@ -103,13 +96,6 @@ public class FilmServiceImpl implements FilmService {
     public List<Film> getDirectorFilms(int id, String string) {
 
         return filmStorage.getDirectorFilms(id, string);
-    }
-
-    class LikesComparator implements Comparator<Film> {
-        @Override
-        public int compare(Film a, Film b) {
-            return Integer.compare(b.getCountLikes(), a.getCountLikes());
-        }
     }
 
     public List<Film> getSharedFilms(int userId, int friendId) {

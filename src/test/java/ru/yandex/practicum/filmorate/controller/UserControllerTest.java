@@ -14,13 +14,12 @@ import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.model.enums.FeedEventType;
 import ru.yandex.practicum.filmorate.model.enums.FeedOperation;
 import ru.yandex.practicum.filmorate.service.impl.UserServiceImpl;
+import ru.yandex.practicum.filmorate.storage.impl.dao.FeedDbStorage;
 import ru.yandex.practicum.filmorate.storage.impl.dao.FilmDBStorage;
 import ru.yandex.practicum.filmorate.storage.impl.dao.LikesDBStorage;
 import ru.yandex.practicum.filmorate.storage.impl.dao.UserDBStorage;
-import ru.yandex.practicum.filmorate.storage.impl.dao.FeedDbStorage;
-import ru.yandex.practicum.filmorate.validators.UserValidator;
 import ru.yandex.practicum.filmorate.validators.FeedValidator;
-
+import ru.yandex.practicum.filmorate.validators.UserValidator;
 
 import java.time.LocalDate;
 

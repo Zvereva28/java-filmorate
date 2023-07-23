@@ -54,7 +54,7 @@ public class FeedDbStorage implements FeedStorage {
         try {
             return new FeedEvent(
                     rs.getInt("event_id"), rs.getTimestamp("timeStamp").getTime(),
-                    rs.getInt("user_id"),  FeedEventType.valueOf(rs.getString("event_type")),
+                    rs.getInt("user_id"), FeedEventType.valueOf(rs.getString("event_type")),
                     FeedOperation.valueOf(rs.getString("operation")), rs.getInt("entity_id")
             );
         } catch (SQLException e) {
