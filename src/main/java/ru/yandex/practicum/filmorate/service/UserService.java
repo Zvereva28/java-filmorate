@@ -20,6 +20,8 @@ public interface UserService {
 
     void deleteFriend(int id, int friendId);
 
+    void deleteUserById(int id);
+
     List<User> getFriend(int id);
 
     List<User> getFriendsCommon(int id, int otherId);
