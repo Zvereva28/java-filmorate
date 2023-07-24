@@ -255,7 +255,8 @@ public class FilmDBStorage implements FilmStorage {
 
     @Override
     public void addLike(Integer filmId, Integer userId) {
-        SimpleJdbcInsert simpleJdbcInsert = new SimpleJdbcInsert(jdbcTemplate.getDataSource())
+
+        SimpleJdbcInsert simpleJdbcInsert = new SimpleJdbcInsert(Objects.requireNonNull(jdbcTemplate.getDataSource()))
                 .withTableName("film_likes");
         Map<String, String> params = Map.of("user_id", userId.toString(),
                 "film_id", filmId.toString());

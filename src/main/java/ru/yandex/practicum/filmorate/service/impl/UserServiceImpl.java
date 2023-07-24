@@ -85,8 +85,8 @@ public class UserServiceImpl implements UserService {
         }
         userStorage.userExist(id);
         userStorage.userExist(friendId);
-        feedStorage.addToFeedDb(id, FeedEventType.FRIEND, FeedOperation.REMOVE, friendId);
         userStorage.deleteFriend(id, friendId);
+        feedStorage.addToFeedDb(id, FeedEventType.FRIEND, FeedOperation.REMOVE, friendId);
     }
 
     @Override

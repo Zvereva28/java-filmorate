@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.FilmNotFoundException;
+import ru.yandex.practicum.filmorate.exception.LikeException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genres;
 import ru.yandex.practicum.filmorate.model.enums.FeedEventType;
@@ -75,11 +76,16 @@ public class FilmServiceImpl implements FilmService {
         if (userId <= 0) {
             throw new FilmNotFoundException("Пользователя id = " + userId + " не может быть");
         }
+
+        feedStorage.addToFeedDb(userId, FeedEventType.LIKE, FeedOperation.ADD, id);
+        if (!filmValidator.isNoLike(userId, id)) {
+            throw new LikeException("Пользователь с id = " + userId + " уже поставил лайк фильму id = " + id);
+        }
+
         Film film = filmStorage.getFilm(id);
         filmStorage.addLike(id, userId);
         Film film1 = filmStorage.updateFilm(film);
         log.debug("- putLikesFilm: {}", film1);
-        feedStorage.addToFeedDb(userId, FeedEventType.LIKE, FeedOperation.ADD, id);
         return film1;
     }
 
