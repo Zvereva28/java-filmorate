@@ -79,4 +79,12 @@ public class ErrorHandler {
                 e.getMessage()
         );
     }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.OK)
+    public ResponseBody likeException(final LikeException e) {
+        return new ResponseBody(
+                e.getMessage()
+        );
+    }
 }

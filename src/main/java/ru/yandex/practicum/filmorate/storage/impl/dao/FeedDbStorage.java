@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.storage.impl.dao;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Component;
@@ -19,6 +20,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
+@Slf4j
 @Component
 public class FeedDbStorage implements FeedStorage {
     private final JdbcTemplate jdbcTemplate;
@@ -32,6 +34,7 @@ public class FeedDbStorage implements FeedStorage {
 
     @Override
     public void addToFeedDb(Integer userId, FeedEventType eventType, FeedOperation operation, Integer entityId) {
+        log.info("+ addToFeedDb. userId: " + userId + ", eventType: " + eventType + ", operation: " + operation + ", entityId: " + entityId);
         String time = String.valueOf(java.time.LocalDateTime.now());
 
         SimpleJdbcInsert simpleJdbcInsert = new SimpleJdbcInsert(Objects.requireNonNull(jdbcTemplate.getDataSource()))

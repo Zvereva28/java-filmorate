@@ -50,7 +50,7 @@ class FilmControllerTest {
 
     @BeforeEach
     public void setUp() {
-        filmController = new FilmController(new FilmServiceImpl(new FilmDBStorage(jdbcTemplate), new FeedDbStorage(jdbcTemplate, new FeedValidator(jdbcTemplate)), new FilmValidator()));
+        filmController = new FilmController(new FilmServiceImpl(new FilmDBStorage(jdbcTemplate), new FeedDbStorage(jdbcTemplate, new FeedValidator(jdbcTemplate)), new FilmValidator(jdbcTemplate)));
     }
 
     @Test
