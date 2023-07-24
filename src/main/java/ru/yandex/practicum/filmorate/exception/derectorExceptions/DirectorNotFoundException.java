@@ -1,4 +1,4 @@
-package ru.yandex.practicum.filmorate.exception;
+package ru.yandex.practicum.filmorate.exception.derectorExceptions;
 
 public class DirectorNotFoundException extends DirectorException {
 

@@ -3,9 +3,9 @@ package ru.yandex.practicum.filmorate.model;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.lang.NonNull;
 
 import javax.validation.constraints.Email;
+import javax.validation.constraints.NotNull;
 import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.Set;
@@ -15,12 +15,17 @@ import java.util.Set;
 @NoArgsConstructor
 public class User {
     private final Set<Integer> friends = new HashSet<>();
+
     private int id;
-    @NonNull
+
+    @NotNull
     @Email
     private String email;
-    @NonNull
+
+    @NotNull
     private String login;
+
     private String name;
+
     private LocalDate birthday;
 }

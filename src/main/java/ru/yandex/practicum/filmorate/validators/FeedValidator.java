@@ -2,7 +2,7 @@ package ru.yandex.practicum.filmorate.validators;
 
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
-import ru.yandex.practicum.filmorate.exception.UserNotFoundException;
+import ru.yandex.practicum.filmorate.exception.userExceptions.UserNotFoundException;
 
 @Component
 public class FeedValidator {

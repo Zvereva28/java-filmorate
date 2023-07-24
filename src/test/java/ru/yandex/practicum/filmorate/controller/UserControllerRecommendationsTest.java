@@ -14,7 +14,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 @Sql({"/schema.sql", "/test-recommendations-data.sql"})
 public class UserControllerRecommendationsTest {
-    private final UserController userController;
+    @Autowired
+    private UserController userController;
 
     @Test
     void getRecommendations() {

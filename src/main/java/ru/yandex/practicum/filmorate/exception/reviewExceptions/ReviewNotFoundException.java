@@ -1,4 +1,4 @@
-package ru.yandex.practicum.filmorate.exception;
+package ru.yandex.practicum.filmorate.exception.reviewExceptions;
 
 public class ReviewNotFoundException extends RuntimeException {
     public ReviewNotFoundException() {

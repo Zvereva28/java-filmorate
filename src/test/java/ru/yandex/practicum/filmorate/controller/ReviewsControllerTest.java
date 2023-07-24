@@ -8,9 +8,9 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.jdbc.Sql;
-import ru.yandex.practicum.filmorate.exception.FilmNotFoundException;
-import ru.yandex.practicum.filmorate.exception.ReviewNotFoundException;
-import ru.yandex.practicum.filmorate.exception.UserNotFoundException;
+import ru.yandex.practicum.filmorate.exception.filmExceptions.FilmNotFoundException;
+import ru.yandex.practicum.filmorate.exception.reviewExceptions.ReviewNotFoundException;
+import ru.yandex.practicum.filmorate.exception.userExceptions.UserNotFoundException;
 import ru.yandex.practicum.filmorate.model.Review;
 import ru.yandex.practicum.filmorate.service.impl.ReviewsServiceImpl;
 import ru.yandex.practicum.filmorate.storage.impl.dao.FeedDbStorage;
@@ -57,7 +57,7 @@ class ReviewsControllerTest {
     @Test
     void updateReview() {
         reviewsController.updateReview(new Review(1, "New negative review from user 1 to film 1", false, 1, 1, 0));
-        assertEquals(false, reviewsController.getReviewById(1).getIsPositive());
+        assertEquals(false, reviewsController.getReview(1).getIsPositive());
     }
 
     @Test
@@ -87,36 +87,36 @@ class ReviewsControllerTest {
 
     @Test
     void getReviewById() {
-        assertEquals("Content for positive review 2 from user 1 to film 2", reviewsController.getReviewById(2).getContent());
+        assertEquals("Content for positive review 2 from user 1 to film 2", reviewsController.getReview(2).getContent());
     }
 
     @Test
     void getReviewByIdWhenNoReview() {
-        assertThrows(ReviewNotFoundException.class, () -> reviewsController.getReviewById(9));
+        assertThrows(ReviewNotFoundException.class, () -> reviewsController.getReview(9));
     }
 
     @Test
     void addLike() {
         reviewsController.addLike(1, 1);
-        assertEquals(1, reviewsController.getReviewById(1).getUseful());
+        assertEquals(1, reviewsController.getReview(1).getUseful());
     }
 
     @Test
     void addDislike() {
         reviewsController.addDislike(1, 1);
-        assertEquals(-1, reviewsController.getReviewById(1).getUseful());
+        assertEquals(-1, reviewsController.getReview(1).getUseful());
     }
 
     @Test
     void deleteLike() {
         reviewsController.deleteLike(1, 1);
-        assertEquals(-1, reviewsController.getReviewById(1).getUseful());
+        assertEquals(-1, reviewsController.getReview(1).getUseful());
     }
 
     @Test
     void deleteDislike() {
         reviewsController.deleteDislike(1, 1);
-        assertEquals(1, reviewsController.getReviewById(1).getUseful());
+        assertEquals(1, reviewsController.getReview(1).getUseful());
     }
 
 }

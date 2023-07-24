@@ -1,4 +1,4 @@
-package ru.yandex.practicum.filmorate.exception;
+package ru.yandex.practicum.filmorate.exception.userExceptions;
 
 public class UserNotFoundException extends UserException {
 
