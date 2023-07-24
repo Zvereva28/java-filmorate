@@ -24,6 +24,7 @@ public class UserDBStorage implements UserStorage {
     private static final String UPDATE_USER = "UPDATE users set user_name=?, email=?, login=?, birthday=? WHERE id=?";
     private static final String SELECT_ALL_USER = "SELECT id, user_name, email, login, birthday, f.friend_id as friends " +
             "FROM users as u LEFT JOIN friends as f ON u.id=f.user_id ORDER BY id";
+    private static final String DELETE_USER = "DELETE FROM users WHERE id=?";
     private final JdbcTemplate jdbcTemplate;
 
     public UserDBStorage(JdbcTemplate jdbcTemplate) {
@@ -61,6 +62,12 @@ public class UserDBStorage implements UserStorage {
     public void deleteFriend(int id, int friendId) {
         jdbcTemplate.update(DELETE_FRIENDS,
                 id, friendId);
+    }
+
+    @Override
+    public void deleteUser(int id) {
+        userExist(id);
+        jdbcTemplate.update(DELETE_USER, id);
     }
 
     @Override

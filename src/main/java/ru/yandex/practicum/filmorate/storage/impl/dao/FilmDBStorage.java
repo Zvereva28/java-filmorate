@@ -69,6 +69,7 @@ public class FilmDBStorage implements FilmStorage {
 
 
     private static final String DELETE_LIKES = "DELETE FROM film_likes WHERE film_id=? AND user_id=?";
+    private static final String DELETE_FILM = "DELETE FROM films WHERE id=?";
     private static final String GET_FILMS_SHARED =
             "SELECT f.id, name, description, release_date, duration, rating_mpa, count_likes, fg.genre_id AS genre_id, g.genre_name AS genre_name, " +
                     "fd.director_id AS director_id, d.director_name AS director_name " +
@@ -376,6 +377,11 @@ public class FilmDBStorage implements FilmStorage {
     @Override
     public List<Film> getSharedFilms(int userId, int friendId) {
         return jdbcTemplate.query(GET_FILMS_SHARED, filmsRowMapper(), userId, friendId).stream().findFirst().orElse(new ArrayList<>());
+    }
+
+    @Override
+    public void deleteFilm(int id) {
+        jdbcTemplate.update(DELETE_FILM, id);
     }
 
 }
