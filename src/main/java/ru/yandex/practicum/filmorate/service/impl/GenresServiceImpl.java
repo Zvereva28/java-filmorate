@@ -16,13 +16,18 @@ public class GenresServiceImpl implements GenresService {
     private final GenresStorage genresStorage;
 
     @Override
-    public Genres getGenresById(int id) {
-        return genresStorage.getGenresById(id);
+    public Genres getGenre(int id) {
+        log.info("+ getGenre : id = {}", id);
+        Genres answer = genresStorage.getGenresById(id);
+        log.info("- getGenre : {}", answer);
+        return answer;
     }
 
     @Override
-    public List<Genres> getAll() {
-
-        return genresStorage.getAll();
+    public List<Genres> getAllGenres() {
+        log.info("+ getAllGenres");
+        List<Genres> answer =  genresStorage.getAll();
+        log.info("- getAllGenres : {}", answer);
+        return answer;
     }
 }

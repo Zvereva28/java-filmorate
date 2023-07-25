@@ -12,7 +12,7 @@ public interface DirectorService {
 
     Director updateDirector(Director director);
 
-    Director getDirector(int id);
+    Director getDirectorById(int id);
 
     void deleteDirector(int id);
 

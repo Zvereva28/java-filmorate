@@ -1,10 +1,9 @@
 package ru.yandex.practicum.filmorate.service.impl;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.exception.FilmNotFoundException;
-import ru.yandex.practicum.filmorate.exception.LikeException;
+import ru.yandex.practicum.filmorate.exception.filmExceptions.FilmNotFoundException;
+import ru.yandex.practicum.filmorate.exception.likeException.LikeException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genres;
 import ru.yandex.practicum.filmorate.model.enums.FeedEventType;
@@ -24,7 +23,7 @@ public class FilmServiceImpl implements FilmService {
     private final FeedStorage feedStorage;
     private final FilmValidator filmValidator;
 
-    public FilmServiceImpl(@Qualifier("filmDBStorage") FilmStorage filmStorage, FeedStorage feedStorage, FilmValidator filmValidator) {
+    public FilmServiceImpl(FilmStorage filmStorage, FeedStorage feedStorage, FilmValidator filmValidator) {
         this.filmStorage = filmStorage;
         this.feedStorage = feedStorage;
         this.filmValidator = filmValidator;
@@ -32,47 +31,52 @@ public class FilmServiceImpl implements FilmService {
 
     @Override
     public Film addFilm(Film film) {
-        log.debug("+ createFilm: {}", film);
+        log.info("+ createFilm : {}", film);
         filmValidator.checkFilm(film);
         int id = filmStorage.addFilm(film).getId();
         film.setId(id);
         film.getGenres().sort(Comparator.comparingInt(Genres::getId));
-        log.debug("- createFilm: {}", film);
+        log.info("- createFilm : {}", filmStorage.getFilm(film.getId()));
         return film;
     }
 
     @Override
     public Film updateFilm(Film film) {
-        log.debug("+ updateFilm: {}", film);
+        log.info("+ updateFilm : {}", film);
         filmValidator.checkFilm(film);
         Film oldFilm = filmStorage.updateFilm(film);
-        log.debug("- updateFilm: {}", oldFilm);
+        log.info("- updateFilm : {}", oldFilm);
         return oldFilm;
     }
 
     @Override
     public List<Film> getAllFilms() {
+        log.info("+ getAllFilms");
         var films = filmStorage.getAllFilms();
-        log.debug("- allFilms: {}", films);
+        log.info("- getAllFilms : {}", films);
         return films;
     }
 
     @Override
     public List<Film> getPopularFilms(int count, int genreId, int year) {
+        log.info("- getPopularFilms : count = {}, genreId = {}, year = {}", count, genreId, year);
         var films = filmStorage.getPopularFilms(count, genreId, year);
-        log.debug("- popularFilms: {}", films);
+        log.info("- getPopularFilms : {}", films);
         return films;
     }
 
     @Override
     public Film getFilm(int id) {
+        log.info("+ getFilm : id = {}", id);
         Film film = filmStorage.getFilm(id);
-        log.debug("- film: {}", film);
+        log.info("- getFilm : {}", film);
         return film;
     }
 
     @Override
-    public Film putLikesFilm(int id, int userId) {
+    public Film addLike(int id, int userId) {
+        log.info("+ addLike : id = {}, userId = {}", id, userId);
+
         if (userId <= 0) {
             throw new FilmNotFoundException("Пользователя id = " + userId + " не может быть");
         }
@@ -84,50 +88,59 @@ public class FilmServiceImpl implements FilmService {
 
         Film film = filmStorage.getFilm(id);
         filmStorage.addLike(id, userId);
-        Film film1 = filmStorage.updateFilm(film);
-        log.debug("- putLikesFilm: {}", film1);
-        return film1;
+        Film updatedFilm = filmStorage.updateFilm(film);
+        log.info("- addLike : {}", updatedFilm);
+        return updatedFilm;
     }
 
     @Override
-    public Film deleteLikesFilm(int id, int userId) {
+    public Film deleteLike(int id, int userId) {
+        log.info("+ deleteLike : id = {}, userId = {}", id, userId);
         if (userId <= 0) {
             throw new FilmNotFoundException("Пользователя id = " + userId + " не может быть");
         }
         Film film = filmStorage.getFilm(id);
         filmStorage.removeLike(id, userId);
         filmStorage.updateFilm(film);
-        log.debug("+ putLikesFilm: {}", film);
+        log.info("- deleteLike: {}", film);
         feedStorage.addToFeedDb(userId, FeedEventType.LIKE, FeedOperation.REMOVE, id);
         return film;
     }
 
     @Override
-    public List<Film> getDirectorFilms(int id, String string) {
-
-        return filmStorage.getDirectorFilms(id, string);
+    public List<Film> getDirectorFilms(int directorId, String sortBy) {
+        log.info("+ getDirectorFilms : directorId = {} sortBy = {}", directorId, sortBy);
+        List<Film> answer = filmStorage.getDirectorFilms(directorId, sortBy);
+        log.info("- getDirectorFilms : {}", answer);
+        return answer;
     }
 
     @Override
     public List<Film> getSharedFilms(int userId, int friendId) {
+        log.info("+ getDirectorFilms : userId = {} friendId = {}", userId, friendId);
         if (userId <= 0) {
             throw new FilmNotFoundException("Пользователя id = " + userId + " не может быть");
         }
         if (friendId <= 0) {
             throw new FilmNotFoundException("Пользователя id = " + userId + " не может быть");
         }
-        return filmStorage.getSharedFilms(userId, friendId);
+        List<Film> answer = filmStorage.getSharedFilms(userId, friendId);
+        log.info("- getSharedFilms : {}", answer);
+        return answer;
     }
 
     @Override
     public void deleteFilm(int id) {
-        log.debug("- deleteFilm: {}", id);
+        log.info("+ deleteFilm : id = {}", id);
         filmStorage.deleteFilm(id);
+        log.info("- deleteFilm : id = {}", id);
     }
 
     @Override
     public List<Film> searchFilms(String query, List<String> by) {
-        log.debug("Вы выполнили поиск фильмов по запросу '" + query + "' по полю '" + by + "'");
-        return filmStorage.searchFilms(query, by);
+        log.info("+ searchFilms : query = " + query + ", by =  " + by);
+        List<Film> answer = filmStorage.searchFilms(query, by);
+        log.info("- searchFilms : {}", answer);
+        return answer;
     }
 }

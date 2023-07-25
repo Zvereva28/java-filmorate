@@ -1,17 +1,15 @@
 package ru.yandex.practicum.filmorate.validators;
 
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
-import ru.yandex.practicum.filmorate.exception.FilmNotFoundException;
-import ru.yandex.practicum.filmorate.exception.ReviewException;
-import ru.yandex.practicum.filmorate.exception.ReviewNotFoundException;
-import ru.yandex.practicum.filmorate.exception.UserNotFoundException;
+import ru.yandex.practicum.filmorate.exception.filmExceptions.FilmNotFoundException;
+import ru.yandex.practicum.filmorate.exception.reviewExceptions.ReviewException;
+import ru.yandex.practicum.filmorate.exception.reviewExceptions.ReviewNotFoundException;
+import ru.yandex.practicum.filmorate.exception.userExceptions.UserNotFoundException;
 
 import java.util.ArrayList;
 import java.util.List;
 
-@Slf4j
 @Component
 public class ReviewValidation {
     private static final String GET_ALL_FILM_IDS = "SELECT id FROM films";

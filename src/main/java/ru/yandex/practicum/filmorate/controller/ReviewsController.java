@@ -1,16 +1,14 @@
 package ru.yandex.practicum.filmorate.controller;
 
 import lombok.AllArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
-import ru.yandex.practicum.filmorate.exception.FilmNotFoundException;
+import ru.yandex.practicum.filmorate.exception.filmExceptions.FilmNotFoundException;
 import ru.yandex.practicum.filmorate.model.Review;
 import ru.yandex.practicum.filmorate.service.ReviewsService;
 
 import javax.validation.Valid;
 import java.util.List;
 
-@Slf4j
 @RestController
 @RequestMapping("/reviews")
 @AllArgsConstructor
@@ -47,27 +45,27 @@ public class ReviewsController {
     }
 
     @GetMapping("/{id}")
-    public Review getReviewById(@PathVariable int id) {
-        return reviewsService.getReviewById(id);
+    public Review getReview(@PathVariable int id) {
+        return reviewsService.getReview(id);
     }
 
     @PutMapping("/{id}/like/{userId}")
     public Review addLike(@PathVariable int id, @PathVariable int userId) {
-        return reviewsService.addLikeToReview(id, userId);
+        return reviewsService.addLike(id, userId);
     }
 
     @PutMapping("/{id}/dislike/{userId}")
     public Review addDislike(@PathVariable int id, @PathVariable int userId) {
-        return reviewsService.addDislikeToReview(id, userId);
+        return reviewsService.addDislike(id, userId);
     }
 
     @DeleteMapping("/{id}/like/{userId}")
     public Review deleteLike(@PathVariable int id, @PathVariable int userId) {
-        return reviewsService.deleteLikeFromReview(id, userId);
+        return reviewsService.deleteLike(id, userId);
     }
 
     @DeleteMapping("/{id}/dislike/{userId}")
     public Review deleteDislike(@PathVariable int id, @PathVariable int userId) {
-        return reviewsService.deleteDislikeFromReview(id, userId);
+        return reviewsService.deleteDislike(id, userId);
     }
 }

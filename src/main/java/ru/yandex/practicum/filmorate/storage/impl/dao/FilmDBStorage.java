@@ -7,8 +7,8 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Component;
-import ru.yandex.practicum.filmorate.exception.DbException;
-import ru.yandex.practicum.filmorate.exception.FilmNotFoundException;
+import ru.yandex.practicum.filmorate.exception.dbExceptions.DbException;
+import ru.yandex.practicum.filmorate.exception.filmExceptions.FilmNotFoundException;
 import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genres;
@@ -27,7 +27,7 @@ import java.util.Set;
 
 @Slf4j
 @Getter
-@Component("filmDBStorage")
+@Component
 public class FilmDBStorage implements FilmStorage {
     private static final String GET_COUNT_OF_LIKES = "SELECT count(*) AS count FROM film_likes where film_id = ?";
     private static final String UPDATE_FILM = "UPDATE films SET  name=?, description=?, release_date=?, duration=?, rating_mpa=?, count_likes=? WHERE id=?";
@@ -178,7 +178,7 @@ public class FilmDBStorage implements FilmStorage {
 
     @Override
     public Film updateFilm(Film film) {
-        Integer id = film.getId();
+        int id = film.getId();
         filmExist(id);
         Integer countLikes;
         try {
@@ -202,7 +202,7 @@ public class FilmDBStorage implements FilmStorage {
             for (Genres genre : genres) {
                 Map<String, String> params = Map.of(
                         "genre_id", genre.getId().toString(),
-                        "film_id", id.toString());
+                        "film_id", Integer.toString(id));
                 simpleJdbcInsert.execute(params);
             }
         }
@@ -215,7 +215,7 @@ public class FilmDBStorage implements FilmStorage {
                 film.getDirectors().add(director);
                 Map<String, String> params = Map.of(
                         "director_id", director.getId().toString(),
-                        "film_id", id.toString());
+                        "film_id", Integer.toString(id));
                 simpleJdbcInsert.execute(params);
             }
         }
