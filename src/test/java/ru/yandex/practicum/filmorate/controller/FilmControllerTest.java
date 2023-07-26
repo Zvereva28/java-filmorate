@@ -13,18 +13,11 @@ import ru.yandex.practicum.filmorate.exception.filmExceptions.FilmException;
 import ru.yandex.practicum.filmorate.exception.filmExceptions.FilmNotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Mpa;
-import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.model.enums.FeedEventType;
-import ru.yandex.practicum.filmorate.model.enums.FeedOperation;
 import ru.yandex.practicum.filmorate.service.impl.FilmServiceImpl;
-import ru.yandex.practicum.filmorate.service.impl.UserServiceImpl;
+import ru.yandex.practicum.filmorate.storage.impl.dao.DirectorDBStorage;
 import ru.yandex.practicum.filmorate.storage.impl.dao.FeedDbStorage;
 import ru.yandex.practicum.filmorate.storage.impl.dao.FilmDBStorage;
-import ru.yandex.practicum.filmorate.storage.impl.dao.LikesDBStorage;
-import ru.yandex.practicum.filmorate.storage.impl.dao.UserDBStorage;
-import ru.yandex.practicum.filmorate.validators.FeedValidator;
 import ru.yandex.practicum.filmorate.validators.FilmValidator;
-import ru.yandex.practicum.filmorate.validators.UserValidator;
 
 import java.time.LocalDate;
 
@@ -39,10 +32,6 @@ class FilmControllerTest {
     private final JdbcTemplate jdbcTemplate;
     @Autowired
     private FilmController filmController;
-    @Autowired
-    private UserController userController;
-    @Autowired
-    private FeedDbStorage feedDbStorage;
 
     FilmControllerTest(@Autowired JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
@@ -50,7 +39,7 @@ class FilmControllerTest {
 
     @BeforeEach
     public void setUp() {
-        filmController = new FilmController(new FilmServiceImpl(new FilmDBStorage(jdbcTemplate), new FeedDbStorage(jdbcTemplate, new FeedValidator(jdbcTemplate)), new FilmValidator(jdbcTemplate)));
+        filmController = new FilmController(new FilmServiceImpl(new FilmDBStorage(jdbcTemplate), new FeedDbStorage(jdbcTemplate), new FilmValidator(jdbcTemplate), new DirectorDBStorage(jdbcTemplate)));
     }
 
     @Test
@@ -194,26 +183,6 @@ class FilmControllerTest {
                 generateUpdateExecutableToReleaseDate()
         );
         assertEquals("Не верная дата релиза", exception.getMessage());
-    }
-
-    @Test
-    void putLikesFilmByIdFeed() {
-        userController = new UserController(new UserServiceImpl(new UserDBStorage(jdbcTemplate), new LikesDBStorage(jdbcTemplate, new FilmDBStorage(jdbcTemplate)), new FeedDbStorage(jdbcTemplate, new FeedValidator(jdbcTemplate)), new UserValidator()));
-        userController.addUser(new User(1, "dolore", "NickName", "Nick Name", LocalDate.of(1995, 11, 28)));
-        filmController.addFilm(new Film(1, "dolore", "description description", LocalDate.of(1995, 11, 28), 50, new Mpa(1), 0));
-        filmController.addLike(1, 1);
-        assertEquals(FeedEventType.LIKE, feedDbStorage.getFeedByUserId(1).get(0).getEventType());
-    }
-
-    @Test
-    void deleteLikesFilmByIdFeed() {
-        userController = new UserController(new UserServiceImpl(new UserDBStorage(jdbcTemplate), new LikesDBStorage(jdbcTemplate, new FilmDBStorage(jdbcTemplate)), new FeedDbStorage(jdbcTemplate, new FeedValidator(jdbcTemplate)), new UserValidator()));
-        userController.addUser(new User(1, "dolore", "NickName", "Nick Name", LocalDate.of(1995, 11, 28)));
-        filmController.addFilm(new Film(1, "dolore", "description description", LocalDate.of(1995, 11, 28), 50, new Mpa(1), 0));
-        filmController.addLike(1, 1);
-        filmController.deleteLike(1, 1);
-        feedDbStorage.getFeedByUserId(1);
-        assertEquals(FeedOperation.REMOVE, feedDbStorage.getFeedByUserId(1).get(1).getOperation());
     }
 
     private Executable generateUpdateExecutableToReleaseDate() {

@@ -21,6 +21,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @Sql({"/schema.sql", "/test-data-reviews.sql"})
 class ReviewsDbStorageTest {
+
     private final JdbcTemplate jdbcTemplate;
 
     private final ReviewsDbStorage reviewsDbStorage;
@@ -129,4 +130,6 @@ class ReviewsDbStorageTest {
     void decreaseUsefulWhenNoUser() {
         assertThrows(UserNotFoundException.class, () -> reviewsDbStorage.decreaseUseful(1, 9));
     }
+
+
 }

@@ -25,11 +25,13 @@ public class GenresDBStorage implements GenresStorage {
         if (genres.size() != 1) {
             throw new GenresNotFoundException("Жанр с id = " + id + " не существует");
         }
+
         return genres.get(0);
     }
 
     @Override
     public List<Genres> getAll() {
+
         return jdbcTemplate.query(SELECT_ALL_GENRES,
                 (rs, rowNum) -> new Genres(rs.getInt("id"), rs.getString("genre_name")));
     }

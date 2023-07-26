@@ -4,11 +4,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.filmExceptions.FilmNotFoundException;
 import ru.yandex.practicum.filmorate.exception.likeException.LikeException;
+import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genres;
 import ru.yandex.practicum.filmorate.model.enums.FeedEventType;
 import ru.yandex.practicum.filmorate.model.enums.FeedOperation;
 import ru.yandex.practicum.filmorate.service.FilmService;
+import ru.yandex.practicum.filmorate.storage.DirectorStorage;
 import ru.yandex.practicum.filmorate.storage.FeedStorage;
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
 import ru.yandex.practicum.filmorate.validators.FilmValidator;
@@ -22,11 +24,13 @@ public class FilmServiceImpl implements FilmService {
     private final FilmStorage filmStorage;
     private final FeedStorage feedStorage;
     private final FilmValidator filmValidator;
+    private final DirectorStorage directorStorage;
 
-    public FilmServiceImpl(FilmStorage filmStorage, FeedStorage feedStorage, FilmValidator filmValidator) {
+    public FilmServiceImpl(FilmStorage filmStorage, FeedStorage feedStorage, FilmValidator filmValidator,  DirectorStorage directorStorage) {
         this.filmStorage = filmStorage;
         this.feedStorage = feedStorage;
         this.filmValidator = filmValidator;
+        this.directorStorage = directorStorage;
     }
 
     @Override
@@ -110,6 +114,7 @@ public class FilmServiceImpl implements FilmService {
     @Override
     public List<Film> getDirectorFilms(int directorId, String sortBy) {
         log.info("+ getDirectorFilms : directorId = {} sortBy = {}", directorId, sortBy);
+        directorStorage.getDirector(directorId);
         List<Film> answer = filmStorage.getDirectorFilms(directorId, sortBy);
         log.info("- getDirectorFilms : {}", answer);
         return answer;
