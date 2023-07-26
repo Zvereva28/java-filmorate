@@ -16,11 +16,11 @@ public interface FilmService {
 
     Film getFilm(int id);
 
-    Film putLikesFilm(int id, int userId);
+    Film addLike(int id, int userId);
 
-    Film deleteLikesFilm(int id, int userId);
+    Film deleteLike(int id, int userId);
 
-    List<Film> getDirectorFilms(int id, String string);
+    List<Film> getDirectorFilms(int directorId, String sortBy);
 
     List<Film> getSharedFilms(int userId, int friendId);
 

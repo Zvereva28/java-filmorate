@@ -8,6 +8,7 @@ import ru.yandex.practicum.filmorate.model.enums.RatingFilms;
 @NoArgsConstructor
 public class Mpa {
     private Integer id;
+
     private String name;
 
     public Mpa(Integer id) {

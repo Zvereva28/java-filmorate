@@ -9,7 +9,6 @@ import ru.yandex.practicum.filmorate.storage.DirectorStorage;
 
 import java.util.List;
 
-
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -19,35 +18,40 @@ public class DirectorServiceImpl implements DirectorService {
 
     @Override
     public List<Director> getAllDirectors() {
+        log.info("+ getAllDirectors");
         List<Director> directors = directorStorage.getAllDirectors();
-        log.info("Получаем список всех режиссеров");
+        log.info("- getAllDirectors");
         return directors;
     }
 
     @Override
     public Director addDirector(Director director) {
-        directorStorage.addDirector(director);
-        log.info("Добавлен новый режиссер: id - '{}', name - '{}'", director.getId(), director.getName());
-        return director;
+        log.info("+ addDirector : {}", director);
+        Director newDirector = directorStorage.addDirector(director);
+        log.info("- addDirector : {}", newDirector);
+        return newDirector;
     }
 
     @Override
     public Director updateDirector(Director director) {
-        directorStorage.updateDirector(director);
-        log.info("Режиссер - '{}', обновлен ", director);
-        return director;
+        log.info("+ updateDirector : {}", director);
+        Director newDirector = directorStorage.updateDirector(director);
+        log.info("- updateDirector : {}", newDirector);
+        return newDirector;
     }
 
     @Override
-    public Director getDirector(int id) {
+    public Director getDirectorById(int id) {
+        log.info("+ updateDirector : id = {}", id);
         Director director = directorStorage.getDirector(id);
-        log.info("Получаем режиссера с id '{}'", id);
+        log.info("- getDirectorById : {}", director);
         return director;
     }
 
     @Override
     public void deleteDirector(int id) {
+        log.info("+ deleteDirector : id = {}", id);
         directorStorage.deleteDirector(id);
-        log.info("Режиссер c id - '{}', удален ", id);
+        log.info("- deleteDirector : id = {}", id);
     }
 }

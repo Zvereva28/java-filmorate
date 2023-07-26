@@ -5,7 +5,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Component;
-import ru.yandex.practicum.filmorate.exception.UserNotFoundException;
+import ru.yandex.practicum.filmorate.exception.userExceptions.UserNotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
 
@@ -14,9 +14,10 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 @Slf4j
-@Component("userDBStorage")
+@Component
 public class UserDBStorage implements UserStorage {
     private static final String SELECT_USER = "SELECT id, user_name, email, login, birthday, f.friend_id as friends " +
             "FROM users as u LEFT JOIN friends as f ON u.id=f.user_id WHERE id = ?";
@@ -33,7 +34,7 @@ public class UserDBStorage implements UserStorage {
 
     @Override
     public User createUser(User user) {
-        SimpleJdbcInsert simpleJdbcInsert = new SimpleJdbcInsert(jdbcTemplate.getDataSource())
+        SimpleJdbcInsert simpleJdbcInsert = new SimpleJdbcInsert(Objects.requireNonNull(jdbcTemplate.getDataSource()))
                 .withTableName("users")
                 .usingGeneratedKeyColumns("id");
         Map<String, String> params = Map.of("user_name", user.getName(), "email", user.getEmail(),
@@ -52,7 +53,7 @@ public class UserDBStorage implements UserStorage {
 
     @Override
     public void addFriend(int id, int friendId) {
-        SimpleJdbcInsert simpleJdbcInsert = new SimpleJdbcInsert(jdbcTemplate.getDataSource())
+        SimpleJdbcInsert simpleJdbcInsert = new SimpleJdbcInsert(Objects.requireNonNull(jdbcTemplate.getDataSource()))
                 .withTableName("friends");
         Map<String, Integer> params = Map.of("user_id", id, "friend_id", friendId);
         simpleJdbcInsert.execute(params);

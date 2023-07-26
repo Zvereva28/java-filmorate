@@ -13,15 +13,15 @@ public interface ReviewsService {
 
     Review deleteReview(int id);
 
-    Review getReviewById(int id);
+    Review getReview(int id);
 
     List<Review> getReviewsByFilmId(Integer id, int count);
 
-    Review addLikeToReview(int id, int userId);
+    Review addLike(int id, int userId);
 
-    Review addDislikeToReview(int id, int userId);
+    Review addDislike(int id, int userId);
 
-    Review deleteLikeFromReview(int id, int userId);
+    Review deleteLike(int id, int userId);
 
-    Review deleteDislikeFromReview(int id, int userId);
+    Review deleteDislike(int id, int userId);
 }

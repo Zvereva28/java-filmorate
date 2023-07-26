@@ -1,9 +1,8 @@
 package ru.yandex.practicum.filmorate.service.impl;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.exception.UserException;
+import ru.yandex.practicum.filmorate.exception.userExceptions.UserException;
 import ru.yandex.practicum.filmorate.model.FeedEvent;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
@@ -28,7 +27,7 @@ public class UserServiceImpl implements UserService {
     private final FeedStorage feedStorage;
     private final UserValidator userValidator;
 
-    public UserServiceImpl(@Qualifier("userDBStorage") UserStorage userStorage, LikesStorage likesStorage, FeedStorage feedStorage, UserValidator userValidator) {
+    public UserServiceImpl(UserStorage userStorage, LikesStorage likesStorage, FeedStorage feedStorage, UserValidator userValidator) {
         this.userStorage = userStorage;
         this.feedStorage = feedStorage;
         this.userValidator = userValidator;
@@ -36,38 +35,41 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User createUser(User user) {
-        log.debug("+ createUser: {}", user);
+    public User addUser(User user) {
+        log.info("+ createUser : {}", user);
         User newUser = userValidator.checkUser(user);
-        log.debug("- createUser: {}", newUser);
-        return userStorage.createUser(newUser);
+        User answer = userStorage.createUser(newUser);
+        log.info("- createUser : {}", answer);
+        return answer;
     }
 
     @Override
     public User updateUser(User user) {
-        log.debug("+ updateUser: {}", user);
+        log.info("+ updateUser : {}", user);
         User newUser = userStorage.updateUser(userValidator.checkUser(user));
-        log.debug("- updateUser: {}", newUser);
+        log.info("- updateUser : {}", newUser);
         return newUser;
     }
 
     @Override
     public List<User> getAllUsers() {
+        log.info("+ updateUser");
         List<User> users = userStorage.getAllUsers();
-        log.debug("- allUsers: {}", users);
+        log.info("- allUsers : {}", users);
         return users;
     }
 
     @Override
     public User getUser(int id) {
+        log.info("+ getUser : id = {}", id);
         User user = userStorage.getUser(id);
-        log.debug("- user: {}", user);
+        log.info("- getUser : {}", user);
         return user;
     }
 
     @Override
-    public void putFriend(int id, int friendId) {
-        log.debug("+ addFriend : {}", id);
+    public void addFriend(int id, int friendId) {
+        log.info("+ addFriend : id = {}, friendId = {}", id, friendId);
         if (id == friendId) {
             throw new UserException("Параметры не могут быть равны");
         }
@@ -75,11 +77,12 @@ public class UserServiceImpl implements UserService {
         userStorage.userExist(friendId);
         userStorage.addFriend(id, friendId);
         feedStorage.addToFeedDb(id, FeedEventType.FRIEND, FeedOperation.ADD, friendId);
+        log.info("- addFriend : id = {}, friendId = {}", id, friendId);
     }
 
     @Override
     public void deleteFriend(int id, int friendId) {
-        log.debug("+ deleteFriend : {}", id);
+        log.info("+ deleteFriend : id = {}, friendId = {}", id, friendId);
         if (id == friendId) {
             throw new UserException("Параметры не могут быть равны");
         }
@@ -87,23 +90,24 @@ public class UserServiceImpl implements UserService {
         userStorage.userExist(friendId);
         userStorage.deleteFriend(id, friendId);
         feedStorage.addToFeedDb(id, FeedEventType.FRIEND, FeedOperation.REMOVE, friendId);
+        log.info("- deleteFriend : id = {}, friendId = {}", id, friendId);
     }
 
     @Override
-    public List<User> getFriend(int id) {
-        log.debug("+ getFriend : {}", id);
+    public List<User> getFriends(int id) {
+        log.info("+ getFriends : id = {}", id);
         Set<Integer> friendsId = userStorage.getUser(id).getFriends();
         List<User> friends = new ArrayList<>();
         for (Integer friendId : friendsId) {
             friends.add(userStorage.getUser(friendId));
         }
-        log.debug("- getFriend : {}", friends);
+        log.info("- getFriends : {}", friends);
         return friends;
     }
 
     @Override
     public List<User> getFriendsCommon(int id, int otherId) {
-        log.debug("+ getFriendsCommon : {} {}", id, otherId);
+        log.info("+ getFriendsCommon : {} {}", id, otherId);
         Set<Integer> friendsId = userStorage.getUser(id).getFriends();
         Set<Integer> otherFriends = userStorage.getUser(otherId).getFriends();
         Set<Integer> common = friendsId.stream()
@@ -113,22 +117,30 @@ public class UserServiceImpl implements UserService {
         for (Integer friendId : common) {
             friends.add(userStorage.getUser(friendId));
         }
-        log.debug("- getFriendsCommon : {}", friends);
+        log.info("- getFriendsCommon : {}", friends);
         return friends;
     }
 
     @Override
     public List<Film> getRecommendations(int userId) {
-        return likesStorage.getFilmsByUserId(userId);
+        log.info("+ getRecommendations : userId = {}", userId);
+        List<Film> answer = likesStorage.getFilmsByUserId(userId);
+        log.info("- getRecommendations : {}", answer);
+        return answer;
     }
 
     @Override
-    public List<FeedEvent> getFeedByUserId(int id) {
-        return feedStorage.getFeedByUserId(id);
+    public List<FeedEvent> getFeed(int id) {
+        log.info("+ getFeed : id = {}", id);
+        List<FeedEvent> answer = feedStorage.getFeedByUserId(id);
+        log.info("- getFeed : {}", answer);
+        return answer;
     }
 
     @Override
     public void deleteUser(int id) {
+        log.info("+ deleteUser : id = {}", id);
         userStorage.deleteUser(id);
+        log.info("- deleteUser : id = {}", id);
     }
 }

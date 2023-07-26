@@ -4,7 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Component;
-import ru.yandex.practicum.filmorate.exception.DbException;
+import ru.yandex.practicum.filmorate.exception.dbExceptions.DbException;
 import ru.yandex.practicum.filmorate.model.FeedEvent;
 import ru.yandex.practicum.filmorate.model.enums.FeedEventType;
 import ru.yandex.practicum.filmorate.model.enums.FeedOperation;
@@ -25,7 +25,7 @@ import java.util.Optional;
 public class FeedDbStorage implements FeedStorage {
     private final JdbcTemplate jdbcTemplate;
     private final FeedValidator validator;
-    private static final String GET_FEED_EVENT_BY_USER_ID = "SELECT event_id, timestamp, user_id, event_type, operation, entity_id FROM feed WHERE user_id = ";
+    private static final String GET_FEED_EVENT_BY_USER_ID = "SELECT EVENT_ID, TIMESTAMP, USER_ID, EVENT_TYPE, OPERATION, ENTITY_ID FROM FEED WHERE USER_ID = ";
 
     public FeedDbStorage(JdbcTemplate jdbcTemplate, FeedValidator validator) {
         this.jdbcTemplate = jdbcTemplate;
@@ -34,7 +34,7 @@ public class FeedDbStorage implements FeedStorage {
 
     @Override
     public void addToFeedDb(Integer userId, FeedEventType eventType, FeedOperation operation, Integer entityId) {
-        log.info("+ addToFeedDb. userId: " + userId + ", eventType: " + eventType + ", operation: " + operation + ", entityId: " + entityId);
+        log.info("+ addToFeedDb : userId = " + userId + ", eventType = " + eventType + ", operation = " + operation + ", entityId = " + entityId);
         String time = String.valueOf(java.time.LocalDateTime.now());
 
         SimpleJdbcInsert simpleJdbcInsert = new SimpleJdbcInsert(Objects.requireNonNull(jdbcTemplate.getDataSource()))
@@ -45,12 +45,16 @@ public class FeedDbStorage implements FeedStorage {
                 "event_type", eventType.toString(), "operation", operation.toString(), "entity_id", entityId.toString());
 
         simpleJdbcInsert.executeAndReturnKey(params);
+        log.info("- addToFeedDb");
     }
 
     @Override
     public List<FeedEvent> getFeedByUserId(int id) {
+        log.info("+ getFeedByUserId : id = {}", id);
         validator.checkUser(id);
-        return getEvents(GET_FEED_EVENT_BY_USER_ID + id);
+        List<FeedEvent> answer = getEvents(GET_FEED_EVENT_BY_USER_ID + id);
+        log.info("- getFeedByUserId : {}", answer);
+        return answer;
     }
 
     private FeedEvent createEvent(ResultSet rs) {

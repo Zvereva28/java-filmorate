@@ -8,7 +8,7 @@ import java.util.List;
 
 public interface UserService {
 
-    User createUser(User newUser);
+    User addUser(User newUser);
 
     User updateUser(User newUser);
 
@@ -16,17 +16,17 @@ public interface UserService {
 
     User getUser(int id);
 
-    void putFriend(int id, int friendId);
+    void addFriend(int id, int friendId);
 
     void deleteFriend(int id, int friendId);
 
-    List<User> getFriend(int id);
+    List<User> getFriends(int id);
 
     List<User> getFriendsCommon(int id, int otherId);
 
     List<Film> getRecommendations(int userId);
 
-    List<FeedEvent> getFeedByUserId(int id);
+    List<FeedEvent> getFeed(int id);
 
     void deleteUser(int id);
 }

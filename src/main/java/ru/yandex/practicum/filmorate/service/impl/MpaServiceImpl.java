@@ -15,17 +15,22 @@ import java.util.List;
 @AllArgsConstructor
 public class MpaServiceImpl implements MpaService {
     @Override
-    public Mpa getMpaById(int id) {
-        return new Mpa(id);
+    public Mpa getMpa(int id) {
+        log.info("+ getMpa : id = {}", id);
+        Mpa answer = new Mpa(id);
+        log.info("- getMpa : {}", answer);
+        return answer;
     }
 
     @Override
-    public List<Mpa> getAll() {
+    public List<Mpa> getAllMpa() {
+        log.info("+ getAllMpa");
         RatingFilms[] ratingFilms = RatingFilms.values();
         List<Mpa> mpaRatings = new ArrayList<>();
         for (RatingFilms rating : ratingFilms) {
             mpaRatings.add(new Mpa(rating.getId()));
         }
+        log.info("- getAllMpa : {}", mpaRatings);
         return mpaRatings;
     }
 }

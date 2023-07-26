@@ -4,7 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Component;
-import ru.yandex.practicum.filmorate.exception.ReviewNotFoundException;
+import ru.yandex.practicum.filmorate.exception.reviewExceptions.ReviewNotFoundException;
 import ru.yandex.practicum.filmorate.model.Review;
 import ru.yandex.practicum.filmorate.storage.ReviewsStorage;
 import ru.yandex.practicum.filmorate.validators.ReviewValidation;
@@ -18,7 +18,7 @@ import java.util.Map;
 import java.util.Optional;
 
 @Slf4j
-@Component()
+@Component
 public class ReviewsDbStorage implements ReviewsStorage {
     private static final String GET_ALL_REVIEWS = "SELECT reviewId, content, isPositive, userId, filmId, useful FROM reviews LIMIT ";
     private static final String UPDATE_REVIEW = "UPDATE reviews SET content = ?, isPositive = ? WHERE reviewId = ?";
