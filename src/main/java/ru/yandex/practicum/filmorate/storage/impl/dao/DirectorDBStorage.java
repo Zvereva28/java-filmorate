@@ -38,7 +38,7 @@ public class DirectorDBStorage implements DirectorStorage {
         Number id = simpleJdbcInsert.executeAndReturnKey(params);
         director.setId(id.intValue());
 
-        return directorExist(director.getId());
+        return director;
     }
 
     @Override
@@ -57,7 +57,7 @@ public class DirectorDBStorage implements DirectorStorage {
         jdbcTemplate.update(UPDATE_DIRECTOR,
                 director.getName(),
                 director.getId());
-        return directorExist(director.getId());
+        return director;
     }
 
     @Override

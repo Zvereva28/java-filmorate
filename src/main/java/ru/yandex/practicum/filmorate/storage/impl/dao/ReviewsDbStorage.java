@@ -54,6 +54,7 @@ public class ReviewsDbStorage implements ReviewsStorage {
                     "userId", review.getUserId().toString(), "filmId", review.getFilmId().toString(), "useful", "0");
 
             id = simpleJdbcInsert.executeAndReturnKey(params);
+            review.setReviewId(id.intValue());
         }
         return getReviewById((int) id);
     }

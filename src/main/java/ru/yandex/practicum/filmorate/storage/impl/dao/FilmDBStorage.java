@@ -29,97 +29,130 @@ import java.util.Set;
 @Getter
 @Component("filmDBStorage")
 public class FilmDBStorage implements FilmStorage {
-    private static final String GET_COUNT_OF_LIKES = "SELECT count(*) AS count FROM film_likes where film_id = ?";
-    private static final String UPDATE_FILM = "UPDATE films SET  name=?, description=?, release_date=?, duration=?, rating_mpa=?, count_likes=? WHERE id=?";
-    private static final String DELETE_FILM_GENRE = "DELETE FROM film_genre WHERE film_id=?";
-    private static final String DELETE_FILM_DIRECTOR = "DELETE FROM film_director WHERE film_id=?";
-    private static final String GET_ALL_FILMS = "SELECT f.id, name, description, release_date, duration, rating_mpa, count_likes, fg.genre_id AS genre_id, g.genre_name AS genre_name, " +
-            "fd.director_id AS director_id, d.director_name AS director_name " +
-            "FROM films as f LEFT JOIN film_genre AS fg ON f.id=fg.film_id LEFT JOIN genre AS g ON fg.genre_id=g.id " +
+    private static final String GET_COUNT_OF_LIKES =
+            "SELECT count(*) AS count FROM film_likes where film_id = ?";
+    private static final String UPDATE_FILM =
+            "UPDATE films SET  name=?, description=?, release_date=?, duration=?, rating_mpa=?, count_likes=? WHERE id=?";
+    private static final String DELETE_FILM_GENRE =
+            "DELETE FROM film_genre WHERE film_id=?";
+    private static final String DELETE_FILM_DIRECTOR =
+            "DELETE FROM film_director WHERE film_id=?";
+    private static final String GET_ALL_FILMS =
+            "SELECT f.id, name, description, release_date, duration, rating_mpa, " +
+                "count_likes, fg.genre_id AS genre_id, g.genre_name AS genre_name, " +
+                "fd.director_id AS director_id, d.director_name AS director_name " +
+            "FROM films as f " +
+            "LEFT JOIN film_genre AS fg ON f.id=fg.film_id " +
+            "LEFT JOIN genre AS g ON fg.genre_id=g.id " +
             "LEFT JOIN film_director AS fd ON f.id=fd.film_id " +
             "LEFT JOIN directors AS d ON fd.director_id=d.director_id " +
             "ORDER BY f.id, genre_id";
-    private static final String GET_POPULAR_FILMS = "SELECT f.id, name, description, release_date, duration, rating_mpa, count_likes, fg.genre_id AS genre_id, g.genre_name AS genre_name,  " +
-            "fd.director_id AS director_id, d.director_name AS director_name " +
-            "FROM films as f LEFT JOIN film_genre AS fg ON f.id=fg.film_id LEFT JOIN genre AS g ON fg.genre_id=g.id  " +
+    private static final String GET_POPULAR_FILMS =
+            "SELECT f.id, name, description, release_date, duration, " +
+                "rating_mpa, count_likes, fg.genre_id AS genre_id, g.genre_name AS genre_name, " +
+                "fd.director_id AS director_id, d.director_name AS director_name " +
+            "FROM films as f " +
+            "LEFT JOIN film_genre AS fg ON f.id=fg.film_id " +
+            "LEFT JOIN genre AS g ON fg.genre_id=g.id " +
             "LEFT JOIN film_director AS fd ON f.id=fd.film_id " +
             "LEFT JOIN directors AS d ON fd.director_id=d.director_id " +
             "WHERE f.id IN (%s) " +
             "ORDER BY count_likes DESC, f.id ASC, genre_id ASC";
-    private static final String GET_ID_FILMS_WITH_LIMITS = String.format(GET_POPULAR_FILMS, "SELECT id FROM films ORDER BY count_likes DESC LIMIT ? ");
+    private static final String GET_ID_FILMS_WITH_LIMITS =
+            String.format(GET_POPULAR_FILMS,
+                    "SELECT id FROM films ORDER BY count_likes DESC LIMIT ? ");
 
-    private static final String GET_ID_FILMS_WITH_GENRES = String.format(GET_POPULAR_FILMS, "SELECT f.id " +
+    private static final String GET_ID_FILMS_WITH_GENRES =
+            String.format(GET_POPULAR_FILMS,
+                    "SELECT f.id " +
             "FROM films as f LEFT JOIN film_genre AS fg ON f.id=fg.film_id " +
             "WHERE fg.genre_id = ?" +
             " ORDER BY count_likes DESC LIMIT ?");
-    private static final String GET_ID_FILMS_WITH_GENRES_YEAR = String.format(GET_POPULAR_FILMS, "SELECT f.id " +
+    private static final String GET_ID_FILMS_WITH_GENRES_YEAR =
+            String.format(GET_POPULAR_FILMS,
+                    "SELECT f.id " +
             "FROM films as f LEFT JOIN film_genre AS fg ON f.id=fg.film_id " +
             "WHERE fg.genre_id = ? AND release_date between ? and ? " +
             " ORDER BY count_likes DESC LIMIT ?");
-    private static final String GET_ID_FILMS_WITH_YEAR = String.format(GET_POPULAR_FILMS, "SELECT f.id " +
+    private static final String GET_ID_FILMS_WITH_YEAR =
+            String.format(GET_POPULAR_FILMS,
+                    "SELECT f.id " +
             "FROM films as f LEFT JOIN film_genre AS fg ON f.id=fg.film_id " +
             "WHERE release_date between ? and ? " +
             " ORDER BY count_likes DESC LIMIT ?");
-    private static final String GET_FILM = "SELECT f.id, name, description, release_date, duration, rating_mpa, count_likes, fg.genre_id AS genre_id, g.genre_name AS genre_name, " +
-            "fd.director_id AS director_id, d.director_name AS director_name " +
-            "FROM films as f LEFT JOIN film_genre AS fg ON f.id=fg.film_id LEFT JOIN genre AS g ON fg.genre_id=g.id " +
-            "LEFT JOIN film_director AS fd ON f.id=fd.film_id LEFT JOIN directors AS d ON fd.director_id=d.director_id " +
+    private static final String GET_FILM =
+            "SELECT f.id, name, description, release_date, duration, rating_mpa, " +
+                "count_likes, fg.genre_id AS genre_id, g.genre_name AS genre_name, " +
+                "fd.director_id AS director_id, d.director_name AS director_name " +
+            "FROM films as f " +
+            "LEFT JOIN film_genre AS fg ON f.id=fg.film_id " +
+            "LEFT JOIN genre AS g ON fg.genre_id=g.id " +
+            "LEFT JOIN film_director AS fd ON f.id=fd.film_id " +
+            "LEFT JOIN directors AS d ON fd.director_id=d.director_id " +
             "WHERE f.id =? " +
             "ORDER BY genre_id";
 
 
-    private static final String DELETE_LIKES = "DELETE FROM film_likes WHERE film_id=? AND user_id=?";
-    private static final String DELETE_FILM = "DELETE FROM films WHERE id=?";
+    private static final String DELETE_LIKES =
+            "DELETE FROM film_likes WHERE film_id=? AND user_id=?";
+    private static final String DELETE_FILM =
+            "DELETE FROM films WHERE id=?";
     private static final String GET_FILMS_SHARED =
-            "SELECT f.id, name, description, release_date, duration, rating_mpa, count_likes, fg.genre_id AS genre_id, g.genre_name AS genre_name, " +
-                    "fd.director_id AS director_id, d.director_name AS director_name " +
-                    "FROM films as f LEFT JOIN film_genre AS fg ON f.id=fg.film_id LEFT JOIN genre AS g ON fg.genre_id=g.id " +
-                    "LEFT JOIN film_director AS fd ON f.id=fd.film_id " +
-                    "LEFT JOIN directors AS d ON fd.director_id=d.director_id " +
-                    "WHERE f.id IN (SELECT t.film_id FROM (SELECT film_id, COUNT(film_id) AS count FROM public.film_likes " +
-                    "WHERE user_id IN (?, ?) " +
-                    "GROUP BY film_id) AS t " +
-                    "WHERE t.count=2) ORDER BY count_likes DESC, f.id ASC, genre_id ASC";
+            "SELECT f.id, name, description, release_date, duration, rating_mpa, " +
+                "count_likes, fg.genre_id AS genre_id, g.genre_name AS genre_name, " +
+                "fd.director_id AS director_id, d.director_name AS director_name " +
+            "FROM films as f " +
+            "LEFT JOIN film_genre AS fg ON f.id=fg.film_id " +
+            "LEFT JOIN genre AS g ON fg.genre_id=g.id " +
+            "LEFT JOIN film_director AS fd ON f.id=fd.film_id " +
+            "LEFT JOIN directors AS d ON fd.director_id=d.director_id " +
+            "WHERE f.id IN (SELECT t.film_id FROM (SELECT film_id, COUNT(film_id) AS count FROM public.film_likes " +
+            "WHERE user_id IN (?, ?) " +
+            "GROUP BY film_id) AS t " +
+            "WHERE t.count=2) ORDER BY count_likes DESC, f.id ASC, genre_id ASC";
 
     private static final String GET_DIRECTOR_FILMS_ORDERBY_YEAR =
             "SELECT f.id, name, description, release_date, duration, rating_mpa, count_likes, " +
-                    "fg.genre_id AS genre_id, g.genre_name AS genre_name, " +
-                    "fd.director_id AS director_id, d.director_name AS director_name " +
-                    "FROM films as f " +
-                    "LEFT JOIN film_genre AS fg ON f.id=fg.film_id " +
-                    "LEFT JOIN genre AS g ON fg.genre_id=g.id " +
-                    "LEFT JOIN film_director AS fd ON f.id=fd.film_id " +
-                    "LEFT JOIN directors AS d ON fd.director_id=d.director_id " +
-                    "WHERE d.director_id=? " +
-                    "ORDER BY release_date";
+                "fg.genre_id AS genre_id, g.genre_name AS genre_name, " +
+                "fd.director_id AS director_id, d.director_name AS director_name " +
+            "FROM films as f " +
+            "LEFT JOIN film_genre AS fg ON f.id=fg.film_id " +
+            "LEFT JOIN genre AS g ON fg.genre_id=g.id " +
+            "LEFT JOIN film_director AS fd ON f.id=fd.film_id " +
+            "LEFT JOIN directors AS d ON fd.director_id=d.director_id " +
+            "WHERE d.director_id=? " +
+            "ORDER BY release_date";
 
     private static final String GET_DIRECTOR_FILMS_ORDERBY_LIKES =
             "SELECT f.id, name, description, release_date, duration, rating_mpa, count_likes, " +
-                    "fg.genre_id AS genre_id, g.genre_name AS genre_name, " +
-                    "fd.director_id AS director_id, d.director_name AS director_name " +
-                    "FROM films as f " +
-                    "LEFT JOIN film_genre AS fg ON f.id=fg.film_id " +
-                    "LEFT JOIN genre AS g ON fg.genre_id=g.id " +
-                    "LEFT JOIN film_director AS fd ON f.id=fd.film_id " +
-                    "LEFT JOIN directors AS d ON fd.director_id=d.director_id " +
-                    "WHERE d.director_id=? " +
-                    "ORDER BY count_likes DESC";
+                "fg.genre_id AS genre_id, g.genre_name AS genre_name, " +
+                "fd.director_id AS director_id, d.director_name AS director_name " +
+            "FROM films as f " +
+            "LEFT JOIN film_genre AS fg ON f.id=fg.film_id " +
+            "LEFT JOIN genre AS g ON fg.genre_id=g.id " +
+            "LEFT JOIN film_director AS fd ON f.id=fd.film_id " +
+            "LEFT JOIN directors AS d ON fd.director_id=d.director_id " +
+            "WHERE d.director_id=? " +
+            "ORDER BY count_likes DESC";
 
     private static final String GET_SEARCH_FILMS =
             "SELECT f.id, f.name, f.description, f.release_date, f.duration, f.rating_mpa, f.count_likes, " +
-                    "fg.genre_id AS genre_id, g.genre_name AS genre_name, " +
-                    "fd.director_id AS director_id, d.director_name AS director_name " +
-                    "FROM films f " +
-                    "LEFT JOIN film_genre AS fg ON f.id=fg.film_id " +
-                    "LEFT JOIN genre AS g ON fg.genre_id=g.id " +
-                    "LEFT JOIN film_director AS fd ON f.id=fd.film_id " +
-                    "LEFT JOIN directors AS d ON fd.director_id=d.director_id " +
-                    "%s " +
-                    "ORDER BY f.count_likes DESC";
+                "fg.genre_id AS genre_id, g.genre_name AS genre_name, " +
+                "fd.director_id AS director_id, d.director_name AS director_name " +
+            "FROM films f " +
+            "LEFT JOIN film_genre AS fg ON f.id=fg.film_id " +
+            "LEFT JOIN genre AS g ON fg.genre_id=g.id " +
+            "LEFT JOIN film_director AS fd ON f.id=fd.film_id " +
+            "LEFT JOIN directors AS d ON fd.director_id=d.director_id " +
+            "%s " +
+            "ORDER BY f.count_likes DESC";
 
-    private static final String SEARCH_BY_FILMS = "WHERE LOWER(f.name) LIKE LOWER(?)";
-    private static final String SEARCH_BY_DIRECTORS = "WHERE LOWER(d.director_name) LIKE LOWER(?)";
-    private static final String SEARCH_BY_FILMS_AND_DIRECTORS = "WHERE LOWER(f.name) LIKE LOWER(?) OR LOWER(d.director_name) LIKE LOWER(?)";
+    private static final String SEARCH_BY_FILMS =
+            "WHERE LOWER(f.name) LIKE LOWER(?)";
+    private static final String SEARCH_BY_DIRECTORS =
+            "WHERE LOWER(d.director_name) LIKE LOWER(?)";
+    private static final String SEARCH_BY_FILMS_AND_DIRECTORS =
+            "WHERE LOWER(f.name) LIKE LOWER(?) OR LOWER(d.director_name) LIKE LOWER(?)";
 
     private final JdbcTemplate jdbcTemplate;
 

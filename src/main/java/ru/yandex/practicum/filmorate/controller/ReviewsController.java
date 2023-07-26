@@ -25,13 +25,7 @@ public class ReviewsController {
     @GetMapping
     public List<Review> getAllReviews(@RequestParam(value = "filmId", required = false) Integer filmId,
                                       @RequestParam(value = "count", defaultValue = "10", required = false) Integer count) {
-        if (filmId == null) {
-            return reviewsService.getAllReviews(count);
-        }
 
-        if (filmId == 0) {
-            throw new FilmNotFoundException("Фильма с id = 0 не может быть");
-        }
 
         return reviewsService.getReviewsByFilmId(filmId, count);
     }
