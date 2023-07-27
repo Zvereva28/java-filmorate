@@ -16,7 +16,6 @@ import ru.yandex.practicum.filmorate.model.enums.FeedOperation;
 import ru.yandex.practicum.filmorate.service.impl.UserServiceImpl;
 import ru.yandex.practicum.filmorate.storage.impl.dao.FeedDbStorage;
 import ru.yandex.practicum.filmorate.storage.impl.dao.FilmDBStorage;
-import ru.yandex.practicum.filmorate.storage.impl.dao.LikesDBStorage;
 import ru.yandex.practicum.filmorate.storage.impl.dao.UserDBStorage;
 import ru.yandex.practicum.filmorate.validators.UserValidator;
 
@@ -29,6 +28,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 @AutoConfigureTestDatabase
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 class UserControllerTest {
+
     @Autowired
     private final JdbcTemplate jdbcTemplate;
     @Autowired
@@ -42,7 +42,7 @@ class UserControllerTest {
 
     @BeforeEach
     public void setUp() {
-        userController = new UserController(new UserServiceImpl(new UserDBStorage(jdbcTemplate), new LikesDBStorage(jdbcTemplate, new FilmDBStorage(jdbcTemplate)), new FeedDbStorage(jdbcTemplate), new UserValidator()));
+        userController = new UserController(new UserServiceImpl(new UserDBStorage(jdbcTemplate), new FilmDBStorage(jdbcTemplate), new FeedDbStorage(jdbcTemplate), new UserValidator()));
     }
 
     @Test
@@ -168,4 +168,6 @@ class UserControllerTest {
     private Executable generateUpdateExecutableIDError() {
         return () -> userController.updateUser(new User(99, "fdhfgj", "StatusTask.NEW", "635", LocalDate.of(1995, 11, 28)));
     }
+
+
 }
