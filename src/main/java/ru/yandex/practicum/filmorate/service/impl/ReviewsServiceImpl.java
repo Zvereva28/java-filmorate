@@ -2,7 +2,6 @@ package ru.yandex.practicum.filmorate.service.impl;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-
 import ru.yandex.practicum.filmorate.exception.filmExceptions.FilmNotFoundException;
 import ru.yandex.practicum.filmorate.model.Review;
 import ru.yandex.practicum.filmorate.model.enums.FeedEventType;
@@ -41,7 +40,7 @@ public class ReviewsServiceImpl implements ReviewsService {
     @Override
     public Review addReview(Review review) {
         log.info("+ addReview: {}", review);
-        filmStorage.getFilm( review.getFilmId());
+        filmStorage.getFilm(review.getFilmId());
         userStorage.getUser(review.getUserId());
         Review answer = reviewsStorage.addReview(review);
         log.info("- addReview: {}", answer);
@@ -52,7 +51,7 @@ public class ReviewsServiceImpl implements ReviewsService {
     @Override
     public Review updateReview(Review review) {
         log.info("+ updateReview : {}", review);
-        filmStorage.getFilm( review.getFilmId());
+        filmStorage.getFilm(review.getFilmId());
         userStorage.getUser(review.getUserId());
         Review answer = reviewsStorage.updateReview(review);
         log.info("- updateReview : {}", answer);
