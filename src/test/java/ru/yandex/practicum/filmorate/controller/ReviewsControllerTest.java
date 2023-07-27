@@ -14,9 +14,9 @@ import ru.yandex.practicum.filmorate.exception.userExceptions.UserNotFoundExcept
 import ru.yandex.practicum.filmorate.model.Review;
 import ru.yandex.practicum.filmorate.service.impl.ReviewsServiceImpl;
 import ru.yandex.practicum.filmorate.storage.impl.dao.FeedDbStorage;
+import ru.yandex.practicum.filmorate.storage.impl.dao.FilmDBStorage;
 import ru.yandex.practicum.filmorate.storage.impl.dao.ReviewsDbStorage;
-import ru.yandex.practicum.filmorate.validators.FeedValidator;
-import ru.yandex.practicum.filmorate.validators.ReviewValidation;
+import ru.yandex.practicum.filmorate.storage.impl.dao.UserDBStorage;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -26,15 +26,17 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @Sql({"/schema.sql", "/test-data-reviews.sql"})
 class ReviewsControllerTest {
+
+    private static final int COUNT = 10;
     @Autowired
     private final JdbcTemplate jdbcTemplate;
     @Autowired
     private ReviewsController reviewsController;
-    private static final int COUNT = 10;
 
     @BeforeEach
     public void setUp() {
-        reviewsController = new ReviewsController(new ReviewsServiceImpl(new ReviewsDbStorage(jdbcTemplate, new ReviewValidation(jdbcTemplate)), new FeedDbStorage(jdbcTemplate, new FeedValidator(jdbcTemplate))));
+        reviewsController = new ReviewsController(new ReviewsServiceImpl(new ReviewsDbStorage(jdbcTemplate), new FeedDbStorage(jdbcTemplate), new FilmDBStorage(jdbcTemplate), new UserDBStorage(jdbcTemplate)));
+
     }
 
     @Test

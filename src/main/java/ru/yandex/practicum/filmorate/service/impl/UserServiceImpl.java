@@ -132,6 +132,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public List<FeedEvent> getFeed(int id) {
         log.info("+ getFeed : id = {}", id);
+        userStorage.getUser(id);
         List<FeedEvent> answer = feedStorage.getFeedByUserId(id);
         log.info("- getFeed : {}", answer);
         return answer;

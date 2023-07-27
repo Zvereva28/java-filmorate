@@ -21,11 +21,8 @@ public class DirectorDBStorage implements DirectorStorage {
     private final JdbcTemplate jdbcTemplate;
 
     private static final String GET_ALL_DIRECTORS = "SELECT director_id, director_name FROM directors";
-
     private static final String UPDATE_DIRECTOR = "UPDATE directors SET director_name = ? WHERE director_id = ?";
-
     private static final String DELETE_DIRECTOR = "DELETE FROM directors WHERE director_id = ?";
-
     private static final String GET_DIRECTOR = "SELECT director_id, director_name FROM directors WHERE director_id = ?";
 
     @Override
@@ -38,12 +35,14 @@ public class DirectorDBStorage implements DirectorStorage {
         Number id = simpleJdbcInsert.executeAndReturnKey(params);
         director.setId(id.intValue());
 
-        return directorExist(director.getId());
+        return director;
     }
 
     @Override
     public Director getDirector(int id) {
-        return directorExist(id);
+
+        return jdbcTemplate.query(GET_DIRECTOR, directorRowMapper(), id).stream()
+                .findFirst().orElseThrow(() -> new DirectorNotFoundException("Режиссера с id = " + id + " не существует"));
     }
 
     @Override
@@ -57,7 +56,8 @@ public class DirectorDBStorage implements DirectorStorage {
         jdbcTemplate.update(UPDATE_DIRECTOR,
                 director.getName(),
                 director.getId());
-        return directorExist(director.getId());
+
+        return director;
     }
 
     @Override
@@ -68,9 +68,8 @@ public class DirectorDBStorage implements DirectorStorage {
 
     @Override
     public Director directorExist(int id) {
-        return jdbcTemplate.query(GET_DIRECTOR, directorRowMapper(), id).stream()
-                .findFirst().orElseThrow(() -> new DirectorNotFoundException("Режиссера с id = " + id + " не существует"));
 
+        return getDirector(id);
     }
 
     private RowMapper<Director> directorRowMapper() {
@@ -78,6 +77,7 @@ public class DirectorDBStorage implements DirectorStorage {
             Director director = new Director();
             director.setId(rs.getInt("director_id"));
             director.setName(rs.getString("director_name"));
+
             return director;
         };
     }

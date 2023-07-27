@@ -9,10 +9,10 @@ import ru.yandex.practicum.filmorate.model.FeedEvent;
 import ru.yandex.practicum.filmorate.model.enums.FeedEventType;
 import ru.yandex.practicum.filmorate.model.enums.FeedOperation;
 import ru.yandex.practicum.filmorate.storage.FeedStorage;
-import ru.yandex.practicum.filmorate.validators.FeedValidator;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -23,19 +23,17 @@ import java.util.Optional;
 @Slf4j
 @Component
 public class FeedDbStorage implements FeedStorage {
-    private final JdbcTemplate jdbcTemplate;
-    private final FeedValidator validator;
     private static final String GET_FEED_EVENT_BY_USER_ID = "SELECT EVENT_ID, TIMESTAMP, USER_ID, EVENT_TYPE, OPERATION, ENTITY_ID FROM FEED WHERE USER_ID = ";
+    private final JdbcTemplate jdbcTemplate;
 
-    public FeedDbStorage(JdbcTemplate jdbcTemplate, FeedValidator validator) {
+    public FeedDbStorage(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
-        this.validator = validator;
     }
 
     @Override
     public void addToFeedDb(Integer userId, FeedEventType eventType, FeedOperation operation, Integer entityId) {
         log.info("+ addToFeedDb : userId = " + userId + ", eventType = " + eventType + ", operation = " + operation + ", entityId = " + entityId);
-        String time = String.valueOf(java.time.LocalDateTime.now());
+        String time = String.valueOf(LocalDateTime.now());
 
         SimpleJdbcInsert simpleJdbcInsert = new SimpleJdbcInsert(Objects.requireNonNull(jdbcTemplate.getDataSource()))
                 .withTableName("feed")
@@ -51,9 +49,9 @@ public class FeedDbStorage implements FeedStorage {
     @Override
     public List<FeedEvent> getFeedByUserId(int id) {
         log.info("+ getFeedByUserId : id = {}", id);
-        validator.checkUser(id);
         List<FeedEvent> answer = getEvents(GET_FEED_EVENT_BY_USER_ID + id);
         log.info("- getFeedByUserId : {}", answer);
+
         return answer;
     }
 
@@ -78,6 +76,7 @@ public class FeedDbStorage implements FeedStorage {
             events.sort(Comparator.comparingInt(FeedEvent::getEventId));
             return events;
         }).stream().findFirst();
+
         return reviewsOpt.orElse(new ArrayList<>());
     }
 }

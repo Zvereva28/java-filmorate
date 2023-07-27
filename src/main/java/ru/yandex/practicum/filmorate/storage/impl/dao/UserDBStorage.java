@@ -47,8 +47,8 @@ public class UserDBStorage implements UserStorage {
 
     @Override
     public User userExist(int id) {
-        return jdbcTemplate.query(SELECT_USER, userRowMapper(), id).stream()
-                .findFirst().orElseThrow(() -> new UserNotFoundException("Пользователя с id = " + id + " не существует"));
+
+        return getUser(id);
     }
 
     @Override
@@ -58,7 +58,6 @@ public class UserDBStorage implements UserStorage {
         Map<String, Integer> params = Map.of("user_id", id, "friend_id", friendId);
         simpleJdbcInsert.execute(params);
     }
-
 
     public void deleteFriend(int id, int friendId) {
         jdbcTemplate.update(DELETE_FRIENDS,
@@ -87,7 +86,8 @@ public class UserDBStorage implements UserStorage {
 
     @Override
     public User getUser(int id) {
-        return userExist(id);
+        return jdbcTemplate.query(SELECT_USER, userRowMapper(), id).stream()
+                .findFirst().orElseThrow(() -> new UserNotFoundException("Пользователя с id = " + id + " не существует"));
     }
 
     private RowMapper<User> userRowMapper() {

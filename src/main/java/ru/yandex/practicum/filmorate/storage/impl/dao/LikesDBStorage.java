@@ -27,6 +27,7 @@ public class LikesDBStorage implements LikesStorage {
         for (int filmId : filmsId) {
             films.add(filmDBStorage.getFilm(filmId));
         }
+
         return films;
     }
 

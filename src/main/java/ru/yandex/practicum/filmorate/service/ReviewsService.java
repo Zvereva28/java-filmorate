@@ -15,7 +15,7 @@ public interface ReviewsService {
 
     Review getReview(int id);
 
-    List<Review> getReviewsByFilmId(int id, int count);
+    List<Review> getReviewsByFilmId(Integer id, int count);
 
     Review addLike(int id, int userId);
 

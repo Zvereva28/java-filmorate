@@ -14,6 +14,7 @@ import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.storage.impl.dao.DirectorDBStorage;
 import ru.yandex.practicum.filmorate.storage.impl.dao.FilmDBStorage;
 import ru.yandex.practicum.filmorate.storage.impl.dao.UserDBStorage;
 
@@ -31,6 +32,8 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 class FilmDBStorageTest {
 
     private final FilmDBStorage filmDBStorage;
+
+    private final DirectorDBStorage directorDBStorage;
 
     private final UserDBStorage userDBStorage;
 
@@ -75,7 +78,7 @@ class FilmDBStorageTest {
     @DisplayName("Обновление фильма, добавление режиссера")
     void updateFilmAddDirector() {
         final Film film = filmDBStorage.addFilm(new Film(0, "dolore", "description description", LocalDate.of(1995, 11, 28), 50, new Mpa(1), 0));
-        final Director director = filmDBStorage.getDirectorStorage().addDirector(new Director("Tarantino"));
+        final Director director = directorDBStorage.addDirector(new Director("Tarantino"));
         final List<Director> directors = new ArrayList<>();
         directors.add(director);
         film.addDirector(director);
@@ -87,7 +90,7 @@ class FilmDBStorageTest {
     @Test
     @DisplayName("Получение списка фильмов режиссера, отсортированных по году")
     void getDirectorFilmsSortedByYear() {
-        final Director director = filmDBStorage.getDirectorStorage().addDirector(new Director("Tarantino"));
+        final Director director = directorDBStorage.addDirector(new Director("Tarantino"));
         final int directorId = director.getId();
         final Film film1 = new Film(1, "Interstellar", "Description", LocalDate.of(2014, 9, 21), 169, new Mpa(1), 0);
         final Film film2 = new Film(2, "Alien Covenant", "Description", LocalDate.of(2017, 9, 21), 110, new Mpa(4), 0);
@@ -109,7 +112,7 @@ class FilmDBStorageTest {
     @Test
     @DisplayName("Получение списка фильмов режиссера, отсортированных по году")
     void getDirectorFilmsSortedByLikes() {
-        final Director director = filmDBStorage.getDirectorStorage().addDirector(new Director("Tarantino"));
+        final Director director = directorDBStorage.addDirector(new Director("Tarantino"));
         final int directorId = director.getId();
         final Film film1 = filmDBStorage.addFilm(new Film(1, "Interstellar", "Description", LocalDate.of(2014, 9, 21), 169, new Mpa(1), 1));
         final Film film2 = filmDBStorage.addFilm(new Film(2, "Alien Covenant", "Description", LocalDate.of(2017, 9, 21), 110, new Mpa(4), 0));
