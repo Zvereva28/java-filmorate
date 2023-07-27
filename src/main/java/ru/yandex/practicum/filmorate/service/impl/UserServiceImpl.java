@@ -10,7 +10,7 @@ import ru.yandex.practicum.filmorate.model.enums.FeedEventType;
 import ru.yandex.practicum.filmorate.model.enums.FeedOperation;
 import ru.yandex.practicum.filmorate.service.UserService;
 import ru.yandex.practicum.filmorate.storage.FeedStorage;
-import ru.yandex.practicum.filmorate.storage.LikesStorage;
+import ru.yandex.practicum.filmorate.storage.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
 import ru.yandex.practicum.filmorate.validators.UserValidator;
 
@@ -23,15 +23,15 @@ import java.util.stream.Collectors;
 @Service
 public class UserServiceImpl implements UserService {
     private final UserStorage userStorage;
-    private final LikesStorage likesStorage;
+    private final FilmStorage filmStorage;
     private final FeedStorage feedStorage;
     private final UserValidator userValidator;
 
-    public UserServiceImpl(UserStorage userStorage, LikesStorage likesStorage, FeedStorage feedStorage, UserValidator userValidator) {
+    public UserServiceImpl(UserStorage userStorage, FilmStorage filmStorage, FeedStorage feedStorage, UserValidator userValidator) {
         this.userStorage = userStorage;
         this.feedStorage = feedStorage;
         this.userValidator = userValidator;
-        this.likesStorage = likesStorage;
+        this.filmStorage = filmStorage;
     }
 
     @Override
@@ -124,7 +124,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public List<Film> getRecommendations(int userId) {
         log.info("+ getRecommendations : userId = {}", userId);
-        List<Film> answer = likesStorage.getFilmsByUserId(userId);
+        List<Film> answer = filmStorage.getRecommendations(userId);
         log.info("- getRecommendations : {}", answer);
         return answer;
     }

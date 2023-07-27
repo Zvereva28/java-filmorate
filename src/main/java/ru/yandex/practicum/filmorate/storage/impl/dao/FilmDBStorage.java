@@ -28,8 +28,6 @@ import java.util.Set;
 @Getter
 @Component
 public class FilmDBStorage implements FilmStorage {
-    private final JdbcTemplate jdbcTemplate;
-
     private static final String GET_COUNT_OF_LIKES =
             "SELECT count(*) AS count FROM film_likes where film_id = ?";
     private static final String UPDATE_FILM =
@@ -62,7 +60,6 @@ public class FilmDBStorage implements FilmStorage {
     private static final String GET_ID_FILMS_WITH_LIMITS =
             String.format(GET_POPULAR_FILMS,
                     "SELECT id FROM films ORDER BY count_likes DESC LIMIT ? ");
-
     private static final String GET_ID_FILMS_WITH_GENRES =
             String.format(GET_POPULAR_FILMS,
                     "SELECT f.id " +
@@ -142,12 +139,18 @@ public class FilmDBStorage implements FilmStorage {
                     "LEFT JOIN directors AS d ON fd.director_id=d.director_id " +
                     "%s " +
                     "ORDER BY f.count_likes DESC";
+    private static final String GET_RECOMMENDATION_FILMS =
+            String.format(GET_POPULAR_FILMS, "SELECT film_id FROM FILM_LIKES fl WHERE USER_ID IN " +
+                    "(SELECT user_id FROM film_likes where film_id in " +
+                    "(SELECT film_id FROM FILM_LIKES fl WHERE USER_ID = ?) " +
+                    "GROUP BY USER_ID ORDER BY COUNT(USER_ID) DESC) AND NOT film_id IN (SELECT film_id FROM FILM_LIKES fl WHERE USER_ID = ?)");
     private static final String SEARCH_BY_FILMS =
             "WHERE LOWER(f.name) LIKE LOWER(?)";
     private static final String SEARCH_BY_DIRECTORS =
             "WHERE LOWER(d.director_name) LIKE LOWER(?)";
     private static final String SEARCH_BY_FILMS_AND_DIRECTORS =
             "WHERE LOWER(f.name) LIKE LOWER(?) OR LOWER(d.director_name) LIKE LOWER(?)";
+    private final JdbcTemplate jdbcTemplate;
 
     @Autowired
     public FilmDBStorage(JdbcTemplate jdbcTemplate) {
@@ -318,6 +321,10 @@ public class FilmDBStorage implements FilmStorage {
             return jdbcTemplate.query(String.format(GET_SEARCH_FILMS, SEARCH_BY_FILMS_AND_DIRECTORS),
                     filmsRowMapper(), queryParam, queryParam).stream().findFirst().orElse(new ArrayList<>());
         }
+    }
+
+    public List<Film> getRecommendations(int userId) {
+        return jdbcTemplate.query(GET_RECOMMENDATION_FILMS, filmsRowMapper(), userId, userId).stream().findFirst().orElse(new ArrayList<>());
     }
 
     private Film filmExist(int id) {
