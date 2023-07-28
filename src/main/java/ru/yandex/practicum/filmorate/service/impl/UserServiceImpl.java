@@ -12,7 +12,6 @@ import ru.yandex.practicum.filmorate.service.UserService;
 import ru.yandex.practicum.filmorate.storage.FeedStorage;
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
-import ru.yandex.practicum.filmorate.validators.UserValidator;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,20 +24,18 @@ public class UserServiceImpl implements UserService {
     private final UserStorage userStorage;
     private final FilmStorage filmStorage;
     private final FeedStorage feedStorage;
-    private final UserValidator userValidator;
 
-    public UserServiceImpl(UserStorage userStorage, FilmStorage filmStorage, FeedStorage feedStorage, UserValidator userValidator) {
+    public UserServiceImpl(UserStorage userStorage, FilmStorage filmStorage, FeedStorage feedStorage) {
         this.userStorage = userStorage;
         this.feedStorage = feedStorage;
-        this.userValidator = userValidator;
         this.filmStorage = filmStorage;
     }
 
     @Override
     public User addUser(User user) {
         log.info("+ createUser : {}", user);
-        User newUser = userValidator.checkUser(user);
-        User answer = userStorage.createUser(newUser);
+        checkEmptyName(user);
+        User answer = userStorage.createUser(user);
         log.info("- createUser : {}", answer);
         return answer;
     }
@@ -46,7 +43,8 @@ public class UserServiceImpl implements UserService {
     @Override
     public User updateUser(User user) {
         log.info("+ updateUser : {}", user);
-        User newUser = userStorage.updateUser(userValidator.checkUser(user));
+        checkEmptyName(user);
+        User newUser = userStorage.updateUser(user);
         log.info("- updateUser : {}", newUser);
         return newUser;
     }
@@ -143,5 +141,14 @@ public class UserServiceImpl implements UserService {
         log.info("+ deleteUser : id = {}", id);
         userStorage.deleteUser(id);
         log.info("- deleteUser : id = {}", id);
+    }
+
+    private void checkEmptyName(User user) {
+        log.info("Начата проверка имени пользователя с логином {}", user.getLogin());
+        if (user.getName().isEmpty()) {
+            user.setName(user.getLogin());
+            log.info("Пользователю {} присвоен логин как имя", user.getLogin());
+        }
+        log.info("Пользователь {} прошел проверку имени: {}", user.getName(), user);
     }
 }

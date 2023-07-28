@@ -12,7 +12,6 @@ import ru.yandex.practicum.filmorate.service.FilmService;
 import ru.yandex.practicum.filmorate.storage.DirectorStorage;
 import ru.yandex.practicum.filmorate.storage.FeedStorage;
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
-import ru.yandex.practicum.filmorate.validators.FilmValidator;
 
 import java.util.Comparator;
 import java.util.List;
@@ -22,20 +21,17 @@ import java.util.List;
 public class FilmServiceImpl implements FilmService {
     private final FilmStorage filmStorage;
     private final FeedStorage feedStorage;
-    private final FilmValidator filmValidator;
     private final DirectorStorage directorStorage;
 
-    public FilmServiceImpl(FilmStorage filmStorage, FeedStorage feedStorage, FilmValidator filmValidator, DirectorStorage directorStorage) {
+    public FilmServiceImpl(FilmStorage filmStorage, FeedStorage feedStorage, DirectorStorage directorStorage) {
         this.filmStorage = filmStorage;
         this.feedStorage = feedStorage;
-        this.filmValidator = filmValidator;
         this.directorStorage = directorStorage;
     }
 
     @Override
     public Film addFilm(Film film) {
         log.info("+ createFilm : {}", film);
-        filmValidator.checkFilm(film);
         int id = filmStorage.addFilm(film).getId();
         film.setId(id);
         film.getGenres().sort(Comparator.comparingInt(Genres::getId));
@@ -46,7 +42,6 @@ public class FilmServiceImpl implements FilmService {
     @Override
     public Film updateFilm(Film film) {
         log.info("+ updateFilm : {}", film);
-        filmValidator.checkFilm(film);
         Film oldFilm = filmStorage.updateFilm(film);
         log.info("- updateFilm : {}", oldFilm);
         return oldFilm;
@@ -85,9 +80,6 @@ public class FilmServiceImpl implements FilmService {
         }
 
         feedStorage.addToFeedDb(userId, FeedEventType.LIKE, FeedOperation.ADD, id);
-        if (!filmValidator.isNoLike(userId, id)) {
-            throw new LikeException("Пользователь с id = " + userId + " уже поставил лайк фильму id = " + id);
-        }
 
         Film film = filmStorage.getFilm(id);
         filmStorage.addLike(id, userId);

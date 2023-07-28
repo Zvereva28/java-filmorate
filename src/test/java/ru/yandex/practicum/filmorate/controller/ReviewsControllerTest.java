@@ -12,6 +12,7 @@ import ru.yandex.practicum.filmorate.exception.filmExceptions.FilmNotFoundExcept
 import ru.yandex.practicum.filmorate.exception.reviewExceptions.ReviewNotFoundException;
 import ru.yandex.practicum.filmorate.exception.userExceptions.UserNotFoundException;
 import ru.yandex.practicum.filmorate.model.Review;
+import ru.yandex.practicum.filmorate.model.dto.ReviewsDTO;
 import ru.yandex.practicum.filmorate.service.impl.ReviewsServiceImpl;
 import ru.yandex.practicum.filmorate.storage.impl.dao.FeedDbStorage;
 import ru.yandex.practicum.filmorate.storage.impl.dao.FilmDBStorage;
@@ -52,27 +53,27 @@ class ReviewsControllerTest {
 
     @Test
     void addReview() {
-        reviewsController.addReview(new Review(0, "New Content", true, 1, 3, 0));
+        reviewsController.addReview(new ReviewsDTO(0, "New Content", true, 1, 3, 0));
         assertEquals(2, reviewsController.getAllReviews(3, COUNT).size());
     }
 
     @Test
     void updateReview() {
-        reviewsController.updateReview(new Review(1, "New negative review from user 1 to film 1", false, 1, 1, 0));
+        reviewsController.updateReview(new ReviewsDTO(1, "New negative review from user 1 to film 1", false, 1, 1, 0));
         assertEquals(false, reviewsController.getReview(1).getIsPositive());
     }
 
     @Test
     void updateReviewWhenNoFilm() {
         assertThrows(FilmNotFoundException.class, () -> reviewsController.updateReview(
-                new Review(1, "New negative review from user 1 to film 9", false,
+                new ReviewsDTO(1, "New negative review from user 1 to film 9", false,
                         1, 9, 0)));
     }
 
     @Test
     void updateReviewWhenNoUser() {
         assertThrows(UserNotFoundException.class, () -> reviewsController.updateReview(
-                new Review(1, "New negative review from user 9 to film 1", false,
+                new ReviewsDTO(1, "New negative review from user 9 to film 1", false,
                         9, 1, 0)));
     }
 

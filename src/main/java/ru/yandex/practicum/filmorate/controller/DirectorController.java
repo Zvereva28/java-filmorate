@@ -2,6 +2,7 @@ package ru.yandex.practicum.filmorate.controller;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import org.mapstruct.factory.Mappers;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -12,9 +13,13 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import ru.yandex.practicum.filmorate.model.Director;
+import ru.yandex.practicum.filmorate.model.dto.DirectorDTO;
+import ru.yandex.practicum.filmorate.model.mappers.FilmorateMapper;
 import ru.yandex.practicum.filmorate.service.DirectorService;
 
 import java.util.List;
+
+import static java.util.stream.Collectors.toList;
 
 @Getter
 @RestController
@@ -22,25 +27,31 @@ import java.util.List;
 @RequiredArgsConstructor
 public class DirectorController {
     private final DirectorService directorService;
+    private final FilmorateMapper mapper = Mappers.getMapper(FilmorateMapper.class);
 
     @GetMapping()
-    public List<Director> getAllDirectors() {
-        return directorService.getAllDirectors();
+    public List<DirectorDTO> getAllDirectors() {
+        return directorService.getAllDirectors()
+                .stream()
+                .map(mapper::directorToDto)
+                .collect(toList());
     }
 
     @GetMapping("/{id}")
-    public Director getDirectorById(@PathVariable int id) {
-        return directorService.getDirectorById(id);
+    public DirectorDTO getDirectorById(@PathVariable int id) {
+        return mapper.directorToDto(directorService.getDirectorById(id));
     }
 
     @PostMapping
-    public Director addDirector(@Validated @RequestBody Director director) {
-        return directorService.addDirector(director);
+    public DirectorDTO addDirector(@Validated @RequestBody DirectorDTO directorDTO) {
+        Director director = directorService.addDirector(mapper.dtoToDirector(directorDTO));
+        return mapper.directorToDto(director);
     }
 
     @PutMapping
-    public Director updateDirector(@Validated @RequestBody Director director) {
-        return directorService.updateDirector(director);
+    public DirectorDTO updateDirector(@Validated @RequestBody DirectorDTO directorDTO) {
+        Director director = directorService.updateDirector(mapper.dtoToDirector(directorDTO));
+        return mapper.directorToDto(director);
     }
 
     @DeleteMapping("/{id}")

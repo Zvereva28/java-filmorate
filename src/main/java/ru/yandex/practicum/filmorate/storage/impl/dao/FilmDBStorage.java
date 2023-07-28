@@ -9,6 +9,7 @@ import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exception.dbExceptions.DbException;
 import ru.yandex.practicum.filmorate.exception.filmExceptions.FilmNotFoundException;
+import ru.yandex.practicum.filmorate.exception.likeException.LikeException;
 import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genres;
@@ -150,6 +151,8 @@ public class FilmDBStorage implements FilmStorage {
             "WHERE LOWER(d.director_name) LIKE LOWER(?)";
     private static final String SEARCH_BY_FILMS_AND_DIRECTORS =
             "WHERE LOWER(f.name) LIKE LOWER(?) OR LOWER(d.director_name) LIKE LOWER(?)";
+    private static final String IS_LIKE = "SELECT COUNT(FILM_ID) FROM FILM_LIKES WHERE USER_ID = ? AND FILM_ID = ?";
+
     private final JdbcTemplate jdbcTemplate;
 
     @Autowired
@@ -278,6 +281,9 @@ public class FilmDBStorage implements FilmStorage {
 
     @Override
     public void addLike(Integer filmId, Integer userId) {
+        if (isLike(userId, filmId)) {
+            throw new LikeException("Пользователь с id = " + userId + " уже поставил лайк фильму id = " + filmId);
+        }
 
         SimpleJdbcInsert simpleJdbcInsert = new SimpleJdbcInsert(Objects.requireNonNull(jdbcTemplate.getDataSource()))
                 .withTableName("film_likes");
@@ -414,4 +420,11 @@ public class FilmDBStorage implements FilmStorage {
         jdbcTemplate.update(DELETE_FILM, id);
     }
 
+    private boolean isLike(int userId, int filmId) {
+        Number row = jdbcTemplate.queryForObject(IS_LIKE, Integer.class, userId, filmId);
+        if (row == null){
+            throw new DbException();
+        }
+        return row.intValue() > 0;
+    }
 }

@@ -11,13 +11,13 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.annotation.DirtiesContext;
 import ru.yandex.practicum.filmorate.exception.userExceptions.UserException;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.model.dto.UsersDTO;
 import ru.yandex.practicum.filmorate.model.enums.FeedEventType;
 import ru.yandex.practicum.filmorate.model.enums.FeedOperation;
 import ru.yandex.practicum.filmorate.service.impl.UserServiceImpl;
 import ru.yandex.practicum.filmorate.storage.impl.dao.FeedDbStorage;
 import ru.yandex.practicum.filmorate.storage.impl.dao.FilmDBStorage;
 import ru.yandex.practicum.filmorate.storage.impl.dao.UserDBStorage;
-import ru.yandex.practicum.filmorate.validators.UserValidator;
 
 import java.time.LocalDate;
 
@@ -42,7 +42,7 @@ class UserControllerTest {
 
     @BeforeEach
     public void setUp() {
-        userController = new UserController(new UserServiceImpl(new UserDBStorage(jdbcTemplate), new FilmDBStorage(jdbcTemplate), new FeedDbStorage(jdbcTemplate), new UserValidator()));
+        userController = new UserController(new UserServiceImpl(new UserDBStorage(jdbcTemplate), new FilmDBStorage(jdbcTemplate), new FeedDbStorage(jdbcTemplate)));
     }
 
     @Test
@@ -54,15 +54,15 @@ class UserControllerTest {
     @Test
     @DisplayName("Список пользователей")
     void findAllStandard() {
-        userController.addUser(new User(0, "dolore", "NickName", "Nick Name", LocalDate.of(1995, 11, 28)));
-        userController.addUser(new User(0, "dolore2", "LogName", "NickName", LocalDate.of(1985, 11, 28)));
+        userController.addUser(new UsersDTO(0, "dolore", "NickName", "Nick Name", LocalDate.of(1995, 11, 28)));
+        userController.addUser(new UsersDTO(0, "dolore2", "LogName", "NickName", LocalDate.of(1985, 11, 28)));
         assertEquals(2, userController.getAllUsers().size());
     }
 
     @Test
     @DisplayName("Создание пользователя")
     void createStandard() {
-        assertEquals(1, userController.addUser(new User(0, "dolore", "NickName", "Nick Name", LocalDate.now())).getId());
+        assertEquals(1, userController.addUser(new UsersDTO(0, "dolore", "NickName", "Nick Name", LocalDate.now())).getId());
     }
 
     @Test
@@ -76,7 +76,7 @@ class UserControllerTest {
     }
 
     private Executable generateExecutableToUserName() {
-        return () -> userController.addUser(new User(0, "fdhfgj", "Status Task.NEW", "635", LocalDate.of(2018, 5, 11)));
+        return () -> userController.addUser(new UsersDTO(0, "fdhfgj", "Status Task.NEW", "635", LocalDate.of(2018, 5, 11)));
     }
 
     @Test
@@ -90,20 +90,20 @@ class UserControllerTest {
     }
 
     private Executable generateExecutableToBirthday() {
-        return () -> userController.addUser(new User(0, "fdhfgj", "StatusTask.NEW", "635", LocalDate.now().plusDays(1)));
+        return () -> userController.addUser(new UsersDTO(0, "fdhfgj", "StatusTask.NEW", "635", LocalDate.now().plusDays(1)));
     }
 
     @Test
     @DisplayName("Обновление пользователя")
     void updateStandard() {
-        userController.addUser(new User(0, "dolore", "NickName", "Nick Name", LocalDate.of(1995, 11, 28)));
-        assertEquals("newEmail", userController.updateUser(new User(1, "newEmail", "NickName", "Nick Name", LocalDate.of(1995, 11, 28))).getEmail());
+        userController.addUser(new UsersDTO(0, "dolore", "NickName", "Nick Name", LocalDate.of(1995, 11, 28)));
+        assertEquals("newEmail", userController.updateUser(new UsersDTO(1, "newEmail", "NickName", "Nick Name", LocalDate.of(1995, 11, 28))).getEmail());
     }
 
     @Test
     @DisplayName("Обновление пользователя, Login содержит пробел")
     void updateExceptionUserName() {
-        userController.addUser(new User(0, "dolore", "NickName", "Nick Name", LocalDate.of(1995, 11, 28)));
+        userController.addUser(new UsersDTO(0, "dolore", "NickName", "Nick Name", LocalDate.of(1995, 11, 28)));
         UserException exception = assertThrows(
                 UserException.class,
                 generateUpdateExecutableToUserLogin()
@@ -112,13 +112,13 @@ class UserControllerTest {
     }
 
     private Executable generateUpdateExecutableToUserLogin() {
-        return () -> userController.updateUser(new User(1, "fdhfgj", "Status Task.NEW", "635", LocalDate.of(2018, 5, 11)));
+        return () -> userController.updateUser(new UsersDTO(1, "fdhfgj", "Status Task.NEW", "635", LocalDate.of(2018, 5, 11)));
     }
 
     @Test
     @DisplayName("Обновление пользователя, Не верная дата рождения")
     void updateExceptionBirthday() {
-        userController.addUser(new User(0, "dolore", "NickName", "Nick Name", LocalDate.of(1995, 11, 28)));
+        userController.addUser(new UsersDTO(0, "dolore", "NickName", "Nick Name", LocalDate.of(1995, 11, 28)));
         UserException exception = assertThrows(
                 UserException.class,
                 generateUpdateExecutableToBirthday()
@@ -127,7 +127,7 @@ class UserControllerTest {
     }
 
     private Executable generateUpdateExecutableToBirthday() {
-        return () -> userController.updateUser(new User(1, "fdhfgj", "StatusTask.NEW", "635", LocalDate.now().plusDays(1)));
+        return () -> userController.updateUser(new UsersDTO(1, "fdhfgj", "StatusTask.NEW", "635", LocalDate.now().plusDays(1)));
     }
 
     @Test
@@ -142,16 +142,16 @@ class UserControllerTest {
 
     @Test
     void putFriendsTestFeed() {
-        userController.addUser(new User(1, "dolore", "NickName", "Nick Name", LocalDate.of(1995, 11, 28)));
-        userController.addUser(new User(2, "dolore2", "NickName2", "Nick Name2", LocalDate.of(1995, 11, 28)));
+        userController.addUser(new UsersDTO(1, "dolore", "NickName", "Nick Name", LocalDate.of(1995, 11, 28)));
+        userController.addUser(new UsersDTO(2, "dolore2", "NickName2", "Nick Name2", LocalDate.of(1995, 11, 28)));
         userController.addFriend(1, 2);
         assertEquals(FeedEventType.FRIEND, feedDbStorage.getFeedByUserId(1).get(0).getEventType());
     }
 
     @Test
     void deleteFriendsTestFeed() {
-        userController.addUser(new User(1, "dolore", "NickName", "Nick Name", LocalDate.of(1995, 11, 28)));
-        userController.addUser(new User(2, "dolore2", "NickName2", "Nick Name2", LocalDate.of(1995, 11, 28)));
+        userController.addUser(new UsersDTO(1, "dolore", "NickName", "Nick Name", LocalDate.of(1995, 11, 28)));
+        userController.addUser(new UsersDTO(2, "dolore2", "NickName2", "Nick Name2", LocalDate.of(1995, 11, 28)));
         userController.addFriend(1, 2);
         userController.deleteFriend(1, 2);
         assertEquals(FeedOperation.REMOVE, feedDbStorage.getFeedByUserId(1).get(1).getOperation());
@@ -159,14 +159,14 @@ class UserControllerTest {
 
     @Test
     void getFeedByUserId() {
-        userController.addUser(new User(1, "dolore", "NickName", "Nick Name", LocalDate.of(1995, 11, 28)));
-        userController.addUser(new User(2, "dolore2", "NickName2", "Nick Name2", LocalDate.of(1995, 11, 28)));
+        userController.addUser(new UsersDTO(1, "dolore", "NickName", "Nick Name", LocalDate.of(1995, 11, 28)));
+        userController.addUser(new UsersDTO(2, "dolore2", "NickName2", "Nick Name2", LocalDate.of(1995, 11, 28)));
         userController.addFriend(1, 2);
         assertEquals(1, feedDbStorage.getFeedByUserId(1).size());
     }
 
     private Executable generateUpdateExecutableIDError() {
-        return () -> userController.updateUser(new User(99, "fdhfgj", "StatusTask.NEW", "635", LocalDate.of(1995, 11, 28)));
+        return () -> userController.updateUser(new UsersDTO(99, "fdhfgj", "StatusTask.NEW", "635", LocalDate.of(1995, 11, 28)));
     }
 
 
