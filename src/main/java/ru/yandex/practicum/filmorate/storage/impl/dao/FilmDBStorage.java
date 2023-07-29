@@ -422,7 +422,7 @@ public class FilmDBStorage implements FilmStorage {
 
     private boolean isLike(int userId, int filmId) {
         Number row = jdbcTemplate.queryForObject(IS_LIKE, Integer.class, userId, filmId);
-        if (row == null){
+        if (row == null) {
             throw new DbException();
         }
         return row.intValue() > 0;

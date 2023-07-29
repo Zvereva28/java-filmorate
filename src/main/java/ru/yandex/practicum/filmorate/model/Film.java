@@ -3,17 +3,10 @@ package ru.yandex.practicum.filmorate.model;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import ru.yandex.practicum.filmorate.validationAnnotations.InMovieEpoch;
 
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Positive;
-import javax.validation.constraints.Size;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 @Data
 @AllArgsConstructor
@@ -36,8 +29,4 @@ public class Film {
     private Integer countLikes = 0;
 
     private final List<Director> directors = new ArrayList<>();
-
-    public void addDirector(Director director) {
-        directors.add(director);
-    }
 }

@@ -11,7 +11,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import ru.yandex.practicum.filmorate.model.Review;
 import ru.yandex.practicum.filmorate.model.dto.ReviewsDTO;
 import ru.yandex.practicum.filmorate.model.mappers.FilmorateMapper;
 import ru.yandex.practicum.filmorate.service.ReviewsService;

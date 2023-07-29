@@ -73,7 +73,7 @@ public class FilmController {
 
     @PostMapping
     public FilmDTO addFilm(@RequestBody @Validated FilmDTO filmDTO) {
-        return mapper.filmToDto(filmService.addFilm(mapper.dtoToFilm(filmDTO))) ;
+        return mapper.filmToDto(filmService.addFilm(mapper.dtoToFilm(filmDTO)));
     }
 
     @PutMapping
