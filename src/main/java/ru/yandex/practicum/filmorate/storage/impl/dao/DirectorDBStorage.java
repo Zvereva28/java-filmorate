@@ -6,6 +6,7 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exception.derectorExceptions.DirectorNotFoundException;
+import ru.yandex.practicum.filmorate.exception.filmExceptions.FilmException;
 import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.storage.DirectorStorage;
 
@@ -18,15 +19,15 @@ import java.util.Objects;
 @RequiredArgsConstructor
 public class DirectorDBStorage implements DirectorStorage {
 
-    private final JdbcTemplate jdbcTemplate;
-
     private static final String GET_ALL_DIRECTORS = "SELECT director_id, director_name FROM directors";
     private static final String UPDATE_DIRECTOR = "UPDATE directors SET director_name = ? WHERE director_id = ?";
     private static final String DELETE_DIRECTOR = "DELETE FROM directors WHERE director_id = ?";
     private static final String GET_DIRECTOR = "SELECT director_id, director_name FROM directors WHERE director_id = ?";
+    private final JdbcTemplate jdbcTemplate;
 
     @Override
     public Director addDirector(Director director) {
+        try {
         SimpleJdbcInsert simpleJdbcInsert = new SimpleJdbcInsert(Objects.requireNonNull(jdbcTemplate.getDataSource()))
                 .withTableName("directors")
                 .usingGeneratedKeyColumns("director_id");
@@ -34,6 +35,9 @@ public class DirectorDBStorage implements DirectorStorage {
         params.put("director_name", director.getName());
         Number id = simpleJdbcInsert.executeAndReturnKey(params);
         director.setId(id.intValue());
+        } catch (NullPointerException e){
+            throw new FilmException("Режиссер " + director.getName() + "не создан");
+        }
 
         return director;
     }
@@ -52,24 +56,22 @@ public class DirectorDBStorage implements DirectorStorage {
 
     @Override
     public Director updateDirector(Director director) {
-        directorExist(director.getId());
-        jdbcTemplate.update(UPDATE_DIRECTOR,
+        int change = jdbcTemplate.update(UPDATE_DIRECTOR,
                 director.getName(),
                 director.getId());
+        if (change == 0) {
+            throw new DirectorNotFoundException("Режиссер с id = " + director.getId() + " не существует");
+        }
 
         return director;
     }
 
     @Override
     public void deleteDirector(int id) {
-        directorExist(id);
-        jdbcTemplate.update(DELETE_DIRECTOR, id);
-    }
-
-    @Override
-    public Director directorExist(int id) {
-
-        return getDirector(id);
+        int change = jdbcTemplate.update(DELETE_DIRECTOR, id);
+        if (change == 0) {
+            throw new DirectorNotFoundException("Режиссер с id = " + id + " не существует");
+        }
     }
 
     private RowMapper<Director> directorRowMapper() {

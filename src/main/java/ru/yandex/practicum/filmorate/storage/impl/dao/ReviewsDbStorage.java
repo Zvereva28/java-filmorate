@@ -4,6 +4,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Component;
+import ru.yandex.practicum.filmorate.exception.filmExceptions.FilmException;
+import ru.yandex.practicum.filmorate.exception.filmExceptions.FilmNotFoundException;
 import ru.yandex.practicum.filmorate.exception.reviewExceptions.ReviewNotFoundException;
 import ru.yandex.practicum.filmorate.model.Review;
 import ru.yandex.practicum.filmorate.storage.ReviewsStorage;
@@ -43,6 +45,7 @@ public class ReviewsDbStorage implements ReviewsStorage {
 
     @Override
     public Review addReview(Review review) {
+        try{
         SimpleJdbcInsert simpleJdbcInsert = new SimpleJdbcInsert(Objects.requireNonNull(jdbcTemplate.getDataSource()))
                 .withTableName("reviews")
                 .usingGeneratedKeyColumns("review_id");
@@ -51,15 +54,20 @@ public class ReviewsDbStorage implements ReviewsStorage {
 
         Number id = simpleJdbcInsert.executeAndReturnKey(params);
         review.setReviewId(id.intValue());
+        } catch (NullPointerException e){
+            throw new FilmException("Отзыв фильму id =" + review.getFilmId() + "не создан");
+        }
 
         return review;
     }
 
     @Override
     public Review updateReview(Review review) {
-        jdbcTemplate.update(UPDATE_REVIEW,
+        int change = jdbcTemplate.update(UPDATE_REVIEW,
                 review.getContent(), review.getIsPositive(), review.getReviewId());
-
+        if (change == 0) {
+            throw new ReviewNotFoundException("Отзыва с id: " + review.getReviewId() + " нет");
+        }
         return getReviewById(review.getReviewId());
     }
 
@@ -85,16 +93,19 @@ public class ReviewsDbStorage implements ReviewsStorage {
     }
 
     @Override
-    public Review increaseUseful(int reviewId, int userId) {
-        jdbcTemplate.update(INCREASE_USEFUL, reviewId);
-
-        return getReviewById(reviewId);
+    public void increaseUseful(int reviewId, int userId) {
+        int change = jdbcTemplate.update(INCREASE_USEFUL, reviewId);
+        if (change == 0) {
+            throw new FilmNotFoundException("Отзыв с id = " + reviewId + " у пользователя с id =" + userId + " не существует");
+        }
     }
 
     @Override
-    public Review decreaseUseful(int reviewId, int userId) {
-        jdbcTemplate.update(DECREASE_USEFUL, reviewId);
-        return getReviewById(reviewId);
+    public void decreaseUseful(int reviewId, int userId) {
+        int change = jdbcTemplate.update(DECREASE_USEFUL, reviewId);
+        if (change == 0) {
+            throw new FilmNotFoundException("Отзыв с id = " + reviewId + " у пользователя с id =" + userId + " не существует");
+        }
     }
 
     private List<Review> getReviews(String sql, String param) {
@@ -119,7 +130,7 @@ public class ReviewsDbStorage implements ReviewsStorage {
                     rs.getInt("film_id"), rs.getInt("useful")
             );
         } catch (SQLException e) {
-            throw new ReviewNotFoundException("Ошибка в БД.");
+            throw new ReviewNotFoundException("Ошибка при сохранения отзыва о фильме в БД." + e.getMessage());
         }
     }
 }

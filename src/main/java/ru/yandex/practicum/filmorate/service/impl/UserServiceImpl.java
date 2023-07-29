@@ -73,8 +73,8 @@ public class UserServiceImpl implements UserService {
         if (id == friendId) {
             throw new UserException("Параметры не могут быть равны");
         }
-        userStorage.userExist(id);
-        userStorage.userExist(friendId);
+        userStorage.getUser(id);
+        userStorage.getUser(friendId);
         userStorage.addFriend(id, friendId);
         feedStorage.addToFeedDb(id, FeedEventType.FRIEND, FeedOperation.ADD, friendId);
         log.info("- addFriend : id = {}, friendId = {}", id, friendId);
@@ -86,8 +86,8 @@ public class UserServiceImpl implements UserService {
         if (id == friendId) {
             throw new UserException("Параметры не могут быть равны");
         }
-        userStorage.userExist(id);
-        userStorage.userExist(friendId);
+        userStorage.getUser(id);
+        userStorage.getUser(friendId);
         userStorage.deleteFriend(id, friendId);
         feedStorage.addToFeedDb(id, FeedEventType.FRIEND, FeedOperation.REMOVE, friendId);
         log.info("- deleteFriend : id = {}, friendId = {}", id, friendId);

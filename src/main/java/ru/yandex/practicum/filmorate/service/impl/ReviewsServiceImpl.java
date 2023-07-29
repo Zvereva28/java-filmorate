@@ -60,12 +60,12 @@ public class ReviewsServiceImpl implements ReviewsService {
     }
 
     @Override
-    public Review deleteReview(int id) {
+    public void deleteReview(int id) {
         log.info("+ deleteReview : id = {}", id);
         Review answer = reviewsStorage.deleteReview(id);
         log.info("- deleteReview : {}", answer);
         feedStorage.addToFeedDb(answer.getUserId(), FeedEventType.REVIEW, FeedOperation.REMOVE, answer.getReviewId());
-        return answer;
+
     }
 
     @Override
@@ -92,38 +92,34 @@ public class ReviewsServiceImpl implements ReviewsService {
     }
 
     @Override
-    public Review addLike(int id, int userId) {
+    public void addLike(int id, int userId) {
         log.info("+ addLikeToReview: id{}, userId: {}", id, userId);
         userStorage.getUser(userId);
         reviewsStorage.getReviewById(id);
-        Review answer = reviewsStorage.increaseUseful(id, userId);
-        log.info("- addLikeToReview : {}", answer);
-        return answer;
+        reviewsStorage.increaseUseful(id, userId);
+        log.info("- addLikeToReview : id{}, userId: {}", id, userId);
     }
 
     @Override
-    public Review addDislike(int id, int userId) {
+    public void addDislike(int id, int userId) {
         log.info("+ addDislikeToReview: id{}, userId: {}", id, userId);
-        Review answer = reviewsStorage.decreaseUseful(id, userId);
-        log.info("- addDislikeToReview : {}: {}", id, answer);
-        return answer;
+        reviewsStorage.decreaseUseful(id, userId);
+        log.info("- addDislikeToReview : id{}, userId: {}", id, userId);
     }
 
     @Override
-    public Review deleteLike(int id, int userId) {
+    public void deleteLike(int id, int userId) {
         log.info("+ deleteLikeFromReview: id{}, userId: {}", id, userId);
         userStorage.getUser(userId);
         reviewsStorage.getReviewById(id);
-        Review answer = reviewsStorage.decreaseUseful(id, userId);
-        log.info("- deleteLikeFromReview : {}", answer);
-        return answer;
+        reviewsStorage.decreaseUseful(id, userId);
+        log.info("- deleteLikeFromReview : id{}, userId: {}", id, userId);
     }
 
     @Override
-    public Review deleteDislike(int id, int userId) {
+    public void deleteDislike(int id, int userId) {
         log.info("+ deleteDislike: id{}, userId: {}", id, userId);
-        Review answer = reviewsStorage.increaseUseful(id, userId);
-        log.info("- deleteDislike : {}", answer);
-        return answer;
+        reviewsStorage.increaseUseful(id, userId);
+        log.info("- deleteDislike : id{}, userId: {}", id, userId);
     }
 }

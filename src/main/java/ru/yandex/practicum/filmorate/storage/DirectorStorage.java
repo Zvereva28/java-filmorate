@@ -10,8 +10,6 @@ public interface DirectorStorage {
 
     Director getDirector(int id);
 
-    Director directorExist(int id);
-
     List<Director> getAllDirectors();
 
     Director updateDirector(Director director);
