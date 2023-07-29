@@ -45,16 +45,16 @@ public class ReviewsDbStorage implements ReviewsStorage {
 
     @Override
     public Review addReview(Review review) {
-        try{
-        SimpleJdbcInsert simpleJdbcInsert = new SimpleJdbcInsert(Objects.requireNonNull(jdbcTemplate.getDataSource()))
-                .withTableName("reviews")
-                .usingGeneratedKeyColumns("review_id");
-        Map<String, String> params = Map.of("content", review.getContent(), "is_positive", review.getIsPositive().toString(),
-                "user_id", review.getUserId().toString(), "film_id", review.getFilmId().toString(), "useful", "0");
+        try {
+            SimpleJdbcInsert simpleJdbcInsert = new SimpleJdbcInsert(Objects.requireNonNull(jdbcTemplate.getDataSource()))
+                    .withTableName("reviews")
+                    .usingGeneratedKeyColumns("review_id");
+            Map<String, String> params = Map.of("content", review.getContent(), "is_positive", review.getIsPositive().toString(),
+                    "user_id", review.getUserId().toString(), "film_id", review.getFilmId().toString(), "useful", "0");
 
-        Number id = simpleJdbcInsert.executeAndReturnKey(params);
-        review.setReviewId(id.intValue());
-        } catch (NullPointerException e){
+            Number id = simpleJdbcInsert.executeAndReturnKey(params);
+            review.setReviewId(id.intValue());
+        } catch (NullPointerException e) {
             throw new FilmException("Отзыв фильму id =" + review.getFilmId() + "не создан");
         }
 

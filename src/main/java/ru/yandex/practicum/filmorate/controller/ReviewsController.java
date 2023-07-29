@@ -52,7 +52,7 @@ public class ReviewsController {
 
     @PutMapping("/{id}/like/{userId}")
     public void addLike(@PathVariable int id, @PathVariable int userId) {
-       reviewsService.addLike(id, userId);
+        reviewsService.addLike(id, userId);
     }
 
     @PutMapping("/{id}/dislike/{userId}")

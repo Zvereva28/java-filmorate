@@ -102,7 +102,6 @@ class ReviewsDbStorageTest {
     }
 
 
-
     @Test
     void increaseUsefulWhenNoReview() {
         assertThrows(ReviewNotFoundException.class, () -> reviewsDbStorage.increaseUseful(9, 1));

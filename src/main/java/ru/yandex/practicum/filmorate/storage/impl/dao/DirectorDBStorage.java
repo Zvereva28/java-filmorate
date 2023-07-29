@@ -28,14 +28,14 @@ public class DirectorDBStorage implements DirectorStorage {
     @Override
     public Director addDirector(Director director) {
         try {
-        SimpleJdbcInsert simpleJdbcInsert = new SimpleJdbcInsert(Objects.requireNonNull(jdbcTemplate.getDataSource()))
-                .withTableName("directors")
-                .usingGeneratedKeyColumns("director_id");
-        Map<String, Object> params = new HashMap<>();
-        params.put("director_name", director.getName());
-        Number id = simpleJdbcInsert.executeAndReturnKey(params);
-        director.setId(id.intValue());
-        } catch (NullPointerException e){
+            SimpleJdbcInsert simpleJdbcInsert = new SimpleJdbcInsert(Objects.requireNonNull(jdbcTemplate.getDataSource()))
+                    .withTableName("directors")
+                    .usingGeneratedKeyColumns("director_id");
+            Map<String, Object> params = new HashMap<>();
+            params.put("director_name", director.getName());
+            Number id = simpleJdbcInsert.executeAndReturnKey(params);
+            director.setId(id.intValue());
+        } catch (NullPointerException e) {
             throw new FilmException("Режиссер " + director.getName() + "не создан");
         }
 

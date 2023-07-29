@@ -54,11 +54,11 @@ public class UserDBStorage implements UserStorage {
     @Override
     public void addFriend(int id, int friendId) {
         try {
-                SimpleJdbcInsert simpleJdbcInsert = new SimpleJdbcInsert(Objects.requireNonNull(jdbcTemplate.getDataSource()))
-                .withTableName("friends");
-        Map<String, Integer> params = Map.of("user_id", id, "friend_id", friendId);
-        simpleJdbcInsert.execute(params);
-        } catch (NullPointerException e){
+            SimpleJdbcInsert simpleJdbcInsert = new SimpleJdbcInsert(Objects.requireNonNull(jdbcTemplate.getDataSource()))
+                    .withTableName("friends");
+            Map<String, Integer> params = Map.of("user_id", id, "friend_id", friendId);
+            simpleJdbcInsert.execute(params);
+        } catch (NullPointerException e) {
             throw new FilmException("Добавление пользователя id = " + id + "друга не создано");
         }
     }

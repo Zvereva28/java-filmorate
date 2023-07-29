@@ -37,10 +37,10 @@ public class FeedDbStorage implements FeedStorage {
         String time = String.valueOf(LocalDateTime.now());
         SimpleJdbcInsert simpleJdbcInsert;
         try {
-           simpleJdbcInsert= new SimpleJdbcInsert(Objects.requireNonNull(jdbcTemplate.getDataSource()))
+            simpleJdbcInsert = new SimpleJdbcInsert(Objects.requireNonNull(jdbcTemplate.getDataSource()))
                     .withTableName("feed")
                     .usingGeneratedKeyColumns("event_id");
-        } catch (NullPointerException e){
+        } catch (NullPointerException e) {
             throw new FilmException("Событие " + eventType.toString() + "не создано");
         }
 
