@@ -51,7 +51,7 @@ public class UserDbStorageTest {
     @DisplayName("Проверка существования пользователя")
     void userExistStandard() {
         userStorage.createUser(new User(0, "dolore", "NickName", "Nick Name", LocalDate.now()));
-        assertEquals(1, userStorage.userExist(1).getId());
+        assertEquals(1, userStorage.getUser(1).getId());
     }
 
     @Test
@@ -65,7 +65,7 @@ public class UserDbStorageTest {
     }
 
     private Executable generateUserExistExecutableIDError() {
-        return () -> userStorage.userExist(99);
+        return () -> userStorage.getUser(99);
     }
 
     @Test

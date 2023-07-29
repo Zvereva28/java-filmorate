@@ -11,17 +11,17 @@ public interface ReviewsService {
 
     Review updateReview(Review review);
 
-    Review deleteReview(int id);
+    void deleteReview(int id);
 
     Review getReview(int id);
 
     List<Review> getReviewsByFilmId(Integer id, int count);
 
-    Review addLike(int id, int userId);
+    void addLike(int id, int userId);
 
-    Review addDislike(int id, int userId);
+    void addDislike(int id, int userId);
 
-    Review deleteLike(int id, int userId);
+    void deleteLike(int id, int userId);
 
-    Review deleteDislike(int id, int userId);
+    void deleteDislike(int id, int userId);
 }

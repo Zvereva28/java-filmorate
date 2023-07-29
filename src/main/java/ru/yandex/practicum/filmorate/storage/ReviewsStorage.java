@@ -17,7 +17,7 @@ public interface ReviewsStorage {
 
     List<Review> getReviewsByFilmId(int id, int count);
 
-    Review increaseUseful(int id, int userId);
+    void increaseUseful(int id, int userId);
 
-    Review decreaseUseful(int id, int userId);
+    void decreaseUseful(int id, int userId);
 }

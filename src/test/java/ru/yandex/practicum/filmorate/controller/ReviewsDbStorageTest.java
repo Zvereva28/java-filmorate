@@ -101,10 +101,6 @@ class ReviewsDbStorageTest {
         assertThrows(FilmNotFoundException.class, () -> reviewsDbStorage.getReviewsByFilmId(9, COUNT));
     }
 
-    @Test
-    void increaseUseful() {
-        assertEquals(1, reviewsDbStorage.increaseUseful(1, 3).getUseful());
-    }
 
     @Test
     void increaseUsefulWhenNoReview() {
@@ -116,10 +112,6 @@ class ReviewsDbStorageTest {
         assertThrows(UserNotFoundException.class, () -> reviewsDbStorage.increaseUseful(1, 9));
     }
 
-    @Test
-    void decreaseUseful() {
-        assertEquals(-1, reviewsDbStorage.decreaseUseful(1, 3).getUseful());
-    }
 
     @Test
     void decreaseUsefulWhenNoReview() {

@@ -5,6 +5,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exception.dbExceptions.DbException;
+import ru.yandex.practicum.filmorate.exception.filmExceptions.FilmException;
 import ru.yandex.practicum.filmorate.model.FeedEvent;
 import ru.yandex.practicum.filmorate.model.enums.FeedEventType;
 import ru.yandex.practicum.filmorate.model.enums.FeedOperation;
@@ -34,10 +35,15 @@ public class FeedDbStorage implements FeedStorage {
     public void addToFeedDb(Integer userId, FeedEventType eventType, FeedOperation operation, Integer entityId) {
         log.info("+ addToFeedDb : userId = " + userId + ", eventType = " + eventType + ", operation = " + operation + ", entityId = " + entityId);
         String time = String.valueOf(LocalDateTime.now());
+        SimpleJdbcInsert simpleJdbcInsert;
+        try {
+            simpleJdbcInsert = new SimpleJdbcInsert(Objects.requireNonNull(jdbcTemplate.getDataSource()))
+                    .withTableName("feed")
+                    .usingGeneratedKeyColumns("event_id");
+        } catch (NullPointerException e) {
+            throw new FilmException("Событие " + eventType.toString() + "не создано");
+        }
 
-        SimpleJdbcInsert simpleJdbcInsert = new SimpleJdbcInsert(Objects.requireNonNull(jdbcTemplate.getDataSource()))
-                .withTableName("feed")
-                .usingGeneratedKeyColumns("event_id");
 
         Map<String, String> params = Map.of("timestamp", time, "user_id", userId.toString(),
                 "event_type", eventType.toString(), "operation", operation.toString(), "entity_id", entityId.toString());
@@ -63,7 +69,7 @@ public class FeedDbStorage implements FeedStorage {
                     FeedOperation.valueOf(rs.getString("operation")), rs.getInt("entity_id")
             );
         } catch (SQLException e) {
-            throw new DbException("Ошибка в БД.");
+            throw new DbException("Ошибка при создании события в БД. " + e.getMessage());
         }
     }
 

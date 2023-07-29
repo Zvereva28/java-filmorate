@@ -5,6 +5,8 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Component;
+import ru.yandex.practicum.filmorate.exception.filmExceptions.FilmException;
+import ru.yandex.practicum.filmorate.exception.filmExceptions.FilmNotFoundException;
 import ru.yandex.practicum.filmorate.exception.userExceptions.UserNotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
@@ -34,29 +36,31 @@ public class UserDBStorage implements UserStorage {
 
     @Override
     public User createUser(User user) {
-        SimpleJdbcInsert simpleJdbcInsert = new SimpleJdbcInsert(Objects.requireNonNull(jdbcTemplate.getDataSource()))
-                .withTableName("users")
-                .usingGeneratedKeyColumns("id");
-        Map<String, String> params = Map.of("user_name", user.getName(), "email", user.getEmail(),
-                "login", user.getLogin(), "birthday", user.getBirthday().toString());
-        Number id = simpleJdbcInsert.executeAndReturnKey(params);
-        user.setId(id.intValue());
+        try {
+            SimpleJdbcInsert simpleJdbcInsert = new SimpleJdbcInsert(Objects.requireNonNull(jdbcTemplate.getDataSource()))
+                    .withTableName("users")
+                    .usingGeneratedKeyColumns("id");
+            Map<String, String> params = Map.of("user_name", user.getName(), "email", user.getEmail(),
+                    "login", user.getLogin(), "birthday", user.getBirthday().toString());
+            Number id = simpleJdbcInsert.executeAndReturnKey(params);
+            user.setId(id.intValue());
+        } catch (NullPointerException e) {
+            throw new FilmException("Пользователь " + user.getName() + "не создан");
+        }
 
         return user;
     }
 
     @Override
-    public User userExist(int id) {
-
-        return getUser(id);
-    }
-
-    @Override
     public void addFriend(int id, int friendId) {
-        SimpleJdbcInsert simpleJdbcInsert = new SimpleJdbcInsert(Objects.requireNonNull(jdbcTemplate.getDataSource()))
-                .withTableName("friends");
-        Map<String, Integer> params = Map.of("user_id", id, "friend_id", friendId);
-        simpleJdbcInsert.execute(params);
+        try {
+            SimpleJdbcInsert simpleJdbcInsert = new SimpleJdbcInsert(Objects.requireNonNull(jdbcTemplate.getDataSource()))
+                    .withTableName("friends");
+            Map<String, Integer> params = Map.of("user_id", id, "friend_id", friendId);
+            simpleJdbcInsert.execute(params);
+        } catch (NullPointerException e) {
+            throw new FilmException("Добавление пользователя id = " + id + "друга не создано");
+        }
     }
 
     public void deleteFriend(int id, int friendId) {
@@ -66,15 +70,19 @@ public class UserDBStorage implements UserStorage {
 
     @Override
     public void deleteUser(int id) {
-        userExist(id);
-        jdbcTemplate.update(DELETE_USER, id);
+        int change = jdbcTemplate.update(DELETE_USER, id);
+        if (change == 0) {
+            throw new FilmNotFoundException("Фильм с id = " + id + " не существует");
+        }
     }
 
     @Override
     public User updateUser(User user) {
-        userExist(user.getId());
-        jdbcTemplate.update(UPDATE_USER,
+        int change = jdbcTemplate.update(UPDATE_USER,
                 user.getName(), user.getEmail(), user.getLogin(), user.getBirthday(), user.getId());
+        if (change == 0) {
+            throw new FilmNotFoundException("Фильм с id = " + user.getId() + " не существует");
+        }
 
         return user;
     }

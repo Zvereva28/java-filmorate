@@ -25,7 +25,8 @@ public class FilmServiceImpl implements FilmService {
     private final FilmValidator filmValidator;
     private final DirectorStorage directorStorage;
 
-    public FilmServiceImpl(FilmStorage filmStorage, FeedStorage feedStorage, FilmValidator filmValidator, DirectorStorage directorStorage) {
+    public FilmServiceImpl(FilmStorage filmStorage, FeedStorage feedStorage, FilmValidator filmValidator,
+                           DirectorStorage directorStorage) {
         this.filmStorage = filmStorage;
         this.feedStorage = feedStorage;
         this.filmValidator = filmValidator;
