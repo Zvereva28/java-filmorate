@@ -260,8 +260,8 @@ public class FilmDBStorage implements FilmStorage {
     @Override
     public List<Film> getPopularFilms(int count, int genreId, int year) {
         if (genreId == 0 & year == 0) {
-            return jdbcTemplate.query(GET_ID_FILMS_WITH_LIMITS, filmsRowMapper(), count).stream().
-                    findFirst().orElse(new ArrayList<>());
+            return jdbcTemplate.query(GET_ID_FILMS_WITH_LIMITS, filmsRowMapper(), count).stream()
+                    .findFirst().orElse(new ArrayList<>());
         } else if (genreId == 0) {
             return jdbcTemplate.query(GET_ID_FILMS_WITH_YEAR, filmsRowMapper(), getStartYear(year), getEndYear(year),
                     count).stream().findFirst().orElse(new ArrayList<>());
