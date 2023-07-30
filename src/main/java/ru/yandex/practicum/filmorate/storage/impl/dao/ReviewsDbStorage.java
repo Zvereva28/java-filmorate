@@ -2,7 +2,10 @@ package ru.yandex.practicum.filmorate.storage.impl.dao;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.PreparedStatementCreator;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exception.filmExceptions.FilmException;
 import ru.yandex.practicum.filmorate.exception.filmExceptions.FilmNotFoundException;
@@ -10,6 +13,8 @@ import ru.yandex.practicum.filmorate.exception.reviewExceptions.ReviewNotFoundEx
 import ru.yandex.practicum.filmorate.model.Review;
 import ru.yandex.practicum.filmorate.storage.ReviewsStorage;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -63,12 +68,25 @@ public class ReviewsDbStorage implements ReviewsStorage {
 
     @Override
     public Review updateReview(Review review) {
-        int change = jdbcTemplate.update(UPDATE_REVIEW,
-                review.getContent(), review.getIsPositive(), review.getReviewId());
-        if (change == 0) {
-            throw new ReviewNotFoundException("Отзыва с id: " + review.getReviewId() + " нет");
-        }
-        return getReviewById(review.getReviewId());
+        KeyHolder keyHolder = new GeneratedKeyHolder();
+        jdbcTemplate.update(
+                new PreparedStatementCreator() {
+                    public PreparedStatement createPreparedStatement(Connection connection) throws SQLException {
+                        PreparedStatement ps = connection.prepareStatement(UPDATE_REVIEW, new String[]{"review_id",
+                                "content", "is_positive", "user_id", "film_id", "useful"});
+                        ps.setString(1, review.getContent());
+                        ps.setString(2, review.getIsPositive().toString());
+                        ps.setString(3, review.getReviewId().toString());
+                        return ps;
+                    }
+                },
+                keyHolder);
+        return new Review((Integer) keyHolder.getKeys().get("review_id"),
+                (String) keyHolder.getKeys().get("content"),
+                (Boolean) keyHolder.getKeys().get("is_positive"),
+                (Integer) keyHolder.getKeys().get("user_id"),
+                (Integer) keyHolder.getKeys().get("film_id"),
+                (Integer) keyHolder.getKeys().get("useful"));
     }
 
     @Override

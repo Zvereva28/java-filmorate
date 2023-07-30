@@ -51,8 +51,6 @@ public class ReviewsServiceImpl implements ReviewsService {
     @Override
     public Review updateReview(Review review) {
         log.info("+ updateReview : {}", review);
-        filmStorage.getFilm(review.getFilmId());
-        userStorage.getUser(review.getUserId());
         Review answer = reviewsStorage.updateReview(review);
         log.info("- updateReview : {}", answer);
         feedStorage.addToFeedDb(answer.getUserId(), FeedEventType.REVIEW, FeedOperation.UPDATE, answer.getReviewId());
@@ -65,7 +63,6 @@ public class ReviewsServiceImpl implements ReviewsService {
         Review answer = reviewsStorage.deleteReview(id);
         log.info("- deleteReview : {}", answer);
         feedStorage.addToFeedDb(answer.getUserId(), FeedEventType.REVIEW, FeedOperation.REMOVE, answer.getReviewId());
-
     }
 
     @Override
