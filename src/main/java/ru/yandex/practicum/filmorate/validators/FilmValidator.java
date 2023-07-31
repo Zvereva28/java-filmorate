@@ -23,19 +23,19 @@ public class FilmValidator {
     public void checkFilm(Film film) {
 
         if (film.getName().isBlank()) {
-            log.info("Название фильма не должно быть пустым ");
+            log.debug("Название фильма не должно быть пустым ");
             throw new FilmException("Название фильма не должно быть пустым");
         }
         if (film.getDescription().length() > MAX_LENGTH_FILM_NAME) {
-            log.info("Описание фильма должно быть не больше " + MAX_LENGTH_FILM_NAME + " символов");
+            log.debug("Описание фильма должно быть не больше " + MAX_LENGTH_FILM_NAME + " символов");
             throw new FilmException("Описание фильма должно быть не больше " + MAX_LENGTH_FILM_NAME + " символов");
         }
         if (film.getDuration() < 1) {
-            log.info("Продолжительность фильма должна быть больше 0");
+            log.debug("Продолжительность фильма должна быть больше 0");
             throw new FilmException("Продолжительность фильма должна быть больше 0");
         }
         if (film.getReleaseDate().isBefore(MIN_DATE_RELEASE_DATE)) {
-            log.info("Не верная дата релиза");
+            log.debug("Не верная дата релиза");
             throw new FilmException("Не верная дата релиза");
         }
     }

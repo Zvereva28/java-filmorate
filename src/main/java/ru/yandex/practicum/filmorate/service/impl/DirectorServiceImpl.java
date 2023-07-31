@@ -18,40 +18,40 @@ public class DirectorServiceImpl implements DirectorService {
 
     @Override
     public List<Director> getAllDirectors() {
-        log.info("+ getAllDirectors");
+        log.debug("+ getAllDirectors");
         List<Director> directors = directorStorage.getAllDirectors();
-        log.info("- getAllDirectors");
+        log.debug("- getAllDirectors");
         return directors;
     }
 
     @Override
     public Director addDirector(Director director) {
-        log.info("+ addDirector : {}", director);
+        log.debug("+ addDirector : {}", director);
         Director newDirector = directorStorage.addDirector(director);
-        log.info("- addDirector : {}", newDirector);
+        log.debug("- addDirector : {}", newDirector);
         return newDirector;
     }
 
     @Override
     public Director updateDirector(Director director) {
-        log.info("+ updateDirector : {}", director);
+        log.debug("+ updateDirector : {}", director);
         Director newDirector = directorStorage.updateDirector(director);
-        log.info("- updateDirector : {}", newDirector);
+        log.debug("- updateDirector : {}", newDirector);
         return newDirector;
     }
 
     @Override
     public Director getDirectorById(int id) {
-        log.info("+ updateDirector : id = {}", id);
+        log.debug("+ updateDirector : id = {}", id);
         Director director = directorStorage.getDirector(id);
-        log.info("- getDirectorById : {}", director);
+        log.debug("- getDirectorById : {}", director);
         return director;
     }
 
     @Override
     public void deleteDirector(int id) {
-        log.info("+ deleteDirector : id = {}", id);
+        log.debug("+ deleteDirector : id = {}", id);
         directorStorage.deleteDirector(id);
-        log.info("- deleteDirector : id = {}", id);
+        log.debug("- deleteDirector : id = {}", id);
     }
 }

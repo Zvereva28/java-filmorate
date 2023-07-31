@@ -16,21 +16,21 @@ import java.util.List;
 public class MpaServiceImpl implements MpaService {
     @Override
     public Mpa getMpa(int id) {
-        log.info("+ getMpa : id = {}", id);
+        log.debug("+ getMpa : id = {}", id);
         Mpa answer = new Mpa(id);
-        log.info("- getMpa : {}", answer);
+        log.debug("- getMpa : {}", answer);
         return answer;
     }
 
     @Override
     public List<Mpa> getAllMpa() {
-        log.info("+ getAllMpa");
+        log.debug("+ getAllMpa");
         RatingFilms[] ratingFilms = RatingFilms.values();
         List<Mpa> mpaRatings = new ArrayList<>();
         for (RatingFilms rating : ratingFilms) {
             mpaRatings.add(new Mpa(rating.getId()));
         }
-        log.info("- getAllMpa : {}", mpaRatings);
+        log.debug("- getAllMpa : {}", mpaRatings);
         return mpaRatings;
     }
 }

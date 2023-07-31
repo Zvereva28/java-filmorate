@@ -14,17 +14,13 @@ import ru.yandex.practicum.filmorate.storage.FeedStorage;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 
 @Slf4j
 @Component
 public class FeedDbStorage implements FeedStorage {
-    private static final String GET_FEED_EVENT_BY_USER_ID = "SELECT EVENT_ID, TIMESTAMP, USER_ID, EVENT_TYPE, OPERATION, ENTITY_ID FROM FEED WHERE USER_ID = ";
+    private static final String GET_FEED_EVENT_BY_USER_ID = "SELECT EVENT_ID, TIMESTAMP, USER_ID, EVENT_TYPE, OPERATION," +
+            " ENTITY_ID FROM FEED WHERE USER_ID = ";
     private final JdbcTemplate jdbcTemplate;
 
     public FeedDbStorage(JdbcTemplate jdbcTemplate) {
@@ -33,7 +29,8 @@ public class FeedDbStorage implements FeedStorage {
 
     @Override
     public void addToFeedDb(Integer userId, FeedEventType eventType, FeedOperation operation, Integer entityId) {
-        log.info("+ addToFeedDb : userId = " + userId + ", eventType = " + eventType + ", operation = " + operation + ", entityId = " + entityId);
+        log.debug("+ addToFeedDb : userId = " + userId + ", eventType = " + eventType + ", operation = " + operation + ", " +
+                "entityId = " + entityId);
         String time = String.valueOf(LocalDateTime.now());
         SimpleJdbcInsert simpleJdbcInsert;
         try {
@@ -46,17 +43,18 @@ public class FeedDbStorage implements FeedStorage {
 
 
         Map<String, String> params = Map.of("timestamp", time, "user_id", userId.toString(),
-                "event_type", eventType.toString(), "operation", operation.toString(), "entity_id", entityId.toString());
+                "event_type", eventType.toString(), "operation", operation.toString(), "entity_id",
+                entityId.toString());
 
         simpleJdbcInsert.executeAndReturnKey(params);
-        log.info("- addToFeedDb");
+        log.debug("- addToFeedDb");
     }
 
     @Override
     public List<FeedEvent> getFeedByUserId(int id) {
-        log.info("+ getFeedByUserId : id = {}", id);
+        log.debug("+ getFeedByUserId : id = {}", id);
         List<FeedEvent> answer = getEvents(GET_FEED_EVENT_BY_USER_ID + id);
-        log.info("- getFeedByUserId : {}", answer);
+        log.debug("- getFeedByUserId : {}", answer);
 
         return answer;
     }

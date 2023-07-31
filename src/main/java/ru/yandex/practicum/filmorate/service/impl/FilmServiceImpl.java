@@ -35,51 +35,51 @@ public class FilmServiceImpl implements FilmService {
 
     @Override
     public Film addFilm(Film film) {
-        log.info("+ createFilm : {}", film);
+        log.debug("+ createFilm : {}", film);
         filmValidator.checkFilm(film);
         int id = filmStorage.addFilm(film).getId();
         film.setId(id);
         film.getGenres().sort(Comparator.comparingInt(Genres::getId));
-        log.info("- createFilm : {}", filmStorage.getFilm(film.getId()));
+        log.debug("- createFilm : {}", filmStorage.getFilm(film.getId()));
         return film;
     }
 
     @Override
     public Film updateFilm(Film film) {
-        log.info("+ updateFilm : {}", film);
+        log.debug("+ updateFilm : {}", film);
         filmValidator.checkFilm(film);
         Film oldFilm = filmStorage.updateFilm(film);
-        log.info("- updateFilm : {}", oldFilm);
+        log.debug("- updateFilm : {}", oldFilm);
         return oldFilm;
     }
 
     @Override
     public List<Film> getAllFilms() {
-        log.info("+ getAllFilms");
+        log.debug("+ getAllFilms");
         var films = filmStorage.getAllFilms();
-        log.info("- getAllFilms : {}", films);
+        log.debug("- getAllFilms : {}", films);
         return films;
     }
 
     @Override
     public List<Film> getPopularFilms(int count, int genreId, int year) {
-        log.info("- getPopularFilms : count = {}, genreId = {}, year = {}", count, genreId, year);
+        log.debug("- getPopularFilms : count = {}, genreId = {}, year = {}", count, genreId, year);
         var films = filmStorage.getPopularFilms(count, genreId, year);
-        log.info("- getPopularFilms : {}", films);
+        log.debug("- getPopularFilms : {}", films);
         return films;
     }
 
     @Override
     public Film getFilm(int id) {
-        log.info("+ getFilm : id = {}", id);
+        log.debug("+ getFilm : id = {}", id);
         Film film = filmStorage.getFilm(id);
-        log.info("- getFilm : {}", film);
+        log.debug("- getFilm : {}", film);
         return film;
     }
 
     @Override
     public Film addLike(int id, int userId) {
-        log.info("+ addLike : id = {}, userId = {}", id, userId);
+        log.debug("+ addLike : id = {}, userId = {}", id, userId);
 
         if (userId <= 0) {
             throw new FilmNotFoundException("Пользователя id = " + userId + " не может быть");
@@ -93,36 +93,36 @@ public class FilmServiceImpl implements FilmService {
         Film film = filmStorage.getFilm(id);
         filmStorage.addLike(id, userId);
         Film updatedFilm = filmStorage.updateFilm(film);
-        log.info("- addLike : {}", updatedFilm);
+        log.debug("- addLike : {}", updatedFilm);
         return updatedFilm;
     }
 
     @Override
     public Film deleteLike(int id, int userId) {
-        log.info("+ deleteLike : id = {}, userId = {}", id, userId);
+        log.debug("+ deleteLike : id = {}, userId = {}", id, userId);
         if (userId <= 0) {
             throw new FilmNotFoundException("Пользователя id = " + userId + " не может быть");
         }
         Film film = filmStorage.getFilm(id);
         filmStorage.removeLike(id, userId);
         filmStorage.updateFilm(film);
-        log.info("- deleteLike: {}", film);
+        log.debug("- deleteLike: {}", film);
         feedStorage.addToFeedDb(userId, FeedEventType.LIKE, FeedOperation.REMOVE, id);
         return film;
     }
 
     @Override
     public List<Film> getDirectorFilms(int directorId, String sortBy) {
-        log.info("+ getDirectorFilms : directorId = {} sortBy = {}", directorId, sortBy);
+        log.debug("+ getDirectorFilms : directorId = {} sortBy = {}", directorId, sortBy);
         directorStorage.getDirector(directorId);
         List<Film> answer = filmStorage.getDirectorFilms(directorId, sortBy);
-        log.info("- getDirectorFilms : {}", answer);
+        log.debug("- getDirectorFilms : {}", answer);
         return answer;
     }
 
     @Override
     public List<Film> getSharedFilms(int userId, int friendId) {
-        log.info("+ getDirectorFilms : userId = {} friendId = {}", userId, friendId);
+        log.debug("+ getDirectorFilms : userId = {} friendId = {}", userId, friendId);
         if (userId <= 0) {
             throw new FilmNotFoundException("Пользователя id = " + userId + " не может быть");
         }
@@ -130,22 +130,22 @@ public class FilmServiceImpl implements FilmService {
             throw new FilmNotFoundException("Пользователя id = " + userId + " не может быть");
         }
         List<Film> answer = filmStorage.getSharedFilms(userId, friendId);
-        log.info("- getSharedFilms : {}", answer);
+        log.debug("- getSharedFilms : {}", answer);
         return answer;
     }
 
     @Override
     public void deleteFilm(int id) {
-        log.info("+ deleteFilm : id = {}", id);
+        log.debug("+ deleteFilm : id = {}", id);
         filmStorage.deleteFilm(id);
-        log.info("- deleteFilm : id = {}", id);
+        log.debug("- deleteFilm : id = {}", id);
     }
 
     @Override
     public List<Film> searchFilms(String query, List<String> by) {
-        log.info("+ searchFilms : query = " + query + ", by =  " + by);
+        log.debug("+ searchFilms : query = " + query + ", by =  " + by);
         List<Film> answer = filmStorage.searchFilms(query, by);
-        log.info("- searchFilms : {}", answer);
+        log.debug("- searchFilms : {}", answer);
         return answer;
     }
 }

@@ -5,18 +5,13 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Component;
-import ru.yandex.practicum.filmorate.exception.filmExceptions.FilmException;
-import ru.yandex.practicum.filmorate.exception.filmExceptions.FilmNotFoundException;
 import ru.yandex.practicum.filmorate.exception.userExceptions.UserNotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 @Slf4j
 @Component
@@ -45,7 +40,7 @@ public class UserDBStorage implements UserStorage {
             Number id = simpleJdbcInsert.executeAndReturnKey(params);
             user.setId(id.intValue());
         } catch (NullPointerException e) {
-            throw new FilmException("Пользователь " + user.getName() + "не создан");
+            throw new UserNotFoundException("Пользователь " + user.getName() + "не создан");
         }
 
         return user;
@@ -59,7 +54,7 @@ public class UserDBStorage implements UserStorage {
             Map<String, Integer> params = Map.of("user_id", id, "friend_id", friendId);
             simpleJdbcInsert.execute(params);
         } catch (NullPointerException e) {
-            throw new FilmException("Добавление пользователя id = " + id + "друга не создано");
+            throw new UserNotFoundException("Добавление пользователя id = " + id + "друга не создано");
         }
     }
 
@@ -72,7 +67,7 @@ public class UserDBStorage implements UserStorage {
     public void deleteUser(int id) {
         int change = jdbcTemplate.update(DELETE_USER, id);
         if (change == 0) {
-            throw new FilmNotFoundException("Фильм с id = " + id + " не существует");
+            throw new UserNotFoundException("Фильм с id = " + id + " не существует");
         }
     }
 
@@ -81,7 +76,7 @@ public class UserDBStorage implements UserStorage {
         int change = jdbcTemplate.update(UPDATE_USER,
                 user.getName(), user.getEmail(), user.getLogin(), user.getBirthday(), user.getId());
         if (change == 0) {
-            throw new FilmNotFoundException("Фильм с id = " + user.getId() + " не существует");
+            throw new UserNotFoundException("Фильм с id = " + user.getId() + " не существует");
         }
 
         return user;

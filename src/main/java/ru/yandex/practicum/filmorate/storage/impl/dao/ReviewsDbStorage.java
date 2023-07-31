@@ -13,25 +13,20 @@ import ru.yandex.practicum.filmorate.exception.reviewExceptions.ReviewNotFoundEx
 import ru.yandex.practicum.filmorate.model.Review;
 import ru.yandex.practicum.filmorate.storage.ReviewsStorage;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
+import java.sql.*;
+import java.util.*;
 
 @Slf4j
 @Component
 public class ReviewsDbStorage implements ReviewsStorage {
-    private static final String GET_ALL_REVIEWS = "SELECT review_id, content, is_positive, user_id, film_id, useful FROM reviews LIMIT ";
+    private static final String GET_ALL_REVIEWS = "SELECT review_id, content, is_positive, user_id, film_id, useful " +
+            "FROM reviews LIMIT ";
     private static final String UPDATE_REVIEW = "UPDATE reviews SET content = ?, is_positive = ? WHERE review_id = ?";
     private static final String DELETE_REVIEW = "DELETE FROM reviews WHERE review_id = ?";
-    private static final String GET_REVIEW_BY_ID = "SELECT review_id, content, is_positive, user_id, film_id, useful FROM reviews WHERE review_id = ";
-    private static final String GET_REVIEWS_BY_FILM_ID = "SELECT review_id, content, is_positive, user_id, film_id, useful FROM reviews WHERE film_id = ";
+    private static final String GET_REVIEW_BY_ID = "SELECT review_id, content, is_positive, user_id, film_id, useful " +
+            "FROM reviews WHERE review_id = ";
+    private static final String GET_REVIEWS_BY_FILM_ID = "SELECT review_id, content, is_positive, user_id, film_id, useful " +
+            "FROM reviews WHERE film_id = ";
     private static final String LIMIT = " LIMIT ";
     private static final String INCREASE_USEFUL = "UPDATE reviews SET useful = useful + 1 WHERE review_id = ?";
     private static final String DECREASE_USEFUL = "UPDATE reviews SET useful = useful - 1 WHERE review_id = ?";
@@ -54,8 +49,9 @@ public class ReviewsDbStorage implements ReviewsStorage {
             SimpleJdbcInsert simpleJdbcInsert = new SimpleJdbcInsert(Objects.requireNonNull(jdbcTemplate.getDataSource()))
                     .withTableName("reviews")
                     .usingGeneratedKeyColumns("review_id");
-            Map<String, String> params = Map.of("content", review.getContent(), "is_positive", review.getIsPositive().toString(),
-                    "user_id", review.getUserId().toString(), "film_id", review.getFilmId().toString(), "useful", "0");
+            Map<String, String> params = Map.of("content", review.getContent(), "is_positive",
+                    review.getIsPositive().toString(), "user_id", review.getUserId().toString(),
+                    "film_id", review.getFilmId().toString(), "useful", "0");
 
             Number id = simpleJdbcInsert.executeAndReturnKey(params);
             review.setReviewId(id.intValue());

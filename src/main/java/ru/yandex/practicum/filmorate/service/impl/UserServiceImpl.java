@@ -27,7 +27,8 @@ public class UserServiceImpl implements UserService {
     private final FeedStorage feedStorage;
     private final UserValidator userValidator;
 
-    public UserServiceImpl(UserStorage userStorage, FilmStorage filmStorage, FeedStorage feedStorage, UserValidator userValidator) {
+    public UserServiceImpl(UserStorage userStorage, FilmStorage filmStorage, FeedStorage feedStorage,
+                           UserValidator userValidator) {
         this.userStorage = userStorage;
         this.feedStorage = feedStorage;
         this.userValidator = userValidator;
@@ -36,40 +37,40 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User addUser(User user) {
-        log.info("+ createUser : {}", user);
+        log.debug("+ createUser : {}", user);
         User newUser = userValidator.checkUser(user);
         User answer = userStorage.createUser(newUser);
-        log.info("- createUser : {}", answer);
+        log.debug("- createUser : {}", answer);
         return answer;
     }
 
     @Override
     public User updateUser(User user) {
-        log.info("+ updateUser : {}", user);
+        log.debug("+ updateUser : {}", user);
         User newUser = userStorage.updateUser(userValidator.checkUser(user));
-        log.info("- updateUser : {}", newUser);
+        log.debug("- updateUser : {}", newUser);
         return newUser;
     }
 
     @Override
     public List<User> getAllUsers() {
-        log.info("+ updateUser");
+        log.debug("+ updateUser");
         List<User> users = userStorage.getAllUsers();
-        log.info("- allUsers : {}", users);
+        log.debug("- allUsers : {}", users);
         return users;
     }
 
     @Override
     public User getUser(int id) {
-        log.info("+ getUser : id = {}", id);
+        log.debug("+ getUser : id = {}", id);
         User user = userStorage.getUser(id);
-        log.info("- getUser : {}", user);
+        log.debug("- getUser : {}", user);
         return user;
     }
 
     @Override
     public void addFriend(int id, int friendId) {
-        log.info("+ addFriend : id = {}, friendId = {}", id, friendId);
+        log.debug("+ addFriend : id = {}, friendId = {}", id, friendId);
         if (id == friendId) {
             throw new UserException("Параметры не могут быть равны");
         }
@@ -77,12 +78,12 @@ public class UserServiceImpl implements UserService {
         userStorage.getUser(friendId);
         userStorage.addFriend(id, friendId);
         feedStorage.addToFeedDb(id, FeedEventType.FRIEND, FeedOperation.ADD, friendId);
-        log.info("- addFriend : id = {}, friendId = {}", id, friendId);
+        log.debug("- addFriend : id = {}, friendId = {}", id, friendId);
     }
 
     @Override
     public void deleteFriend(int id, int friendId) {
-        log.info("+ deleteFriend : id = {}, friendId = {}", id, friendId);
+        log.debug("+ deleteFriend : id = {}, friendId = {}", id, friendId);
         if (id == friendId) {
             throw new UserException("Параметры не могут быть равны");
         }
@@ -90,24 +91,24 @@ public class UserServiceImpl implements UserService {
         userStorage.getUser(friendId);
         userStorage.deleteFriend(id, friendId);
         feedStorage.addToFeedDb(id, FeedEventType.FRIEND, FeedOperation.REMOVE, friendId);
-        log.info("- deleteFriend : id = {}, friendId = {}", id, friendId);
+        log.debug("- deleteFriend : id = {}, friendId = {}", id, friendId);
     }
 
     @Override
     public List<User> getFriends(int id) {
-        log.info("+ getFriends : id = {}", id);
+        log.debug("+ getFriends : id = {}", id);
         Set<Integer> friendsId = userStorage.getUser(id).getFriends();
         List<User> friends = new ArrayList<>();
         for (Integer friendId : friendsId) {
             friends.add(userStorage.getUser(friendId));
         }
-        log.info("- getFriends : {}", friends);
+        log.debug("- getFriends : {}", friends);
         return friends;
     }
 
     @Override
     public List<User> getFriendsCommon(int id, int otherId) {
-        log.info("+ getFriendsCommon : {} {}", id, otherId);
+        log.debug("+ getFriendsCommon : {} {}", id, otherId);
         Set<Integer> friendsId = userStorage.getUser(id).getFriends();
         Set<Integer> otherFriends = userStorage.getUser(otherId).getFriends();
         Set<Integer> common = friendsId.stream()
@@ -117,31 +118,31 @@ public class UserServiceImpl implements UserService {
         for (Integer friendId : common) {
             friends.add(userStorage.getUser(friendId));
         }
-        log.info("- getFriendsCommon : {}", friends);
+        log.debug("- getFriendsCommon : {}", friends);
         return friends;
     }
 
     @Override
     public List<Film> getRecommendations(int userId) {
-        log.info("+ getRecommendations : userId = {}", userId);
+        log.debug("+ getRecommendations : userId = {}", userId);
         List<Film> answer = filmStorage.getRecommendations(userId);
-        log.info("- getRecommendations : {}", answer);
+        log.debug("- getRecommendations : {}", answer);
         return answer;
     }
 
     @Override
     public List<FeedEvent> getFeed(int id) {
-        log.info("+ getFeed : id = {}", id);
+        log.debug("+ getFeed : id = {}", id);
         userStorage.getUser(id);
         List<FeedEvent> answer = feedStorage.getFeedByUserId(id);
-        log.info("- getFeed : {}", answer);
+        log.debug("- getFeed : {}", answer);
         return answer;
     }
 
     @Override
     public void deleteUser(int id) {
-        log.info("+ deleteUser : id = {}", id);
+        log.debug("+ deleteUser : id = {}", id);
         userStorage.deleteUser(id);
-        log.info("- deleteUser : id = {}", id);
+        log.debug("- deleteUser : id = {}", id);
     }
 }
