@@ -70,7 +70,7 @@ public class UserDBStorage implements UserStorage {
     public void deleteUser(int id) {
         int change = jdbcTemplate.update(DELETE_USER, id);
         if (change == 0) {
-            throw new UserNotFoundException("Фильм с id = " + id + " не существует");
+            throw new UserNotFoundException("Пользователя с id = " + id + " не существует");
         }
     }
 
@@ -79,7 +79,7 @@ public class UserDBStorage implements UserStorage {
         int change = jdbcTemplate.update(UPDATE_USER,
                 user.getName(), user.getEmail(), user.getLogin(), user.getBirthday(), user.getId());
         if (change == 0) {
-            throw new UserNotFoundException("Фильм с id = " + user.getId() + " не существует");
+            throw new UserNotFoundException("Пользователя с id = " + user.getId() + " не существует");
         }
 
         return user;
