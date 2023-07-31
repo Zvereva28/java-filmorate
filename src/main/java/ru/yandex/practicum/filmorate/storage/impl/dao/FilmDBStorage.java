@@ -32,7 +32,8 @@ public class FilmDBStorage implements FilmStorage {
     private static final String GET_COUNT_OF_LIKES =
             "SELECT count(*) AS count FROM film_likes where film_id = ?";
     private static final String UPDATE_FILM =
-            "UPDATE films SET  name=?, description=?, release_date=?, duration=?, rating_mpa=?, count_likes=? WHERE id=?";
+            "UPDATE films SET  name=?, description=?, release_date=?, duration=?, rating_mpa=?, count_likes=? " +
+                    "WHERE id=?";
     private static final String DELETE_FILM_GENRE =
             "DELETE FROM film_genre WHERE film_id=?";
     private static final String DELETE_FILM_DIRECTOR =
@@ -103,7 +104,8 @@ public class FilmDBStorage implements FilmStorage {
                     "LEFT JOIN genre AS g ON fg.genre_id=g.id " +
                     "LEFT JOIN film_director AS fd ON f.id=fd.film_id " +
                     "LEFT JOIN directors AS d ON fd.director_id=d.director_id " +
-                    "WHERE f.id IN (SELECT t.film_id FROM (SELECT film_id, COUNT(film_id) AS count FROM public.film_likes " +
+                    "WHERE f.id IN (SELECT t.film_id FROM (SELECT film_id, COUNT(film_id) " +
+                    "AS count FROM public.film_likes " +
                     "WHERE user_id IN (?, ?) " +
                     "GROUP BY film_id) AS t " +
                     "WHERE t.count=2) ORDER BY count_likes DESC, f.id ASC, genre_id ASC";
@@ -173,27 +175,32 @@ public class FilmDBStorage implements FilmStorage {
                 .withTableName("film_genre");
         Set<Genres> genres = new HashSet<>(film.getGenres());
         film.getGenres().clear();
-        if (genres.size() > 0) {
+
+        if (!genres.isEmpty()) {
+            List<Map<String, String>> paramsInserts = new ArrayList<>();
             for (Genres genre : genres) {
                 film.getGenres().add(genre);
-                params = Map.of(
+                paramsInserts.add(Map.of(
                         "genre_id", genre.getId().toString(),
-                        "film_id", id.toString());
-                simpleJdbcInsert.execute(params);
+                        "film_id", id.toString()));
             }
+            simpleJdbcInsert.executeBatch(paramsInserts.toArray(new Map[genres.size()]));
         }
+
         simpleJdbcInsert = new SimpleJdbcInsert(jdbcTemplate.getDataSource())
                 .withTableName("film_director");
         Set<Director> directors = new HashSet<>(film.getDirectors());
         film.getDirectors().clear();
-        if (directors.size() > 0) {
+
+        if (!directors.isEmpty()) {
+            List<Map<String, String>> paramsInserts = new ArrayList<>();
             for (Director director : directors) {
                 film.getDirectors().add(director);
-                params = Map.of(
+                paramsInserts.add(Map.of(
                         "director_id", director.getId().toString(),
-                        "film_id", id.toString());
-                simpleJdbcInsert.execute(params);
+                        "film_id", id.toString()));
             }
+            simpleJdbcInsert.executeBatch(paramsInserts.toArray(new Map[genres.size()]));
         }
         film.setId(id.intValue());
 
@@ -202,14 +209,9 @@ public class FilmDBStorage implements FilmStorage {
 
     @Override
     public Film updateFilm(Film film) {
-        int id = film.getId();
-        Integer countLikes;
-        try {
-            countLikes = jdbcTemplate.queryForObject(GET_COUNT_OF_LIKES,
-                    (rs, rowNum) -> rs.getInt("count"), film.getId());
-        } catch (RuntimeException e) {
-            countLikes = 0;
-        }
+        Integer id = film.getId();
+        Integer countLikes = jdbcTemplate.queryForObject(GET_COUNT_OF_LIKES,
+                (rs, rowNum) -> rs.getInt("count"), film.getId());
         int change = jdbcTemplate.update(UPDATE_FILM,
                 film.getName(), film.getDescription(), film.getReleaseDate(),
                 film.getDuration(), film.getMpa().getId(), countLikes, film.getId());
@@ -224,32 +226,36 @@ public class FilmDBStorage implements FilmStorage {
                     .withTableName("film_genre");
             Set<Genres> genres = new HashSet<>(film.getGenres());
             film.getGenres().clear();
-            if (genres.size() > 0) {
+            if (!genres.isEmpty()) {
+                List<Map<String, String>> paramsInserts = new ArrayList<>();
                 for (Genres genre : genres) {
-                    Map<String, String> params = Map.of(
+                    film.getGenres().add(genre);
+                    paramsInserts.add(Map.of(
                             "genre_id", genre.getId().toString(),
-                            "film_id", Integer.toString(id));
-                    simpleJdbcInsert.execute(params);
+                            "film_id", id.toString()));
                 }
+                simpleJdbcInsert.executeBatch(paramsInserts.toArray(new Map[genres.size()]));
             }
+
             simpleJdbcInsert = new SimpleJdbcInsert(jdbcTemplate.getDataSource())
                     .withTableName("film_director");
             Set<Director> directors = new HashSet<>(film.getDirectors());
             film.getDirectors().clear();
-            if (directors.size() > 0) {
+            if (!directors.isEmpty()) {
+                List<Map<String, String>> paramsInserts = new ArrayList<>();
                 for (Director director : directors) {
                     film.getDirectors().add(director);
-                    Map<String, String> params = Map.of(
+                    paramsInserts.add(Map.of(
                             "director_id", director.getId().toString(),
-                            "film_id", Integer.toString(id));
-                    simpleJdbcInsert.execute(params);
+                            "film_id", id.toString()));
                 }
+                simpleJdbcInsert.executeBatch(paramsInserts.toArray(new Map[genres.size()]));
             }
         } catch (NullPointerException e) {
             throw new FilmException("Фильм " + film.getName() + "не создан");
         }
 
-        return getFilm(id);
+        return film;
     }
 
     @Override

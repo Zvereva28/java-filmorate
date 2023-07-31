@@ -48,9 +48,10 @@ public class FilmServiceImpl implements FilmService {
     public Film updateFilm(Film film) {
         log.debug("+ updateFilm : {}", film);
         filmValidator.checkFilm(film);
-        Film oldFilm = filmStorage.updateFilm(film);
-        log.debug("- updateFilm : {}", oldFilm);
-        return oldFilm;
+        Film newFilm = filmStorage.updateFilm(film);
+        newFilm.getGenres().sort(Comparator.comparingInt(Genres::getId));
+        log.debug("- updateFilm : {}", newFilm);
+        return newFilm;
     }
 
     @Override
