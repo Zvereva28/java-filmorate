@@ -3,7 +3,7 @@ package ru.yandex.practicum.filmorate.model.enums;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import ru.yandex.practicum.filmorate.exception.mpaExceptions.MpaNotFoundException;
+import ru.yandex.practicum.filmorate.exceptions.MpaNotFoundException;
 
 import java.util.Arrays;
 

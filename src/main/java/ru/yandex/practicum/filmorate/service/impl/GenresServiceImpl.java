@@ -26,8 +26,8 @@ public class GenresServiceImpl implements GenresService {
     @Override
     public List<Genres> getAllGenres() {
         log.debug("+ getAllGenres");
-        List<Genres> answer = genresStorage.getAll();
-        log.debug("- getAllGenres : {}", answer);
-        return answer;
+        List<Genres> genres = genresStorage.getAll();
+        log.debug("- getAllGenres : {}", genres);
+        return genres;
     }
 }

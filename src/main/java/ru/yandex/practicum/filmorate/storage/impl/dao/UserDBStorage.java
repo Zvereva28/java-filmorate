@@ -5,13 +5,14 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Component;
-import ru.yandex.practicum.filmorate.exception.userExceptions.UserNotFoundException;
+import ru.yandex.practicum.filmorate.exceptions.UserNotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -21,10 +22,10 @@ import java.util.Objects;
 public class UserDBStorage implements UserStorage {
     private static final String SELECT_USER = "SELECT id, user_name, email, login, birthday, f.friend_id as friends " +
             "FROM users as u LEFT JOIN friends as f ON u.id=f.user_id WHERE id = ?";
-    private static final String DELETE_FRIENDS = "DELETE FROM friends WHERE user_id = ? AND friend_id = ?";
+    private static final String DELETE_FRIEND = "DELETE FROM friends WHERE user_id = ? AND friend_id = ?";
     private static final String UPDATE_USER = "UPDATE users set user_name=?, email=?, login=?, birthday=? WHERE id=?";
-    private static final String SELECT_ALL_USER = "SELECT id, user_name, email, login, birthday, f.friend_id as friends " +
-            "FROM users as u LEFT JOIN friends as f ON u.id=f.user_id ORDER BY id";
+    private static final String SELECT_ALL_USER = "SELECT id, user_name, email, login, birthday, " +
+            "f.friend_id as friends FROM users as u LEFT JOIN friends as f ON u.id=f.user_id ORDER BY id";
     private static final String DELETE_USER = "DELETE FROM users WHERE id=?";
     private final JdbcTemplate jdbcTemplate;
 
@@ -35,9 +36,10 @@ public class UserDBStorage implements UserStorage {
     @Override
     public User createUser(User user) {
         try {
-            SimpleJdbcInsert simpleJdbcInsert = new SimpleJdbcInsert(Objects.requireNonNull(jdbcTemplate.getDataSource()))
-                    .withTableName("users")
-                    .usingGeneratedKeyColumns("id");
+            SimpleJdbcInsert simpleJdbcInsert =
+                    new SimpleJdbcInsert(Objects.requireNonNull(jdbcTemplate.getDataSource()))
+                        .withTableName("users")
+                        .usingGeneratedKeyColumns("id");
             Map<String, String> params = Map.of("user_name", user.getName(), "email", user.getEmail(),
                     "login", user.getLogin(), "birthday", user.getBirthday().toString());
             Number id = simpleJdbcInsert.executeAndReturnKey(params);
@@ -52,8 +54,9 @@ public class UserDBStorage implements UserStorage {
     @Override
     public void addFriend(int id, int friendId) {
         try {
-            SimpleJdbcInsert simpleJdbcInsert = new SimpleJdbcInsert(Objects.requireNonNull(jdbcTemplate.getDataSource()))
-                    .withTableName("friends");
+            SimpleJdbcInsert simpleJdbcInsert =
+                    new SimpleJdbcInsert(Objects.requireNonNull(jdbcTemplate.getDataSource()))
+                        .withTableName("friends");
             Map<String, Integer> params = Map.of("user_id", id, "friend_id", friendId);
             simpleJdbcInsert.execute(params);
         } catch (NullPointerException e) {
@@ -62,7 +65,7 @@ public class UserDBStorage implements UserStorage {
     }
 
     public void deleteFriend(int id, int friendId) {
-        jdbcTemplate.update(DELETE_FRIENDS,
+        jdbcTemplate.update(DELETE_FRIEND,
                 id, friendId);
     }
 
@@ -87,13 +90,15 @@ public class UserDBStorage implements UserStorage {
 
     @Override
     public List<User> getAllUsers() {
-        return jdbcTemplate.query(SELECT_ALL_USER, usersRowMapper()).stream().findFirst().orElse(new ArrayList<>());
+        return jdbcTemplate.query(SELECT_ALL_USER,
+                usersRowMapper()).stream().findFirst().orElse(Collections.emptyList());
     }
 
     @Override
     public User getUser(int id) {
         return jdbcTemplate.query(SELECT_USER, userRowMapper(), id).stream()
-                .findFirst().orElseThrow(() -> new UserNotFoundException("Пользователя с id = " + id + " не существует"));
+                .findFirst().orElseThrow(() -> new UserNotFoundException("Пользователя с id = " + id +
+                        " не существует"));
     }
 
     private RowMapper<User> userRowMapper() {

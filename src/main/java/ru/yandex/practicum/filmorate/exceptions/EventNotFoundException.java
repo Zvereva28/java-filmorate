@@ -1,4 +1,4 @@
-package ru.yandex.practicum.filmorate.exception.eventExceptions;
+package ru.yandex.practicum.filmorate.exceptions;
 
 public class EventNotFoundException extends RuntimeException {
     public EventNotFoundException() {

@@ -2,7 +2,7 @@ package ru.yandex.practicum.filmorate.service.impl;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.exception.userExceptions.UserException;
+import ru.yandex.practicum.filmorate.exceptions.UserException;
 import ru.yandex.practicum.filmorate.model.FeedEvent;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
@@ -125,18 +125,18 @@ public class UserServiceImpl implements UserService {
     @Override
     public List<Film> getRecommendations(int userId) {
         log.debug("+ getRecommendations : userId = {}", userId);
-        List<Film> answer = filmStorage.getRecommendations(userId);
-        log.debug("- getRecommendations : {}", answer);
-        return answer;
+        List<Film> films = filmStorage.getRecommendations(userId);
+        log.debug("- getRecommendations : {}", films);
+        return films;
     }
 
     @Override
     public List<FeedEvent> getFeed(int id) {
         log.debug("+ getFeed : id = {}", id);
         userStorage.getUser(id);
-        List<FeedEvent> answer = feedStorage.getFeedByUserId(id);
-        log.debug("- getFeed : {}", answer);
-        return answer;
+        List<FeedEvent> events = feedStorage.getFeedByUserId(id);
+        log.debug("- getFeed : {}", events);
+        return events;
     }
 
     @Override

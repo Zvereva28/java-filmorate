@@ -1,6 +1,4 @@
-package ru.yandex.practicum.filmorate.exception.genresException;
-
-import ru.yandex.practicum.filmorate.exception.userExceptions.UserException;
+package ru.yandex.practicum.filmorate.exceptions;
 
 public class GenresNotFoundException extends UserException {
 

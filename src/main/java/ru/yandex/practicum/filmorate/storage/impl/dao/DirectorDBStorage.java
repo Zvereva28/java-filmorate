@@ -5,8 +5,8 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Component;
-import ru.yandex.practicum.filmorate.exception.derectorExceptions.DirectorNotFoundException;
-import ru.yandex.practicum.filmorate.exception.filmExceptions.FilmException;
+import ru.yandex.practicum.filmorate.exceptions.DirectorNotFoundException;
+import ru.yandex.practicum.filmorate.exceptions.FilmException;
 import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.storage.DirectorStorage;
 
@@ -28,9 +28,10 @@ public class DirectorDBStorage implements DirectorStorage {
     @Override
     public Director addDirector(Director director) {
         try {
-            SimpleJdbcInsert simpleJdbcInsert = new SimpleJdbcInsert(Objects.requireNonNull(jdbcTemplate.getDataSource()))
-                    .withTableName("directors")
-                    .usingGeneratedKeyColumns("director_id");
+            SimpleJdbcInsert simpleJdbcInsert =
+                    new SimpleJdbcInsert(Objects.requireNonNull(jdbcTemplate.getDataSource()))
+                        .withTableName("directors")
+                        .usingGeneratedKeyColumns("director_id");
             Map<String, Object> params = new HashMap<>();
             params.put("director_name", director.getName());
             Number id = simpleJdbcInsert.executeAndReturnKey(params);
@@ -46,7 +47,8 @@ public class DirectorDBStorage implements DirectorStorage {
     public Director getDirector(int id) {
 
         return jdbcTemplate.query(GET_DIRECTOR, directorRowMapper(), id).stream()
-                .findFirst().orElseThrow(() -> new DirectorNotFoundException("Режиссера с id = " + id + " не существует"));
+                .findFirst().orElseThrow(() ->
+                        new DirectorNotFoundException("Режиссера с id = " + id + " не существует"));
     }
 
     @Override

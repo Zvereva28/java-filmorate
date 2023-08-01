@@ -2,8 +2,8 @@ package ru.yandex.practicum.filmorate.service.impl;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.exception.filmExceptions.FilmNotFoundException;
-import ru.yandex.practicum.filmorate.exception.likeException.LikeException;
+import ru.yandex.practicum.filmorate.exceptions.FilmNotFoundException;
+import ru.yandex.practicum.filmorate.exceptions.LikeException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genres;
 import ru.yandex.practicum.filmorate.model.enums.FeedEventType;
@@ -116,9 +116,9 @@ public class FilmServiceImpl implements FilmService {
     public List<Film> getDirectorFilms(int directorId, String sortBy) {
         log.debug("+ getDirectorFilms : directorId = {} sortBy = {}", directorId, sortBy);
         directorStorage.getDirector(directorId);
-        List<Film> answer = filmStorage.getDirectorFilms(directorId, sortBy);
-        log.debug("- getDirectorFilms : {}", answer);
-        return answer;
+        List<Film> films = filmStorage.getDirectorFilms(directorId, sortBy);
+        log.debug("- getDirectorFilms : {}", films);
+        return films;
     }
 
     @Override
@@ -130,9 +130,9 @@ public class FilmServiceImpl implements FilmService {
         if (friendId <= 0) {
             throw new FilmNotFoundException("Пользователя id = " + userId + " не может быть");
         }
-        List<Film> answer = filmStorage.getSharedFilms(userId, friendId);
-        log.debug("- getSharedFilms : {}", answer);
-        return answer;
+        List<Film> films = filmStorage.getSharedFilms(userId, friendId);
+        log.debug("- getSharedFilms : {}", films);
+        return films;
     }
 
     @Override
@@ -145,8 +145,8 @@ public class FilmServiceImpl implements FilmService {
     @Override
     public List<Film> searchFilms(String query, List<String> by) {
         log.debug("+ searchFilms : query = " + query + ", by =  " + by);
-        List<Film> answer = filmStorage.searchFilms(query, by);
-        log.debug("- searchFilms : {}", answer);
-        return answer;
+        List<Film> films = filmStorage.searchFilms(query, by);
+        log.debug("- searchFilms : {}", films);
+        return films;
     }
 }

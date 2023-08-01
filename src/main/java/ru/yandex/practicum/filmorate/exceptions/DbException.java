@@ -1,4 +1,4 @@
-package ru.yandex.practicum.filmorate.exception.dbExceptions;
+package ru.yandex.practicum.filmorate.exceptions;
 
 public class DbException extends RuntimeException {
 
