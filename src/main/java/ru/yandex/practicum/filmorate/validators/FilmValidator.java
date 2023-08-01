@@ -3,7 +3,7 @@ package ru.yandex.practicum.filmorate.validators;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
-import ru.yandex.practicum.filmorate.exception.filmExceptions.FilmException;
+import ru.yandex.practicum.filmorate.exceptions.FilmException;
 import ru.yandex.practicum.filmorate.model.Film;
 
 import java.time.LocalDate;

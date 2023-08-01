@@ -1,18 +1,9 @@
-package ru.yandex.practicum.filmorate.exception;
+package ru.yandex.practicum.filmorate.exceptions;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import ru.yandex.practicum.filmorate.exception.derectorExceptions.DirectorNotFoundException;
-import ru.yandex.practicum.filmorate.exception.filmExceptions.FilmException;
-import ru.yandex.practicum.filmorate.exception.filmExceptions.FilmNotFoundException;
-import ru.yandex.practicum.filmorate.exception.genresException.GenresNotFoundException;
-import ru.yandex.practicum.filmorate.exception.likeException.LikeException;
-import ru.yandex.practicum.filmorate.exception.mpaExceptions.MpaNotFoundException;
-import ru.yandex.practicum.filmorate.exception.reviewExceptions.ReviewNotFoundException;
-import ru.yandex.practicum.filmorate.exception.userExceptions.UserException;
-import ru.yandex.practicum.filmorate.exception.userExceptions.UserNotFoundException;
 
 @RestControllerAdvice
 public class ErrorHandler {

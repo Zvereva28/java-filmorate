@@ -7,9 +7,9 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Component;
-import ru.yandex.practicum.filmorate.exception.dbExceptions.DbException;
-import ru.yandex.practicum.filmorate.exception.filmExceptions.FilmException;
-import ru.yandex.practicum.filmorate.exception.filmExceptions.FilmNotFoundException;
+import ru.yandex.practicum.filmorate.exceptions.DbException;
+import ru.yandex.practicum.filmorate.exceptions.FilmException;
+import ru.yandex.practicum.filmorate.exceptions.FilmNotFoundException;
 import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genres;
@@ -19,6 +19,7 @@ import ru.yandex.practicum.filmorate.storage.FilmStorage;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -34,9 +35,9 @@ public class FilmDBStorage implements FilmStorage {
     private static final String UPDATE_FILM =
             "UPDATE films SET  name=?, description=?, release_date=?, duration=?, rating_mpa=?, count_likes=? " +
                     "WHERE id=?";
-    private static final String DELETE_FILM_GENRE =
+    private static final String DELETE_FROM_FILM_GENRE_WHERE_FILM_ID =
             "DELETE FROM film_genre WHERE film_id=?";
-    private static final String DELETE_FILM_DIRECTOR =
+    private static final String DELETE_FROM_FILM_DIRECTOR_WHERE_FILM_ID =
             "DELETE FROM film_director WHERE film_id=?";
     private static final String GET_ALL_FILMS =
             "SELECT f.id, name, description, release_date, duration, rating_mpa, " +
@@ -154,6 +155,8 @@ public class FilmDBStorage implements FilmStorage {
             "WHERE LOWER(d.director_name) LIKE LOWER(?)";
     private static final String SEARCH_BY_FILMS_AND_DIRECTORS =
             "WHERE LOWER(f.name) LIKE LOWER(?) OR LOWER(d.director_name) LIKE LOWER(?)";
+    private static final String YEAR_BEGIN = "-01-01";
+    private static final String YEAR_END = "-12-31";
     private final JdbcTemplate jdbcTemplate;
 
     @Autowired
@@ -219,43 +222,52 @@ public class FilmDBStorage implements FilmStorage {
             throw new FilmNotFoundException("Фильм с id = " + id + " не существует");
         }
 
-        jdbcTemplate.update(DELETE_FILM_GENRE, id);
-        jdbcTemplate.update(DELETE_FILM_DIRECTOR, id);
         try {
-            SimpleJdbcInsert simpleJdbcInsert = new SimpleJdbcInsert(Objects.requireNonNull(jdbcTemplate.getDataSource()))
-                    .withTableName("film_genre");
-            Set<Genres> genres = new HashSet<>(film.getGenres());
-            film.getGenres().clear();
-            if (!genres.isEmpty()) {
-                List<Map<String, String>> paramsInserts = new ArrayList<>();
-                for (Genres genre : genres) {
-                    film.getGenres().add(genre);
-                    paramsInserts.add(Map.of(
-                            "genre_id", genre.getId().toString(),
-                            "film_id", id.toString()));
-                }
-                simpleJdbcInsert.executeBatch(paramsInserts.toArray(new Map[genres.size()]));
-            }
-
-            simpleJdbcInsert = new SimpleJdbcInsert(jdbcTemplate.getDataSource())
-                    .withTableName("film_director");
-            Set<Director> directors = new HashSet<>(film.getDirectors());
-            film.getDirectors().clear();
-            if (!directors.isEmpty()) {
-                List<Map<String, String>> paramsInserts = new ArrayList<>();
-                for (Director director : directors) {
-                    film.getDirectors().add(director);
-                    paramsInserts.add(Map.of(
-                            "director_id", director.getId().toString(),
-                            "film_id", id.toString()));
-                }
-                simpleJdbcInsert.executeBatch(paramsInserts.toArray(new Map[genres.size()]));
-            }
+            updateFilmGenre(film, id);
+            updateFilmDirector(film, id);
         } catch (NullPointerException e) {
             throw new FilmException("Фильм " + film.getName() + "не создан");
         }
 
         return film;
+    }
+
+    private void updateFilmGenre(Film film, Integer id) throws NullPointerException {
+        jdbcTemplate.update(DELETE_FROM_FILM_GENRE_WHERE_FILM_ID, id);
+        SimpleJdbcInsert simpleJdbcInsert =
+                new SimpleJdbcInsert(Objects.requireNonNull(jdbcTemplate.getDataSource()))
+                        .withTableName("film_genre");
+        Set<Genres> genres = new HashSet<>(film.getGenres());
+        film.getGenres().clear();
+        if (!genres.isEmpty()) {
+            List<Map<String, String>> paramsInserts = new ArrayList<>();
+            for (Genres genre : genres) {
+                film.getGenres().add(genre);
+                paramsInserts.add(Map.of(
+                        "genre_id", genre.getId().toString(),
+                        "film_id", id.toString()));
+            }
+            simpleJdbcInsert.executeBatch(paramsInserts.toArray(new Map[genres.size()]));
+        }
+    }
+
+    private void updateFilmDirector(Film film, Integer id) throws NullPointerException {
+        jdbcTemplate.update(DELETE_FROM_FILM_DIRECTOR_WHERE_FILM_ID, id);
+        SimpleJdbcInsert simpleJdbcInsert =
+                new SimpleJdbcInsert(Objects.requireNonNull(jdbcTemplate.getDataSource()))
+                    .withTableName("film_director");
+        Set<Director> directors = new HashSet<>(film.getDirectors());
+        film.getDirectors().clear();
+        if (!directors.isEmpty()) {
+            List<Map<String, String>> paramsInserts = new ArrayList<>();
+            for (Director director : directors) {
+                film.getDirectors().add(director);
+                paramsInserts.add(Map.of(
+                        "director_id", director.getId().toString(),
+                        "film_id", id.toString()));
+            }
+            simpleJdbcInsert.executeBatch(paramsInserts.toArray(new Map[directors.size()]));
+        }
     }
 
     @Override
@@ -265,7 +277,7 @@ public class FilmDBStorage implements FilmStorage {
 
     @Override
     public List<Film> getPopularFilms(int count, int genreId, int year) {
-        if (genreId == 0 & year == 0) {
+        if (genreId == 0 && year == 0) {
             return jdbcTemplate.query(GET_ID_FILMS_WITH_LIMITS, filmsRowMapper(), count).stream()
                     .findFirst().orElse(new ArrayList<>());
         } else if (genreId == 0) {
@@ -280,11 +292,11 @@ public class FilmDBStorage implements FilmStorage {
     }
 
     private String getStartYear(int year) {
-        return year + "-01-01";
+        return year + YEAR_BEGIN;
     }
 
     private String getEndYear(int year) {
-        return year + "-12-31";
+        return year + YEAR_END;
     }
 
     @Override
@@ -296,8 +308,9 @@ public class FilmDBStorage implements FilmStorage {
     @Override
     public void addLike(Integer filmId, Integer userId) {
         try {
-            SimpleJdbcInsert simpleJdbcInsert = new SimpleJdbcInsert(Objects.requireNonNull(jdbcTemplate.getDataSource()))
-                    .withTableName("film_likes");
+            SimpleJdbcInsert simpleJdbcInsert =
+                    new SimpleJdbcInsert(Objects.requireNonNull(jdbcTemplate.getDataSource()))
+                        .withTableName("film_likes");
             Map<String, String> params = Map.of("user_id", userId.toString(),
                     "film_id", filmId.toString());
             simpleJdbcInsert.execute(params);
@@ -322,7 +335,7 @@ public class FilmDBStorage implements FilmStorage {
             return jdbcTemplate.query(GET_DIRECTOR_FILMS_ORDERBY_LIKES, filmsRowMapper(), id)
                     .stream().findFirst().orElse(new ArrayList<>());
         }
-        return new ArrayList<>();
+        return Collections.emptyList();
     }
 
     @Override
@@ -345,7 +358,7 @@ public class FilmDBStorage implements FilmStorage {
 
     public List<Film> getRecommendations(int userId) {
         return jdbcTemplate.query(GET_RECOMMENDATION_FILMS, filmsRowMapper(), userId, userId).stream().findFirst()
-                .orElse(new ArrayList<>());
+                .orElse(Collections.emptyList());
     }
 
     private RowMapper<Film> filmRowMapper() {
@@ -379,7 +392,8 @@ public class FilmDBStorage implements FilmStorage {
                     film = createFilmFromDB(rs);
                 }
                 if (rs.getInt("genre_id") != 0) {
-                    Genres genre = new Genres(rs.getInt("genre_id"), rs.getString("genre_name"));
+                    Genres genre = new Genres(rs.getInt("genre_id"),
+                            rs.getString("genre_name"));
                     if (!film.getGenres().contains(genre)) {
                         film.getGenres().add(genre);
                     }
@@ -400,7 +414,8 @@ public class FilmDBStorage implements FilmStorage {
                         rs.getString("director_name")));
             }
             if (rs.getInt("genre_id") > 0) {
-                film.getGenres().add(new Genres(rs.getInt("genre_id"), rs.getString("genre_name")));
+                film.getGenres().add(new Genres(rs.getInt("genre_id"),
+                        rs.getString("genre_name")));
             }
             return film;
         } catch (SQLException e) {

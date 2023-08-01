@@ -1,4 +1,4 @@
-package ru.yandex.practicum.filmorate.exception.userExceptions;
+package ru.yandex.practicum.filmorate.exceptions;
 
 public class UserException extends RuntimeException {
 

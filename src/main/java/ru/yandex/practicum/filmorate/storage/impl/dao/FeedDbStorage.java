@@ -4,8 +4,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Component;
-import ru.yandex.practicum.filmorate.exception.dbExceptions.DbException;
-import ru.yandex.practicum.filmorate.exception.filmExceptions.FilmException;
+import ru.yandex.practicum.filmorate.exceptions.DbException;
+import ru.yandex.practicum.filmorate.exceptions.FilmException;
 import ru.yandex.practicum.filmorate.model.FeedEvent;
 import ru.yandex.practicum.filmorate.model.enums.FeedEventType;
 import ru.yandex.practicum.filmorate.model.enums.FeedOperation;
@@ -15,6 +15,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -24,8 +25,8 @@ import java.util.Optional;
 @Slf4j
 @Component
 public class FeedDbStorage implements FeedStorage {
-    private static final String GET_FEED_EVENT_BY_USER_ID = "SELECT EVENT_ID, TIMESTAMP, USER_ID, EVENT_TYPE, OPERATION," +
-            " ENTITY_ID FROM FEED WHERE USER_ID = ";
+    private static final String GET_FEED_EVENT_BY_USER_ID = "SELECT EVENT_ID, TIMESTAMP, USER_ID, EVENT_TYPE, " +
+            "OPERATION, ENTITY_ID FROM FEED WHERE USER_ID = ";
     private final JdbcTemplate jdbcTemplate;
 
     public FeedDbStorage(JdbcTemplate jdbcTemplate) {
@@ -34,8 +35,8 @@ public class FeedDbStorage implements FeedStorage {
 
     @Override
     public void addToFeedDb(Integer userId, FeedEventType eventType, FeedOperation operation, Integer entityId) {
-        log.debug("+ addToFeedDb : userId = " + userId + ", eventType = " + eventType + ", operation = " + operation + ", " +
-                "entityId = " + entityId);
+        log.debug("+ addToFeedDb : userId = " + userId + ", eventType = " + eventType + ", operation = "
+                + operation + ", " + "entityId = " + entityId);
         String time = String.valueOf(LocalDateTime.now());
         SimpleJdbcInsert simpleJdbcInsert;
         try {
@@ -58,10 +59,10 @@ public class FeedDbStorage implements FeedStorage {
     @Override
     public List<FeedEvent> getFeedByUserId(int id) {
         log.debug("+ getFeedByUserId : id = {}", id);
-        List<FeedEvent> answer = getEvents(GET_FEED_EVENT_BY_USER_ID + id);
-        log.debug("- getFeedByUserId : {}", answer);
+        List<FeedEvent> answers = getEvents(GET_FEED_EVENT_BY_USER_ID + id);
+        log.debug("- getFeedByUserId : {}", answers);
 
-        return answer;
+        return answers;
     }
 
     private FeedEvent createEvent(ResultSet rs) {
@@ -86,6 +87,6 @@ public class FeedDbStorage implements FeedStorage {
             return events;
         }).stream().findFirst();
 
-        return reviewsOpt.orElse(new ArrayList<>());
+        return reviewsOpt.orElse(Collections.emptyList());
     }
 }

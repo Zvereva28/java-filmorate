@@ -2,7 +2,7 @@ package ru.yandex.practicum.filmorate.storage.impl.dao;
 
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.exception.genresException.GenresNotFoundException;
+import ru.yandex.practicum.filmorate.exceptions.GenresNotFoundException;
 import ru.yandex.practicum.filmorate.model.Genres;
 import ru.yandex.practicum.filmorate.storage.GenresStorage;
 
@@ -31,7 +31,6 @@ public class GenresDBStorage implements GenresStorage {
 
     @Override
     public List<Genres> getAll() {
-
         return jdbcTemplate.query(SELECT_ALL_GENRES,
                 (rs, rowNum) -> new Genres(rs.getInt("id"), rs.getString("genre_name")));
     }

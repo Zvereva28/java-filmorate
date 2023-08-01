@@ -2,7 +2,7 @@ package ru.yandex.practicum.filmorate.service.impl;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.exception.filmExceptions.FilmNotFoundException;
+import ru.yandex.practicum.filmorate.exceptions.FilmNotFoundException;
 import ru.yandex.practicum.filmorate.model.Review;
 import ru.yandex.practicum.filmorate.model.enums.FeedEventType;
 import ru.yandex.practicum.filmorate.model.enums.FeedOperation;
@@ -32,9 +32,9 @@ public class ReviewsServiceImpl implements ReviewsService {
     @Override
     public List<Review> getAllReviews(int count) {
         log.debug("+ getAllReviews");
-        List<Review> answer = reviewsStorage.getAllReviews(count);
-        log.debug("- getAllReviews : {}", answer);
-        return answer;
+        List<Review> reviews = reviewsStorage.getAllReviews(count);
+        log.debug("- getAllReviews : {}", reviews);
+        return reviews;
     }
 
     @Override
@@ -83,9 +83,9 @@ public class ReviewsServiceImpl implements ReviewsService {
             throw new FilmNotFoundException("Фильма с id = 0 не может быть");
         }
         filmStorage.getFilm(id);
-        List<Review> answer = reviewsStorage.getReviewsByFilmId(id, count);
-        log.debug("- getReviewsByFilmId : {}", answer);
-        return answer;
+        List<Review> reviews = reviewsStorage.getReviewsByFilmId(id, count);
+        log.debug("- getReviewsByFilmId : {}", reviews);
+        return reviews;
     }
 
     @Override

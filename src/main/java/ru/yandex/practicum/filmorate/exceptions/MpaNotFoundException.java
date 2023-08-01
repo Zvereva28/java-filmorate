@@ -1,6 +1,4 @@
-package ru.yandex.practicum.filmorate.exception.mpaExceptions;
-
-import ru.yandex.practicum.filmorate.exception.userExceptions.UserException;
+package ru.yandex.practicum.filmorate.exceptions;
 
 public class MpaNotFoundException extends UserException {
 
