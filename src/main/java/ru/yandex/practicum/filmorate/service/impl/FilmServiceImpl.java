@@ -1,105 +1,152 @@
 package ru.yandex.practicum.filmorate.service.impl;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.exception.FilmNotFoundException;
+import ru.yandex.practicum.filmorate.exceptions.FilmNotFoundException;
+import ru.yandex.practicum.filmorate.exceptions.LikeException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.Genres;
+import ru.yandex.practicum.filmorate.model.enums.FeedEventType;
+import ru.yandex.practicum.filmorate.model.enums.FeedOperation;
 import ru.yandex.practicum.filmorate.service.FilmService;
+import ru.yandex.practicum.filmorate.storage.DirectorStorage;
+import ru.yandex.practicum.filmorate.storage.FeedStorage;
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
 import ru.yandex.practicum.filmorate.validators.FilmValidator;
 
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
 @Slf4j
 @Service
 public class FilmServiceImpl implements FilmService {
-
-
     private final FilmStorage filmStorage;
+    private final FeedStorage feedStorage;
     private final FilmValidator filmValidator;
+    private final DirectorStorage directorStorage;
 
-    public FilmServiceImpl(@Qualifier("filmDBStorage") FilmStorage filmStorage, FilmValidator filmValidator) {
+    public FilmServiceImpl(FilmStorage filmStorage, FeedStorage feedStorage, FilmValidator filmValidator,
+                           DirectorStorage directorStorage) {
         this.filmStorage = filmStorage;
+        this.feedStorage = feedStorage;
         this.filmValidator = filmValidator;
+        this.directorStorage = directorStorage;
     }
 
     @Override
     public Film addFilm(Film film) {
-        log.debug("+ createFilm: {}", film);
+        log.debug("+ createFilm : {}", film);
         filmValidator.checkFilm(film);
-        Film newFilm = filmStorage.addFilm(film);
-        log.debug("- createFilm: {}", film);
-        return newFilm;
-    }
-
-    @Override
-    public Film updateFilm(Film film) {
-        log.debug("+ updateFilm: {}", film);
-        filmValidator.checkFilm(film);
-        Film oldFilm = filmStorage.updateFilm(film);
-        log.debug("- updateFilm: {}", oldFilm);
-        return oldFilm;
-    }
-
-    @Override
-    public List<Film> getAllFilms() {
-        var films = filmStorage.getAllFilms();
-        log.debug("- allFilms: {}", films);
-        return films;
-    }
-
-    @Override
-    public List<Film> getPopularFilms(int count) {
-        var films = filmStorage.getAllFilms();
-        Collections.sort(films, new LikesComparator());
-        if (count > films.size()) {
-            log.debug("- popularFilms: {}", films);
-            return films;
-        } else {
-            List<Film> popularFilms = films.subList(0, count);
-            log.debug("- popularFilms: {}", popularFilms);
-            return popularFilms;
-        }
-    }
-
-    @Override
-    public Film getFilm(int id) {
-        Film film = filmStorage.getFilm(id);
-        log.debug("- film: {}", film);
+        int id = filmStorage.addFilm(film).getId();
+        film.setId(id);
+        film.getGenres().sort(Comparator.comparingInt(Genres::getId));
+        log.debug("- createFilm : {}", filmStorage.getFilm(film.getId()));
         return film;
     }
 
     @Override
-    public Film putLikesFilm(int id, int userId) {
-        if (userId <= 0) {
-            throw new FilmNotFoundException("Пользователя id = " + userId + " не может быть");
-        }
-        Film film = filmStorage.getFilm(id);
-        filmStorage.addLike(id, userId);
-        Film film1 = filmStorage.updateFilm(film);
-        log.debug("- putLikesFilm: {}", film1);
-        return film1;
+    public Film updateFilm(Film film) {
+        log.debug("+ updateFilm : {}", film);
+        filmValidator.checkFilm(film);
+        Film newFilm = filmStorage.updateFilm(film);
+        newFilm.getGenres().sort(Comparator.comparingInt(Genres::getId));
+        log.debug("- updateFilm : {}", newFilm);
+        return newFilm;
     }
 
     @Override
-    public Film deleteLikesFilm(int id, int userId) {
+    public List<Film> getAllFilms() {
+        log.debug("+ getAllFilms");
+        var films = filmStorage.getAllFilms();
+        log.debug("- getAllFilms : {}", films);
+        return films;
+    }
+
+    @Override
+    public List<Film> getPopularFilms(int count, int genreId, int year) {
+        log.debug("- getPopularFilms : count = {}, genreId = {}, year = {}", count, genreId, year);
+        var films = filmStorage.getPopularFilms(count, genreId, year);
+        log.debug("- getPopularFilms : {}", films);
+        return films;
+    }
+
+    @Override
+    public Film getFilm(int id) {
+        log.debug("+ getFilm : id = {}", id);
+        Film film = filmStorage.getFilm(id);
+        log.debug("- getFilm : {}", film);
+        return film;
+    }
+
+    @Override
+    public Film addLike(int id, int userId) {
+        log.debug("+ addLike : id = {}, userId = {}", id, userId);
+
+        if (userId <= 0) {
+            throw new FilmNotFoundException("Пользователя id = " + userId + " не может быть");
+        }
+
+        feedStorage.addToFeedDb(userId, FeedEventType.LIKE, FeedOperation.ADD, id);
+        if (!filmValidator.isNoLike(userId, id)) {
+            throw new LikeException("Пользователь с id = " + userId + " уже поставил лайк фильму id = " + id);
+        }
+
+        Film film = filmStorage.getFilm(id);
+        filmStorage.addLike(id, userId);
+        Film updatedFilm = filmStorage.updateFilm(film);
+        log.debug("- addLike : {}", updatedFilm);
+        return updatedFilm;
+    }
+
+    @Override
+    public Film deleteLike(int id, int userId) {
+        log.debug("+ deleteLike : id = {}, userId = {}", id, userId);
         if (userId <= 0) {
             throw new FilmNotFoundException("Пользователя id = " + userId + " не может быть");
         }
         Film film = filmStorage.getFilm(id);
         filmStorage.removeLike(id, userId);
         filmStorage.updateFilm(film);
-        log.debug("+ putLikesFilm: {}", film);
+        log.debug("- deleteLike: {}", film);
+        feedStorage.addToFeedDb(userId, FeedEventType.LIKE, FeedOperation.REMOVE, id);
         return film;
     }
 
-    class LikesComparator implements Comparator<Film> {
-        @Override
-        public int compare(Film a, Film b) {
-            return Integer.compare(b.getCountLikes(), a.getCountLikes());
+    @Override
+    public List<Film> getDirectorFilms(int directorId, String sortBy) {
+        log.debug("+ getDirectorFilms : directorId = {} sortBy = {}", directorId, sortBy);
+        directorStorage.getDirector(directorId);
+        List<Film> films = filmStorage.getDirectorFilms(directorId, sortBy);
+        log.debug("- getDirectorFilms : {}", films);
+        return films;
+    }
+
+    @Override
+    public List<Film> getSharedFilms(int userId, int friendId) {
+        log.debug("+ getDirectorFilms : userId = {} friendId = {}", userId, friendId);
+        if (userId <= 0) {
+            throw new FilmNotFoundException("Пользователя id = " + userId + " не может быть");
         }
+        if (friendId <= 0) {
+            throw new FilmNotFoundException("Пользователя id = " + userId + " не может быть");
+        }
+        List<Film> films = filmStorage.getSharedFilms(userId, friendId);
+        log.debug("- getSharedFilms : {}", films);
+        return films;
+    }
+
+    @Override
+    public void deleteFilm(int id) {
+        log.debug("+ deleteFilm : id = {}", id);
+        filmStorage.deleteFilm(id);
+        log.debug("- deleteFilm : id = {}", id);
+    }
+
+    @Override
+    public List<Film> searchFilms(String query, List<String> by) {
+        log.debug("+ searchFilms : query = " + query + ", by =  " + by);
+        List<Film> films = filmStorage.searchFilms(query, by);
+        log.debug("- searchFilms : {}", films);
+        return films;
     }
 }

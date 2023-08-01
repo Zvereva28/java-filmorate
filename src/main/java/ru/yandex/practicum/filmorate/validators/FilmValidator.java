@@ -1,8 +1,9 @@
 package ru.yandex.practicum.filmorate.validators;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
-import ru.yandex.practicum.filmorate.exception.FilmException;
+import ru.yandex.practicum.filmorate.exceptions.FilmException;
 import ru.yandex.practicum.filmorate.model.Film;
 
 import java.time.LocalDate;
@@ -12,6 +13,12 @@ import java.time.LocalDate;
 public class FilmValidator {
     private static final int MAX_LENGTH_FILM_NAME = 200;
     private static final LocalDate MIN_DATE_RELEASE_DATE = LocalDate.of(1895, 12, 28);
+    private static final String IS_NO_LIKE = "SELECT COUNT(FILM_ID) FROM FILM_LIKES WHERE USER_ID = ? AND FILM_ID = ?";
+    private final JdbcTemplate jdbcTemplate;
+
+    public FilmValidator(JdbcTemplate jdbcTemplate) {
+        this.jdbcTemplate = jdbcTemplate;
+    }
 
     public void checkFilm(Film film) {
 
@@ -31,6 +38,10 @@ public class FilmValidator {
             log.debug("Не верная дата релиза");
             throw new FilmException("Не верная дата релиза");
         }
+    }
 
+    public boolean isNoLike(int userId, int filmId) {
+        Number row = jdbcTemplate.queryForObject(IS_NO_LIKE, Integer.class, userId, filmId);
+        return row == null || row.equals(0);
     }
 }

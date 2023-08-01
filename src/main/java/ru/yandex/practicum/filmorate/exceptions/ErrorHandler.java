@@ -1,4 +1,4 @@
-package ru.yandex.practicum.filmorate.exception;
+package ru.yandex.practicum.filmorate.exceptions;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -61,6 +61,30 @@ public class ErrorHandler {
     public ResponseBody handleThrowable(final Throwable e) {
         return new ResponseBody(
                 "Произошла непредвиденная ошибка."
+        );
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ResponseBody reviewNotFoundException(final ReviewNotFoundException e) {
+        return new ResponseBody(
+                e.getMessage()
+        );
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ResponseBody directorNotFoundException(final DirectorNotFoundException e) {
+        return new ResponseBody(
+                e.getMessage()
+        );
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.OK)
+    public ResponseBody likeException(final LikeException e) {
+        return new ResponseBody(
+                e.getMessage()
         );
     }
 }

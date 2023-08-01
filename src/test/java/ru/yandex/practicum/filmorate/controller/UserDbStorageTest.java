@@ -8,7 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
-import ru.yandex.practicum.filmorate.exception.UserException;
+import ru.yandex.practicum.filmorate.exceptions.UserException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.impl.dao.UserDBStorage;
 
@@ -51,7 +51,7 @@ public class UserDbStorageTest {
     @DisplayName("Проверка существования пользователя")
     void userExistStandard() {
         userStorage.createUser(new User(0, "dolore", "NickName", "Nick Name", LocalDate.now()));
-        assertEquals(1, userStorage.userExist(1).getId());
+        assertEquals(1, userStorage.getUser(1).getId());
     }
 
     @Test
@@ -65,7 +65,7 @@ public class UserDbStorageTest {
     }
 
     private Executable generateUserExistExecutableIDError() {
-        return () -> userStorage.userExist(99);
+        return () -> userStorage.getUser(99);
     }
 
     @Test

@@ -14,19 +14,23 @@ import java.util.List;
 @Service
 @AllArgsConstructor
 public class MpaServiceImpl implements MpaService {
-
     @Override
-    public Mpa getMpaById(int id) {
-        return new Mpa(id);
+    public Mpa getMpa(int id) {
+        log.debug("+ getMpa : id = {}", id);
+        Mpa answer = new Mpa(id);
+        log.debug("- getMpa : {}", answer);
+        return answer;
     }
 
     @Override
-    public List<Mpa> getAll() {
+    public List<Mpa> getAllMpa() {
+        log.debug("+ getAllMpa");
         RatingFilms[] ratingFilms = RatingFilms.values();
         List<Mpa> mpaRatings = new ArrayList<>();
         for (RatingFilms rating : ratingFilms) {
             mpaRatings.add(new Mpa(rating.getId()));
         }
+        log.debug("- getAllMpa : {}", mpaRatings);
         return mpaRatings;
     }
 }
